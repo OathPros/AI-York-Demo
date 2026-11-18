@@ -149,7 +149,11 @@ export const toolItemSchema = z.object({
   audience: z.enum(["all", "students", "staff"]),
   activities
 });
-export const eventItemSchema = eventSuggestionSchema.omit({ referringPage: true }).extend({ summary: text(1000).default("") });
+export const eventItemSchema = eventSuggestionSchema.omit({ referringPage: true }).extend({
+  summary: text(1000).default(""),
+  activities: activities.default([]),
+  demo: z.boolean().optional()
+});
 export const communityItemSchema = z.object({
   name: text(200).min(2),
   summary: text(2000).default(""),

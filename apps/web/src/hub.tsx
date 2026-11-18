@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import type { Activity, ContentBundle, ContentItem, PageCopy } from "@ai-york/contracts";
 import { pageCopy } from "./page-copy";
+import { Calendar, News, Upcoming } from "./updates";
 
 export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide";
 export type Go = (page: Page) => void;
@@ -127,7 +128,11 @@ export function PolicyList({ content, activity }: { content: ContentBundle; acti
 }
 
 export function EventList({ content }: { content: ContentBundle }) {
-  return <section className="section" aria-labelledby="events-title"><p className="eyebrow">Calendar</p><h2 id="events-title">Upcoming events and trainings</h2><div className="grid">{content.event.map((event) => <article className="card" key={event.id}><span className="status">{event.data.type === "training" ? "Training" : "Event"} · {event.data.date}{event.data.allDay ? "" : ` ${event.data.startTime ?? ""}`}</span><h3>{event.title}</h3><p>{event.data.organizer} · {event.data.audience}</p><p>{event.data.location || ""}</p>{event.data.summary && <p>{event.data.summary}</p>}<ExternalLink href={event.data.onlineLink || event.data.sourceUrl}>More information</ExternalLink></article>)}</div>{content.event.length === 0 && <Empty>No published events yet. Suggest one, or an admin can add it in Studio.</Empty>}</section>;
+  return <section className="section updates-page">
+    <h1>AI calendar</h1>
+    <p className="lead">Browse AI workshops and events by month, topic or type</p>
+    <Calendar events={content.event} />
+  </section>;
 }
 
 export function CommunityList({ content, activity }: { content: ContentBundle; activity?: Activity }) {
@@ -152,12 +157,16 @@ export function AudiencePage({ kind, content, go, copy = pageCopy[kind] }: { kin
           <article><h3>Practise without sharing coursework</h3><p>Ask for a practice question or an explanation using a fictional example. Keep private course material and personal information out of prompts unless authorized</p></article>
           <article><h3>Verify and acknowledge your use</h3><p>Check every citation and claim and follow the course instructions for disclosing AI assistance</p></article>
         </div>
+        <div className="field-example"><h3>Try an active recall exercise</h3><p>Using a topic you are allowed to share, ask for five practice questions with the answers held back. Answer them on your own, then check the feedback against your course notes</p>
+          <ExternalLink href="https://www.yorku.ca/teachingandlearning/gen-ai/for-students/">Read York’s student guidance</ExternalLink>
+        </div>
       </section>}
       {kind === "partner" && <section className="shell workplace-examples"><h2>Find the right route</h2>
         <div className="task-notes">
           <article><h3>Find a degree or certificate</h3><p>Use the program links below to compare admissions requirements and delivery options</p></article>
           <article><h3>Explore research partnerships</h3><p>Start with York Research and Innovation to identify researchers, research strengths and ways to collaborate</p><ExternalLink href="https://www.yorku.ca/research/">Contact York Research and Innovation</ExternalLink></article>
         </div>
+        <div className="field-example"><h3>Prepare a partnership brief</h3><p>Describe the problem, the people it affects, the expertise you need and a possible first project. Flag data access, ownership and funding questions before anyone shares private material</p></div>
       </section>}
       {page.activity && <GuideFinder key={kind} content={content} initial={[page.activity]} />}
       {page.activity && <PolicyList content={content} activity={page.activity} />}
@@ -182,6 +191,12 @@ export function TeachingPage({ content, go, copy = pageCopy.teach }: { content: 
     <section className="experience-intro shell" id="teaching-start"><div><p className="eyebrow">Start with your course</p><h2>Make the purpose clear</h2></div><p>AI can support learning when its role is connected to course outcomes, students know what is expected, and instructors continue to make academic decisions. Course and assignment instructions always come first</p></section>
     <section className="route-field shell" aria-labelledby="teaching-routes-title"><div className="section-heading"><p className="eyebrow">Plan your approach</p><h2 id="teaching-routes-title">Four teaching decisions</h2></div><div className="editorial-routes">{teachingRoutes.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
     <section className="dark-band"><div className="shell split-band"><div><p className="eyebrow">For students</p><h2>Clear instructions build trust</h2></div><div><p>Tell students what kinds of AI assistance are acceptable, what they must disclose, and how their work will be evaluated. Make the expectations specific to the learning task</p><button className="light-link" onClick={() => go("study")}>Explore student guidance <span aria-hidden="true">→</span></button></div></div></section>
+    <section className="shell field-example">
+      <h2>Write an assignment level AI statement</h2>
+      <p>For each assignment, name the permitted tasks, explain what students must produce independently, and say how they should disclose AI use</p>
+      <p>Example for a course that permits brainstorming. You may use AI to generate questions about your topic. Write your own argument, verify every citation and include a short note describing the tool and how you used it</p>
+      <ExternalLink href="https://www.yorku.ca/teachingcommons/artificial-intelligence-ai-pedagogies/">Find teaching support</ExternalLink>
+    </section>
     <GuideFinder content={content} initial={["teach"]} />
     <ToolsSection content={content} activity="teach" showFilter={false} />
     <TrainingSection content={content} tags={["teach"]} title="Teaching resources" />
@@ -202,6 +217,11 @@ export function ResearchPage({ content, copy = pageCopy.research }: { content: C
     <section className="experience-intro shell"><div><p className="eyebrow">Before you use a tool</p><h2>Start with the research context</h2></div><p>A tool may be suitable for public or synthetic material and still be unsuitable for identifiable data, confidential partner information or a study governed by specific consent. Review the full workflow before moving research material into an AI service</p></section>
     <section className="research-checks shell" id="research-checks" aria-labelledby="research-checks-title"><div className="section-heading"><p className="eyebrow">Decision framework</p><h2 id="research-checks-title">Four checks before use</h2></div><div className="check-list">{researchChecks.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><div><h3>{title}</h3><p>{text}</p></div></article>)}</div></section>
     <section className="red-band"><div className="shell split-band"><div><p className="eyebrow">Human participant research</p><h2>Authorization comes before transfer</h2></div><p>Do not place identifiable or restricted participant information in an AI service unless the use is covered by consent, ethics approval and an authorized data environment. De-identification alone may not remove the risk</p></div></section>
+    <section className="shell field-example">
+      <h2>Plan a literature screening workflow</h2>
+      <p>Use approved public metadata to test search terms and draft screening criteria. Have a researcher confirm each inclusion decision against the original source and log the tool, date, version and checks in the project records</p>
+      <ExternalLink href="https://researchguides.library.yorku.ca/genairesearch">Open the library guide to generative AI in research</ExternalLink>
+    </section>
     <GuideFinder content={content} initial={["research"]} />
     <ToolsSection content={content} activity="research" showFilter={false} />
     <TrainingSection content={content} tags={["study"]} title="Research learning and support" />
@@ -230,6 +250,7 @@ export function WorkPage({ content, copy = pageCopy.work }: { content: ContentBu
         <h3>{title}</h3><p>{description}</p>
       </article>)}</div>
       <p>Keep people accountable for decisions and review outputs before sharing them</p>
+      <div className="field-example"><h3>Review an AI assisted message before sending</h3><p>Compare the draft with the source material. Verify the facts, check whether any recipient should see the information and have the person responsible for the message approve it</p></div>
     </section>
     <GuideFinder content={content} initial={["work"]} />
     <ToolsSection content={content} activity="work" showFilter={false} />
@@ -261,18 +282,55 @@ export function GoverningPage() {
 }
 
 export function NewsPage() {
-  return <><PageHeader eyebrow="News" title="Latest AI @ York updates" intro="Dated updates on new guidance, tools and policy changes." /><section className="section"><p className="notice">Placeholder: the architecture feeds this section automatically from YFile and the York calendar's AI tag. That feed is not built yet.</p></section></>;
+  return <section className="section updates-page">
+    <h1>AI news</h1>
+    <p className="lead">Explore updates by topic and see where each story came from</p>
+    <News />
+  </section>;
 }
 
 export function Home({ content, go, copy = pageCopy.home }: { content: ContentBundle; go: Go; copy?: PageCopy }) {
   return (
     <div className="home-page">
-      <section className="home-hero" aria-labelledby="home-title"><div className="home-hero-copy"><p className="hero-eyebrow">Guidance tools support</p><h1 id="home-title">{copy.title === pageCopy.home.title ? <>AI <em>@</em> York</> : copy.title}</h1><p>{copy.intro}</p><div className="hero-actions"><a className="button dark" href="#guide-title" onClick={jumpToSection}>Find guidance <span aria-hidden="true">→</span></a><button className="button outline" onClick={() => go("tools")}>Explore AI tools <span aria-hidden="true">→</span></button></div></div><div className="home-hero-art" aria-hidden="true"><span className="hero-art-label">AI at York</span><strong>AI</strong><div><span>Responsible use starts with context</span><b>+</b></div></div></section>
+      <section className="home-hero" aria-labelledby="home-title">
+        <div className="home-shell home-hero-copy">
+          <h1 id="home-title">{copy.title}</h1>
+          <p>{copy.intro}</p>
+          <div className="hero-actions">
+            <a className="button primary" href="#guide-title" onClick={jumpToSection}>Find guidance</a>
+            <button className="button inverse" onClick={() => go("tools")}>Explore AI tools</button>
+          </div>
+        </div>
+      </section>
       <section className="home-statement"><div className="home-shell"><p><strong>Start with what you are doing</strong> then check the information involved, the rules that apply and the tool you plan to use</p><button onClick={() => go("work")}>Explore AI at work</button></div></section>
+      <section className="section home-updates" aria-labelledby="home-updates-title">
+        <h2 id="home-updates-title">News and events</h2>
+        <div className="home-updates-grid">
+          <div>
+            <h3>Latest news</h3>
+            <News compact />
+            <a className="text-link" href="#/news">See all news</a>
+          </div>
+          <div>
+            <h3>Upcoming events</h3>
+            <Upcoming events={content.event} />
+            <a className="text-link" href="#/events">Open the calendar</a>
+          </div>
+        </div>
+      </section>
       <Principles />
       <GuideFinder content={content} />
       <ToolsSection content={content} />
-      <section className="home-next"><div className="home-shell home-next-grid"><div><p className="eyebrow">Find your route</p><h2>What will you do with AI</h2><p>Choose the context that best matches your work. Each route brings together practical guidance, policies, approved tools and learning</p></div><div className="home-route-list">{(["study", "teach", "research", "work"] as const).map((key, index) => <button key={key} onClick={() => go(key)}><span>0{index + 1}</span><strong>{audiencePages[key].name}</strong><b aria-hidden="true">→</b></button>)}</div></div></section>
+      <section className="home-next">
+        <div className="home-shell home-next-grid">
+          <div><h2>Find guidance for your role</h2><p>Get practical examples, policy links and tools for the work you do</p></div>
+          <div className="home-route-list">
+            {(["study", "teach", "research", "work", "partner"] as const).map((key) => (
+              <button key={key} onClick={() => go(key)}><strong>{audiencePages[key].name}</strong><b aria-hidden="true">→</b></button>
+            ))}
+          </div>
+        </div>
+      </section>
       <TrainingSection content={content} />
       <section className="home-index"><div className="home-shell"><div><p className="eyebrow">Everything in one place</p><h2>Search AI at York</h2><p>Browse all {Object.values(content).flat().length} published guidance items, policies, tools, events, communities and learning resources</p></div><button className="button dark" onClick={() => go("index")}>Open the A to Z index <span aria-hidden="true">→</span></button></div></section>
     </div>

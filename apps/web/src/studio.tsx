@@ -136,7 +136,7 @@ export const collectionMeta: Record<ContentCollection, { label: string; single: 
     { key: "title", label: "Title", kind: "text", required: true }, { key: "date", label: "Date", kind: "date", required: true }, { key: "allDay", label: "All day", kind: "checkbox" },
     { key: "startTime", label: "Start time", kind: "time" }, { key: "endTime", label: "End time", kind: "time" }, { key: "timezone", label: "Timezone", kind: "text", required: true },
     { key: "organizer", label: "Organizer", kind: "text", required: true }, { key: "audience", label: "Audience", kind: "text", required: true }, { key: "location", label: "Location", kind: "text" },
-    { key: "onlineLink", label: "Online link", kind: "url" }, { key: "sourceUrl", label: "Source URL", kind: "url" }, { key: "summary", label: "Summary", kind: "textarea" }] },
+    { key: "onlineLink", label: "Online link", kind: "url" }, { key: "sourceUrl", label: "Source URL", kind: "url" }, { key: "summary", label: "Summary", kind: "textarea" }, activityField] },
   community: { label: "Community inventory", single: "community", hint: "Groups people can join and share practice with.", fields: [
     { key: "name", label: "Name", kind: "text", required: true }, { key: "summary", label: "Description", kind: "textarea" }, { key: "url", label: "Joining link", kind: "url" }, { key: "contact", label: "Contact", kind: "text" }, activityField] },
   training: { label: "Training inventory", single: "training", hint: "Courses, workshops, guides and credentials.", fields: [

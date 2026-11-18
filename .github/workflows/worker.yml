@@ -1,6 +1,9 @@
 name: Deploy Worker
 
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/worker.yml]
   workflow_dispatch:
     inputs:
       apply_migrations:
@@ -20,7 +23,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - if: inputs.apply_migrations
+      - if: github.event_name == 'push' || inputs.apply_migrations
         run: npx wrangler d1 migrations apply DB --remote
         working-directory: apps/api
         env:
@@ -31,3 +34,56 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Verify public API and calendar seed
+        if: github.event_name == 'push'
+        run: |
+          api=https://ai-york-demo-api.luke-gagliardi.workers.dev
+          curl -fsS --retry 4 "$api/health" | jq -e '.ok and .database'
+          for attempt in {1..8}; do
+            if curl -fsS "$api/api/v1/public/content" | jq -e 'any(.content.event[]; .id == "demo-study-clinic" and .data.demo and (.data.activities | index("study")))'; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+      - name: Build Cloudflare Pages frontend
+        if: github.event_name == 'push'
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: https://ai-york-demo-api.luke-gagliardi.workers.dev
+      - name: Publish and verify Cloudflare Pages
+        if: github.event_name == 'push'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          page_url=https://ai-york-demo.pages.dev/
+          asset=$(node -p 'require("fs").readdirSync("apps/web/dist/assets").find(x => x.endsWith(".js"))')
+          matches_release() {
+            curl -fsS "$page_url?release=$GITHUB_SHA" -o "$RUNNER_TEMP/ai-york-live.html" &&
+              grep -Fq "/assets/$asset" "$RUNNER_TEMP/ai-york-live.html" &&
+              curl -fsS "${page_url}assets/$asset" -o /dev/null
+          }
+          if matches_release; then exit 0; fi
+          npx wrangler pages deploy apps/web/dist --project-name ai-york-demo --branch main
+          for attempt in {1..8}; do
+            if matches_release; then exit 0; fi
+            sleep 10
+          done
+          exit 1
+      - name: Verify GitHub Pages frontend
+        if: github.event_name == 'push'
+        run: |
+          site=https://oathpros.github.io
+          for attempt in {1..12}; do
+            if curl -fsS "$site/AI-York-Demo/?release=$GITHUB_SHA" -o "$RUNNER_TEMP/york-github.html"; then
+              asset=$(sed -n 's/.*src="\([^"]*\/assets\/index-[^"]*\.js\)".*/\1/p' "$RUNNER_TEMP/york-github.html")
+              if [ -n "$asset" ] && curl -fsS "$site$asset" -o "$RUNNER_TEMP/york-github.js" &&
+                grep -Fq 'AI calendar' "$RUNNER_TEMP/york-github.js" &&
+                grep -Fq 'Find guidance for your role' "$RUNNER_TEMP/york-github.js"; then
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          exit 1

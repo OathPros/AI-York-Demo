@@ -1,0 +1,13 @@
+INSERT OR IGNORE INTO content_items
+  (workspace_id, collection, id, title, status, data_json, created_at, updated_at)
+VALUES
+  ('base', 'event', 'demo-study-clinic', 'AI study skills clinic', 'published',
+    '{"type":"training","title":"AI study skills clinic","date":"2026-11-23","startTime":"12:00","endTime":"13:00","allDay":false,"timezone":"America/Toronto","organizer":"AI @ York demo","audience":"Students","location":"Online","summary":"Practise checking sources and using AI to create practice questions within course rules","activities":["study"],"demo":true}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('base', 'event', 'demo-teaching-roundtable', 'Assessment design roundtable', 'published',
+    '{"type":"event","title":"Assessment design roundtable","date":"2026-11-25","startTime":"14:00","endTime":"15:00","allDay":false,"timezone":"America/Toronto","organizer":"AI @ York demo","audience":"Instructors","location":"Online","summary":"Bring an assessment and discuss what students should do independently and where AI assistance could fit","activities":["teach"],"demo":true}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('base', 'event', 'demo-research-data', 'Research data and AI clinic', 'published',
+    '{"type":"training","title":"Research data and AI clinic","date":"2026-11-26","startTime":"11:00","endTime":"12:00","allDay":false,"timezone":"America/Toronto","organizer":"AI @ York demo","audience":"Researchers","location":"Online","summary":"Map where data moves in an AI workflow and identify which permissions need to be in place first","activities":["research"],"demo":true}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('base', 'event', 'demo-work-prompts', 'Copilot practice for staff', 'published',
+    '{"type":"training","title":"Copilot practice for staff","date":"2026-11-30","startTime":"13:00","endTime":"14:00","allDay":false,"timezone":"America/Toronto","organizer":"AI @ York demo","audience":"Staff","location":"Online","summary":"Use a fictional service update to practise prompting, checking facts and reviewing a draft","activities":["work"],"demo":true}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('base', 'event', 'demo-community-exchange', 'AI practice exchange', 'published',
+    '{"type":"event","title":"AI practice exchange","date":"2026-12-03","startTime":"12:30","endTime":"13:30","allDay":false,"timezone":"America/Toronto","organizer":"AI @ York demo","audience":"York community","location":"Online","summary":"Share a useful workflow alongside the checks that made it appropriate for your context","activities":["work","study","teach","research"],"demo":true}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

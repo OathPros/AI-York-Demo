@@ -139,7 +139,7 @@ function App() {
     }
   };
 
-  const navItems: [Page, string][] = [["home", "Home"], ["study", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["tools", "Tools"]];
+  const navItems: [Page, string][] = [["home", "Home"], ["study", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["tools", "Tools"], ["events", "Calendar"], ["news", "News"]];
   return <div className="app">{screen !== "studio" && <><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button><button onClick={openStudio}>Open Studio</button></div>
     <header className="site-header"><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button className="nav-primary" onClick={() => go("guide")}>Can I use AI for this</button></nav></header></>}
     <main>

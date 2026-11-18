@@ -56,36 +56,30 @@ main { flex: 1 }
 
 /* Homepage */
 .home-page { background: #fff }
-.home-hero { display: grid; grid-template-columns: 1.04fr .96fr; min-height: 610px; background: var(--wash) }
-.home-hero-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 4.7rem clamp(28px, 5vw, 78px) 5rem max(44px, calc((100vw - 1320px) / 2)) }
-.hero-eyebrow { display: flex; align-items: center; gap: .8rem; color: var(--red) }
-.hero-eyebrow::before { content: ""; width: 30px; height: 2px; background: var(--red) }
-.home-hero h1 { margin: 1.5rem 0 1.25rem; font-size: clamp(3.6rem, 6.7vw, 6.7rem); font-weight: 700; letter-spacing: -.08em; line-height: .98 }
-.home-hero h1 em { color: var(--red); font-style: normal }
-.home-hero-copy > p:not(.hero-eyebrow) { max-width: 540px; margin: 0; color: #393939; font-size: clamp(1.08rem, 1.4vw, 1.35rem) }
-.hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 2.25rem }
-.home-hero-art { position: relative; isolation: isolate; min-height: 610px; overflow: hidden; background: var(--red); color: #fff }
-.home-hero-art::before { content: ""; position: absolute; inset: 0; z-index: -1; background: repeating-linear-gradient(90deg, rgba(255,255,255,.1) 0, rgba(255,255,255,.1) 1px, transparent 1px, transparent 92px), linear-gradient(137deg, transparent 33%, rgba(0,0,0,.12) 33%, rgba(0,0,0,.12) 49%, transparent 49%) }
-.home-hero-art::after { content: ""; position: absolute; width: 500px; height: 500px; top: -205px; right: -235px; border: 1px solid rgba(255,255,255,.45); transform: rotate(45deg) }
-.home-hero-art > strong { position: absolute; top: 9%; left: 7%; color: transparent; font-size: clamp(16rem, 28vw, 33rem); font-weight: 700; letter-spacing: -.16em; line-height: .85; -webkit-text-stroke: 2px rgba(255,255,255,.78); user-select: none }
-.hero-art-label { position: absolute; top: 46px; left: 44px; z-index: 2; font-size: .7rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase }
-.home-hero-art > div { position: absolute; right: 44px; bottom: 50px; left: 44px; display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; z-index: 2 }
-.home-hero-art > div span { max-width: 240px; font-size: 1.25rem; font-weight: 700; line-height: 1.25 }
-.home-hero-art > div b { font-size: 4.2rem; font-weight: 400; line-height: .7 }
+.home-hero, .experience-hero {
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+  background: linear-gradient(90deg, rgba(15, 12, 13, .88) 0%, rgba(15, 12, 13, .66) 57%, rgba(15, 12, 13, .24) 100%),
+    var(--banner) center var(--banner-position, 50%) / cover #30252a;
+}
+.home-hero { --banner: url("./assets/banners/home.webp"); min-height: clamp(28rem, 46vw, 39rem); padding-block: clamp(3rem, 7vw, 6rem) }
+.home-hero h1 { margin: 0 0 1rem; font-size: clamp(3.4rem, 8vw, 7rem); letter-spacing: -.065em }
+.home-hero-copy > p { max-width: 39rem; margin: 0; font-size: clamp(1.08rem, 1.6vw, 1.34rem) }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.5rem }
 .home-statement { background: #1c1c1c; color: #fff }
 .home-statement .home-shell { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem }
 .home-statement p { margin: 0; font-size: .94rem }
 .home-statement button { min-height: 0; padding: .2rem 0; border: 0; border-bottom: 1px solid rgba(255,255,255,.6); background: transparent; color: #fff; font-weight: 600; cursor: pointer }
 
-.section { width: min(calc(100% - 48px), 1180px); margin-inline: auto; padding-block: clamp(4.5rem, 8vw, 6.8rem) }
+.section { width: min(calc(100% - 48px), 1180px); margin-inline: auto; padding-block: clamp(2.2rem, 5vw, 4.3rem) }
 .section > .eyebrow { margin-bottom: .8rem }
 .section > h2, .section-heading h2 { margin: 0; font-size: clamp(2.45rem, 4.5vw, 4.2rem) }
 .section > .lead { max-width: 760px; margin: 1rem 0 2.2rem; color: var(--muted) }
-.home-page .section + .section { border-top: 0 }
-.home-page .section:nth-of-type(3) { width: 100%; padding-inline: max(24px, calc((100vw - 1180px) / 2)); background: var(--wash) }
+:is(.home-page, .experience-page) > .section + .section { padding-top: .85rem }
 .principles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; margin: 2.4rem 0 0; padding: 1px; background: #d7d6d3; list-style: none }
-.principles article { min-height: 235px; padding: 1.8rem 1.4rem 2rem; background: var(--wash) }
-.principles .num { display: block; margin-bottom: 2.3rem; color: var(--red); font-size: .7rem; font-weight: 700; letter-spacing: .1em }
+.principles article { padding: 1.25rem; background: var(--wash) }
+.principles .num { display: block; margin-bottom: .8rem; color: var(--red-dark); font-size: .7rem; font-weight: 700; letter-spacing: .1em }
 .principles h3 { margin: 0 0 .9rem; font-size: 1.4rem }
 .principles p { margin: 0; color: #555; font-size: .84rem }
 
@@ -151,21 +145,21 @@ main { flex: 1 }
 .text-button { min-height: 0; padding: 0; border: 0; background: transparent; text-decoration: underline; cursor: pointer }
 
 /* Teaching and research */
-.experience-hero { display: flex; align-items: flex-end; padding-block: clamp(3.5rem, 8vw, 6rem) 3rem; color: #fff }
+.experience-hero { min-height: clamp(18rem, 35vw, 27rem); padding-block: 3rem }
 .experience-hero .eyebrow { color: #ffbec9 }
-.experience-hero h1 { max-width: 850px; margin: 1rem 0; font-size: clamp(3.5rem, 8vw, 7rem) }
+.experience-hero h1 { margin: .6rem 0; font-size: clamp(2.6rem, 6vw, 5rem) }
 .experience-lede { max-width: 760px; margin: 0; font-size: clamp(1.15rem, 2.2vw, 1.55rem) }
-.experience-intro { display: grid; grid-template-columns: .75fr 1.25fr; gap: clamp(2rem, 7vw, 7rem); padding-block: clamp(4rem, 8vw, 7rem) }
+.experience-intro { display: grid; grid-template-columns: .75fr 1.25fr; gap: clamp(1.5rem, 4vw, 4rem); padding-block: clamp(2.2rem, 5vw, 3.8rem) }
 .experience-intro h2 { margin: .8rem 0 0; font-size: clamp(2.5rem, 5vw, 4.5rem) }
 .experience-intro > p { margin: 0; font-size: clamp(1.15rem, 2.1vw, 1.6rem); line-height: 1.45 }
-.route-field, .research-checks { padding-bottom: clamp(4rem, 9vw, 7rem) }
+.route-field, .research-checks { padding-bottom: clamp(2.2rem, 5vw, 3.8rem) }
 .section-heading { margin-bottom: 2rem }
 .section-heading .eyebrow { margin-bottom: .7rem }
 .editorial-routes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; padding: 1px; background: var(--line) }
 .editorial-routes article { min-height: 280px; padding: 1.5rem; background: var(--wash) }
 .editorial-routes h3 { margin: 3.5rem 0 1rem; font-size: 1.5rem }
 .editorial-routes p { color: var(--muted); font-size: .88rem }
-.dark-band, .red-band { padding-block: clamp(4rem, 8vw, 6.5rem); color: #fff }
+.dark-band, .red-band { padding-block: clamp(2.2rem, 5vw, 4rem); color: #fff }
 .dark-band { background: var(--ink) }
 .red-band { background: var(--red-dark) }
 .split-band { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(2rem, 8vw, 7rem); align-items: start }
@@ -178,17 +172,11 @@ main { flex: 1 }
 .check-list h3 { margin: 0 0 .5rem; font-size: 1.6rem }
 .check-list p { max-width: 840px; margin: 0; color: var(--muted) }
 
-.experience-hero {
-  --banner-position: 50% 50%;
-  min-height: clamp(22rem, 42vw, 32rem);
-  background: linear-gradient(95deg, rgba(19, 15, 18, .94), rgba(19, 15, 18, .58)),
-    url("https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2026/10/Campus-Walk-East_360_8192x4096-scaled.jpg") var(--banner-position) / cover,
-    #352a2e;
-}
-.teaching-hero { --banner-position: 30% 46% }
-.research-hero { --banner-position: 62% 44% }
-.study-hero { --banner-position: 18% 42% }
-.partner-hero { --banner-position: 86% 55% }
+.teaching-hero { --banner: url("./assets/banners/teach.webp"); --banner-position: 42% }
+.research-hero { --banner: url("./assets/banners/research.webp"); --banner-position: 45% }
+.study-hero { --banner: url("./assets/banners/study.webp"); --banner-position: 57% }
+.partner-hero { --banner: url("./assets/banners/partner.webp"); --banner-position: 58% }
+.work-hero { --banner: url("./assets/banners/work.webp"); --banner-position: 53% }
 .work-hero .button { margin-top: 1.5rem }
 .workplace-examples, .work-source { padding-block: clamp(3rem, 6vw, 5rem) }
 .workplace-examples > h2, .work-source h2 { margin: 0 0 1.75rem; font-size: clamp(2rem, 4vw, 3.4rem) }
@@ -202,12 +190,37 @@ main { flex: 1 }
 .editorial-routes article h3 { margin: 0 0 .7rem }
 .editorial-routes article > span { display: none }
 .home-page .card { border-radius: .55rem; border-color: #e8e4df }
-.home-hero, .home-hero-art { min-height: clamp(29rem, 43vw, 36rem) }
-.home-hero-art::before { background: linear-gradient(32deg, rgba(99, 5, 22, .9), rgba(152, 7, 31, .55)),
-  url("https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2026/10/Campus-Walk-East_360_8192x4096-scaled.jpg") center / cover }
-.home-hero-art > strong { opacity: .46 }
 .home-route-list { background: #261e21 }
 .home-route-list button { background: transparent }
+.home-next-grid { min-height: 0; padding-block: clamp(2rem, 5vw, 4rem) }
+.home-route-list button { min-height: 62px; grid-template-columns: minmax(0, 1fr) auto }
+.field-example { margin-block: 1.5rem .5rem; padding: clamp(1rem, 3vw, 1.75rem); background: var(--wash); border-inline-start: 4px solid var(--red-dark) }
+.field-example h2, .field-example h3 { margin: 0 0 .5rem }
+.field-example p { margin: .5rem 0 }
+.home-updates-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 5vw, 4rem); margin-top: 1.65rem }
+.home-updates-grid h3 { margin: 0 0 .7rem; font-size: 1.35rem }
+.home-updates-grid > div > .text-link { display: inline-block; margin-top: 1rem }
+.updates-page h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5rem) }
+.updates-filters { display: flex; flex-wrap: wrap; gap: .8rem; margin-bottom: 1.3rem }
+.updates-filters label { flex: 1 1 11rem; max-width: 19rem; min-width: 0 }
+.update-item { display: grid; gap: .45rem; padding: 1rem 0; border-bottom: 1px solid var(--line) }
+.update-item h2, .update-item h4 { margin: 0; font-size: clamp(1.2rem, 2.5vw, 1.55rem) }
+.update-item p { margin: 0; color: var(--text) }
+.update-item .update-meta { color: var(--red-dark); font-weight: 700; font-size: .85rem }
+.update-item a { justify-self: start }
+.update-tags { display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; margin: .25rem 0 0; padding: 0 }
+.update-tags li { padding: .15rem .55rem; background: var(--wash); color: #424242; border-radius: 1rem; font-size: .82rem }
+.calendar-layout { max-width: 58rem }
+.calendar-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .5rem; margin-bottom: .6rem }
+.calendar-toolbar h2 { margin: 0; text-align: center; font-size: clamp(1.4rem, 4vw, 2rem) }
+.calendar-toolbar button { min-width: 44px; border: 1px solid var(--line); background: #fff; font-size: 1.5rem; cursor: pointer }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-bottom: .75rem }
+.calendar-grid > * { display: grid; min-height: 44px; place-content: center; text-align: center; position: relative }
+.calendar-weekday { font-weight: 700; font-size: .82rem }
+.calendar-day { background: var(--wash) }
+.calendar-grid button { border: 1px solid #e7b5bf; background: #fff1f4; color: var(--red-dark); font-weight: 700; cursor: pointer }
+.calendar-grid button[aria-pressed="true"] { color: #fff; background: var(--red-dark); border-color: var(--red-dark) }
+.calendar-dot { position: absolute; inset: auto auto .2rem 50%; width: .25rem; height: .25rem; border-radius: 50%; background: currentColor }
 
 /* Studio workspace */
 .studio-workspace { display: grid; grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr); min-height: 100vh; background: #f5f5f7 }
@@ -234,9 +247,6 @@ main { flex: 1 }
 .studio-preview p:first-child { margin: 0; color: var(--muted) }
 .ribbon button:first-of-type { margin-left: auto }
 @media (max-width: 720px) {
-  .home-hero, .home-hero-art { min-height: 0 }
-  .home-hero-art { min-height: 275px }
-  .experience-hero { min-height: 24rem }
   .studio-workspace, .studio-page-form { grid-template-columns: minmax(0, 1fr) }
   .studio-sidebar { flex-direction: row; flex-wrap: wrap; padding: .8rem }
   .studio-sidebar strong { width: 100%; padding-bottom: .25rem }
@@ -272,8 +282,6 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
 @media (max-width: 1000px) {
   .site-header { align-items: flex-start; flex-direction: column; padding-block: 1rem }
   .site-header nav { justify-content: flex-start }
-  .home-hero { grid-template-columns: 1.05fr .95fr; min-height: 500px }
-  .home-hero-art { min-height: 500px }
   .principles { grid-template-columns: repeat(3, 1fr) }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .editorial-routes { grid-template-columns: repeat(2, 1fr) }
@@ -293,19 +301,14 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
   .brand small { display: none }
   .site-header nav { width: 100%; gap: .4rem 1rem; flex-wrap: wrap; justify-content: flex-start; padding-bottom: .4rem }
   .site-header nav button { flex: 0 0 auto }
-  .home-hero { display: flex; flex-direction: column; min-height: 0 }
-  .home-hero-copy { padding: 3.2rem 20px 2.8rem }
-  .home-hero h1 { font-size: clamp(3.2rem, 14vw, 4.5rem) }
-  .home-hero-art { min-height: 275px }
-  .home-hero-art > strong { top: 8%; left: 24%; font-size: 14rem }
-  .hero-art-label { top: 28px; left: 20px }
-  .home-hero-art > div { right: 20px; bottom: 28px; left: 20px }
+  .home-hero, .experience-hero { background-image: linear-gradient(0deg, rgba(15, 12, 13, .94), rgba(15, 12, 13, .57) 72%), var(--banner) }
   .home-statement .home-shell { padding-block: 1.2rem; align-items: flex-start; flex-direction: column }
-  .section { padding-block: 4rem }
+  .section { padding-block: 2.5rem }
   .principles, .grid, .editorial-routes { grid-template-columns: 1fr }
   .principles article, .card, .editorial-routes article { min-height: 0 }
   .choices, .traffic { grid-template-columns: 1fr }
   .home-next-grid { min-height: 0 }
+  .home-updates-grid { grid-template-columns: minmax(0, 1fr) }
   .home-route-list { margin-inline: -16px }
   .home-index .home-shell { padding-block: 3.5rem; align-items: flex-start; flex-direction: column }
   .check-list article { grid-template-columns: 2.5rem 1fr }
