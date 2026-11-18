@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { getCookie, setCookie } from "hono/cookie";
+import { editablePageSchema, pageCopySchema } from "@ai-york/contracts";
 import { contentCollectionSchema, contentCollections, contentSchemas, contentWriteSchema, eventSuggestionSchema, requestSchema, roleSchema, type ContentBundle, type ContentCollection, type ContentItem, type ContentStatus, type DemoRole } from "@ai-york/contracts";
 
 type AppEnv = { Bindings: Env; Variables: { workspaceId: string; role: DemoRole } };
@@ -222,6 +223,35 @@ app.delete("/api/v1/studio/content/:collection/:itemId", async (c) => {
   await c.env.DB.prepare("INSERT INTO content_items (workspace_id, collection, id, title, status, data_json, created_at, updated_at) VALUES (?, ?, ?, ?, 'archived', ?, ?, ?) ON CONFLICT(workspace_id, collection, id) DO UPDATE SET status = 'archived', updated_at = excluded.updated_at")
     .bind(workspaceId, collection, c.req.param("itemId"), row.title, row.data_json, now(), now()).run();
   return c.json({ status: "archived" });
+});
+
+app.get("/api/v1/public/:workspaceId/pages", async (c) => {
+  const rows = await c.env.DB.prepare("SELECT page, published FROM page_copy WHERE workspace_id = ? AND published IS NOT NULL")
+    .bind(c.req.param("workspaceId")).all<{ page: string; published: string }>();
+  return c.json({ pages: Object.fromEntries(rows.results.map(({ page, published }) => [page, JSON.parse(published)])) });
+});
+
+app.get("/api/v1/studio/pages", async (c) => {
+  if (c.get("role") !== "admin") return jsonError("Admin demo role required.", 403);
+  const rows = await c.env.DB.prepare("SELECT page, draft, published FROM page_copy WHERE workspace_id = ?")
+    .bind(c.get("workspaceId")).all<{ page: string; draft: string; published: string | null }>();
+  return c.json({ pages: Object.fromEntries(rows.results.map(({ page, draft, published }) => [
+    page, { draft: JSON.parse(draft), published: published ? JSON.parse(published) : null }
+  ])) });
+});
+
+app.put("/api/v1/studio/pages/:page", async (c) => {
+  if (c.get("role") !== "admin") return jsonError("Admin demo role required.", 403);
+  const page = editablePageSchema.safeParse(c.req.param("page"));
+  if (!page.success) return jsonError("Unknown page.", 404);
+  const body = await c.req.json().catch(() => null);
+  const copy = pageCopySchema.safeParse(body?.copy);
+  if (!copy.success || typeof body?.publish !== "boolean") return jsonError("Enter a page title and introduction.");
+  const draft = JSON.stringify(copy.data);
+  await c.env.DB.prepare(`INSERT INTO page_copy (workspace_id, page, draft, published) VALUES (?, ?, ?, ?)
+    ON CONFLICT(workspace_id, page) DO UPDATE SET draft = excluded.draft, published = COALESCE(excluded.published, page_copy.published)`)
+    .bind(c.get("workspaceId"), page.data, draft, body.publish ? draft : null).run();
+  return c.json({ copy: copy.data });
 });
 
 export default app;

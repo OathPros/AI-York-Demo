@@ -106,6 +106,13 @@ export const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 export type ContentStatus = z.infer<typeof contentStatusSchema>;
 export const activitySchema = z.enum(["study", "teach", "research", "work"]);
 export type Activity = z.infer<typeof activitySchema>;
+export const editablePageSchema = z.enum(["home", "study", "teach", "research", "work", "partner"]);
+export type EditablePage = z.infer<typeof editablePageSchema>;
+export const pageCopySchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  intro: z.string().trim().min(10).max(900)
+});
+export type PageCopy = z.infer<typeof pageCopySchema>;
 export const dataClassSchema = z.enum(["none", "public", "internal", "sensitive", "unsure"]);
 
 const text = (max: number) => z.string().trim().max(max);

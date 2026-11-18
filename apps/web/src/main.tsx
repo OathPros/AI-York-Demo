@@ -2,16 +2,17 @@ import React, { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { changeTypeLabels, changeTypes, contentCollections, type ChangeType, type ContentBundle, type DemoRole, type SuggestionPayload } from "@ai-york/contracts";
 import { api } from "./api";
-import { AudiencePage, CommunityList, EventList, GoverningPage, GuideFinder, Home, IndexPage, InitiativePage, NewsPage, PageHeader, PolicyList, ResearchPage, TeachingPage, TrainingSection, ToolsSection, type Page } from "./hub";
-import { CmsManager } from "./studio";
+import { AudiencePage, CommunityList, EventList, GoverningPage, GuideFinder, Home, IndexPage, NewsPage, PageHeader, PolicyList, ResearchPage, TeachingPage, TrainingSection, ToolsSection, WorkPage, type Page } from "./hub";
+import { CmsManager, PageEditor, StudioShell, type StudioView } from "./studio";
+import type { PublishedPages } from "./page-copy";
 import "./styles.css";
 
 type Screen = "site" | "role" | "suggest" | "studio" | "receipt";
-type StudioTab = "inbox" | "content";
+
 type RequestRow = { id: string; kind: ChangeType; status: string; payload: SuggestionPayload & Record<string, string | boolean | undefined>; created_at: string };
-const pages: Page[] = ["home", "study", "teach", "research", "work", "partner", "initiative", "policies", "tools", "learning", "events", "communities", "news", "governing", "index", "guide"];
+const pages: Page[] = ["home", "study", "teach", "research", "work", "partner", "policies", "tools", "learning", "events", "communities", "news", "governing", "index", "guide"];
 const emptyContent = (): ContentBundle => Object.fromEntries(contentCollections.map((name) => [name, []])) as unknown as ContentBundle;
-const pageFromHash = (): Page => { const key = window.location.hash.replace(/^#\/?/, "").split("?")[0] as Page; return pages.includes(key) ? key : "home"; };
+const pageFromHash = (): Page => { const key = window.location.hash.replace(/^#\/?/, "").split("?")[0] as Page; return String(key) === "initiative" ? "work" : pages.includes(key) ? key : "home"; };
 
 function App() {
   const [screen, setScreen] = useState<Screen>("site");
@@ -20,7 +21,18 @@ function App() {
   const [role, setRole] = useState<DemoRole>("external");
   const [content, setContent] = useState<ContentBundle>(emptyContent());
   const [adminContent, setAdminContent] = useState<ContentBundle>(emptyContent());
-  const [studioTab, setStudioTab] = useState<StudioTab>("inbox");
+  const [studioView, setStudioView] = useState<StudioView>("overview");
+  const [publishedPages, setPublishedPages] = useState<PublishedPages>({});
+  useEffect(() => {
+    if (!workspaceId) return;
+    let active = true;
+    api(`/api/v1/public/${workspaceId}/pages`).then(({ pages }) => {
+      if (active) setPublishedPages(pages);
+    }).catch(() => {
+      if (active) setPublishedPages({});
+    });
+    return () => { active = false; };
+  }, [workspaceId]);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [receipt, setReceipt] = useState<{ reference: string; receiptSecret: string }>();
   const [visitorLink, setVisitorLink] = useState("");
@@ -60,11 +72,31 @@ function App() {
     void load();
   }, []);
 
-  const start = async () => { const data = await api("/api/v1/demo/start", { method: "POST" }); setWorkspaceId(data.workspaceId); sessionStorage.setItem("ai-york-workspace", data.workspaceId); await loadContent(data.workspaceId); setScreen("role"); };
   const chooseRole = async (next: DemoRole) => {
-    await api("/api/v1/demo/role", { method: "POST", body: JSON.stringify({ role: next }) });
-    setRole(next);
-    if (next === "admin") { setScreen("studio"); await Promise.all([loadRequests(), loadAdminContent()]); } else setScreen("suggest");
+    setError("");
+    try {
+      let id = workspaceId;
+      if (!id) {
+        const data = await api("/api/v1/demo/start", { method: "POST" });
+        id = data.workspaceId;
+        setWorkspaceId(id);
+        sessionStorage.setItem("ai-york-workspace", id);
+      }
+      await api("/api/v1/demo/role", { method: "POST", body: JSON.stringify({ role: next }) });
+      setRole(next);
+      await loadContent(id);
+      if (next === "admin") {
+        setStudioView("overview");
+        const [inbox, inventory] = await Promise.all([api("/api/v1/studio/requests"), api("/api/v1/studio/content")]);
+        setRequests(inbox.requests);
+        setAdminContent(inventory.content);
+        setScreen("studio");
+      } else {
+        setScreen("suggest");
+      }
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not open the demo workspace");
+    }
   };
   const buildPayload = () => {
     const base = { type: changeType, title: form.title, referringPage: form.referringPage };
@@ -83,14 +115,18 @@ function App() {
     await navigator.clipboard?.writeText(link);
   };
   const suggest = () => { setForm((f) => ({ ...f, referringPage: window.location.hash || "#/" })); setScreen("role"); };
+  const openStudio = () => {
+    if (workspaceId && role === "admin") void chooseRole("admin");
+    else suggest();
+  };
 
   const renderPage = () => {
     switch (page) {
-      case "home": return <Home content={content} go={go} />;
-      case "study": case "work": case "partner": return <AudiencePage key={page} kind={page} content={content} go={go} />;
-      case "teach": return <TeachingPage content={content} go={go} />;
-      case "research": return <ResearchPage content={content} />;
-      case "initiative": return <InitiativePage go={go} />;
+      case "home": return <Home content={content} go={go} copy={publishedPages.home} />;
+      case "study": case "partner": return <AudiencePage key={page} kind={page} content={content} go={go} copy={publishedPages[page]} />;
+      case "teach": return <TeachingPage content={content} go={go} copy={publishedPages.teach} />;
+      case "research": return <ResearchPage content={content} copy={publishedPages.research} />;
+      case "work": return <WorkPage content={content} copy={publishedPages.work} />;
       case "guide": return <><PageHeader eyebrow="Usage & Guidance" title="Practical guidance, in plain language" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder content={content} /></>;
       case "policies": return <><PageHeader eyebrow="Policy inventory" title="Policies that apply to AI at York" intro="Each entry links to its authoritative source. Guidance on this site points back to these policies." /><PolicyList content={content} /></>;
       case "tools": return <><PageHeader eyebrow="Tools & Access" title="Tools and how to get access" intro="Compare York-approved tools by who can use them and what they are for." /><ToolsSection content={content} /></>;
@@ -103,18 +139,20 @@ function App() {
     }
   };
 
-  const navItems: [Page, string][] = [["home", "Home"], ["study", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["initiative", "Initiative"], ["tools", "Tools"]];
-  return <div className="app"><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button></div>
-    <header className="site-header"><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button className="nav-primary" onClick={() => go("guide")}>Can I use AI for this</button></nav></header>
+  const navItems: [Page, string][] = [["home", "Home"], ["study", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["tools", "Tools"]];
+  return <div className="app">{screen !== "studio" && <><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button><button onClick={openStudio}>Open Studio</button></div>
+    <header className="site-header"><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button className="nav-primary" onClick={() => go("guide")}>Can I use AI for this</button></nav></header></>}
     <main>
       {screen === "site" && <>{error && <p className="error" role="alert">{error}</p>}{renderPage()}</>}
-      {screen === "role" && <section className="panel narrow"><p className="eyebrow">Passport York · Demo role selection</p><h1>Choose a role to explore</h1><p>Demo only. Choose a role to explore the prototype. No username, password, Duo prompt or real York session is used.</p><div className="role-grid"><button className="role" onClick={() => (workspaceId ? chooseRole("external") : start())}><strong>External User</strong><span>Suggest an event, training, fix a broken link or tell us what is missing.</span></button><button className="role" onClick={() => (workspaceId ? chooseRole("admin") : start())}><strong>AI @ York Admin</strong><span>Manage the policy, interpretation, tool, event, community and training inventories, and review suggested changes.</span></button></div><button className="text-button" onClick={() => go("home")}>Return to AI @ York</button></section>}
+      {screen === "role" && <section className="panel narrow"><p className="eyebrow">Passport York · Demo role selection</p><h1>Choose a role to explore</h1><p>Demo only. Choose a role to explore the prototype. No username, password, Duo prompt or real York session is used.</p>{error && <p className="error" role="alert">{error}</p>}<div className="role-grid"><button className="role" onClick={() => chooseRole("external")}><strong>External User</strong><span>Suggest an event, training, fix a broken link or tell us what is missing.</span></button><button className="role" onClick={() => chooseRole("admin")}><strong>AI @ York Admin</strong><span>Manage the policy, interpretation, tool, event, community and training inventories, and review suggested changes.</span></button></div><button className="text-button" onClick={() => go("home")}>Return to AI @ York</button></section>}
       {screen === "suggest" && <section className="panel"><p className="eyebrow">External User</p><h1>Suggest a change</h1><p>Tell us what should change on AI @ York. Share fictional demonstration content only. Your referring page is prefilled below.</p><form onSubmit={submit}><label>What kind of change?<select value={changeType} onChange={(e) => setChangeType(e.target.value as ChangeType)}>{changeTypes.map((t) => <option key={t} value={t}>{changeTypeLabels[t]}</option>)}</select></label><label>{isCalendarType ? (changeType === "training" ? "Training title" : "Event title") : "Short summary"}<input required minLength={3} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label>{isCalendarType && <><div className="two"><label>Date<input required type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></label><label>Timezone<input required value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} /></label></div><label className="check"><input type="checkbox" checked={form.allDay} onChange={(e) => setForm({ ...form, allDay: e.target.checked })} /> All-day</label>{!form.allDay && <div className="two"><label>Start time<input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} /></label><label>End time<input type="time" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} /></label></div>}<div className="two"><label>Organizer<input required value={form.organizer} onChange={(e) => setForm({ ...form, organizer: e.target.value })} /></label><label>Audience<input required value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })} /></label></div><label>Location or online link<input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></label></>}{(changeType === "broken_link" || changeType === "correction") && <label>Page with the problem<input required value={form.pageUrl} onChange={(e) => setForm({ ...form, pageUrl: e.target.value })} /></label>}{changeType === "broken_link" && <label>Broken link address<input type="url" value={form.brokenUrl} onChange={(e) => setForm({ ...form, brokenUrl: e.target.value })} /></label>}{!isCalendarType && <label>{changeType === "correction" ? "What should it say instead?" : changeType === "broken_link" ? "Anything else we should know (optional)" : "Details"}<textarea required={changeType !== "broken_link"} rows={4} value={form.details} onChange={(e) => setForm({ ...form, details: e.target.value })} /></label>}{changeType !== "broken_link" && changeType !== "other" && <label>{isCalendarType ? "Source URL" : "Link or source (optional)"}<input type="url" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} /></label>}<label>Referring page<input readOnly value={form.referringPage} /></label>{error && <p className="error">{error}</p>}<button className="primary" type="submit">Preview and submit</button></form></section>}
       {screen === "receipt" && <section className="panel narrow"><p className="eyebrow">Received for review</p><h1>Thanks for helping improve AI @ York.</h1><p>Your suggestion has been saved in the demonstration workspace.</p><div className="receipt"><strong>Reference</strong><code>{receipt?.reference}</code><strong>Private receipt secret</strong><code>{receipt?.receiptSecret}</code></div><button className="primary" onClick={() => chooseRole("admin")}>Switch demo role</button></section>}
-      {screen === "studio" && <section className="panel wide"><div className="studio-head"><div><p className="eyebrow">AI @ York Studio · Workspace {workspaceId.slice(-8)}</p><h1>{studioTab === "inbox" ? "Requests inbox" : "Content management"}</h1></div><button onClick={() => { setRole("external"); setScreen("suggest"); }}>Switch demo role</button></div>
-        <div className="filters" role="group" aria-label="Studio sections"><button aria-pressed={studioTab === "inbox"} onClick={() => setStudioTab("inbox")}>Requests inbox</button><button aria-pressed={studioTab === "content"} onClick={() => { setStudioTab("content"); void loadAdminContent(); }}>Content inventories</button></div>
-        {studioTab === "content" ? <CmsManager content={adminContent} reload={loadAdminContent} /> : <><p>Review incoming suggestions before they appear publicly.</p><div className="actions"><button onClick={loadRequests}>Refresh inbox</button><button onClick={copyVisitorLink}>Copy visitor link</button></div>{visitorLink && <p className="success">Visitor link copied. It grants public reads and external suggestions, not Studio access.</p>}<div className="request-list">{requests.map((request) => <article className="request" key={request.id}><div><span className="status">{request.status}</span> <span className="status">{changeTypeLabels[request.kind] ?? request.kind}</span><h2>{request.payload.title}</h2><p>{request.kind === "event" || request.kind === "training" ? `${request.payload.date} · ${request.payload.organizer} · ${request.payload.audience}` : [request.payload.pageUrl, request.payload.brokenUrl, request.payload.sourceUrl, request.payload.details].filter(Boolean).join(" · ")}</p></div>{request.status === "received" && <div className="actions">{request.kind === "event" || request.kind === "training" ? <button className="primary" onClick={() => act(request.id)}>Publish to calendar</button> : <button className="primary" onClick={() => act(request.id, "resolve")}>Mark as resolved</button>}<button onClick={() => act(request.id, "decline")}>Decline</button></div>}</article>)}{requests.length === 0 && <p className="empty">No requests loaded. Refresh inbox to check the workspace.</p>}</div></>}
-      </section>}
+      {screen === "studio" && <StudioShell view={studioView} navigate={setStudioView} exit={() => go(page)}
+        content={adminContent} pending={requests.filter((request) => request.status === "received").length}>
+        {studioView === "pages" && <PageEditor onPublish={(key, copy) => setPublishedPages((current) => ({ ...current, [key]: copy }))} />}
+
+        {studioView === "inbox" ? <><h1>Requests inbox</h1><p>Review incoming suggestions before they appear publicly.</p><div className="actions"><button onClick={loadRequests}>Refresh inbox</button><button onClick={copyVisitorLink}>Copy visitor link</button></div>{visitorLink && <p className="success">Visitor link copied. It grants public reads and external suggestions, not Studio access.</p>}<div className="request-list">{requests.map((request) => <article className="request" key={request.id}><div><span className="status">{request.status}</span> <span className="status">{changeTypeLabels[request.kind] ?? request.kind}</span><h2>{request.payload.title}</h2><p>{request.kind === "event" || request.kind === "training" ? `${request.payload.date} · ${request.payload.organizer} · ${request.payload.audience}` : [request.payload.pageUrl, request.payload.brokenUrl, request.payload.sourceUrl, request.payload.details].filter(Boolean).join(" · ")}</p></div>{request.status === "received" && <div className="actions">{request.kind === "event" || request.kind === "training" ? <button className="primary" onClick={() => act(request.id)}>Publish to calendar</button> : <button className="primary" onClick={() => act(request.id, "resolve")}>Mark as resolved</button>}<button onClick={() => act(request.id, "decline")}>Decline</button></div>}</article>)}{requests.length === 0 && <p className="empty">No requests loaded. Refresh inbox to check the workspace.</p>}</div></> : studioView !== "pages" && studioView !== "overview" && <CmsManager key={studioView} collection={studioView} content={adminContent} reload={loadAdminContent} />}
+      </StudioShell>}
     </main><footer><span>AI @ York · Demonstration site · {role === "admin" ? "Admin role" : "Visitor"}</span><a href="https://www.yorku.ca/ai-at-york/" target="_blank" rel="noreferrer">Official AI @ York website</a></footer></div>;
 }
 createRoot(document.getElementById("root")!).render(<React.StrictMode><App /></React.StrictMode>);

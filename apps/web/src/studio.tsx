@@ -1,6 +1,112 @@
-import React, { useState } from "react";
-import { contentCollections, type ContentBundle, type ContentCollection, type ContentItem, type ContentStatus } from "@ai-york/contracts";
+import React, { useEffect, useState } from "react";
+import { contentCollections, editablePageSchema, type ContentBundle, type ContentCollection, type ContentItem, type ContentStatus, type EditablePage, type PageCopy } from "@ai-york/contracts";
 import { api } from "./api";
+import { pageCopy } from "./page-copy";
+
+export type StudioView = "overview" | "pages" | "inbox" | ContentCollection;
+const inventoryLabels: Record<ContentCollection, string> = {
+  policy: "Policies", interpretation: "Guidance", tool: "Tools", event: "Events",
+  community: "Communities", training: "Training"
+};
+
+export function StudioShell({ view, navigate, exit, content, pending, children }: {
+  view: StudioView; navigate: (view: StudioView) => void; exit: () => void;
+  content: ContentBundle; pending: number; children: React.ReactNode;
+}) {
+  const entries = Object.values(content).flat();
+  const navigation = (target: StudioView, label: string) => <button key={target} type="button"
+    aria-current={target === view ? "page" : undefined} onClick={() => navigate(target)}>{label}</button>;
+  return <div className="studio-workspace">
+    <nav className="studio-sidebar" aria-label="Studio navigation">
+      <strong>AI @ York Studio</strong>
+      {navigation("overview", "Overview")}
+      {navigation("pages", "Site pages")}
+      {navigation("inbox", "Requests inbox")}
+      <p>Content</p>
+      {contentCollections.map((name) => navigation(name, inventoryLabels[name]))}
+    </nav>
+    <div className="studio-main">
+      <div className="studio-top"><span>Demo workspace</span><button onClick={exit}>View site</button></div>
+      {view === "overview" ? <>
+        <h1>Studio overview</h1>
+        <p>Update page introductions, manage resources and review suggestions</p>
+        <div className="studio-metrics">
+          <button onClick={() => navigate("pages")}><strong>{editablePageSchema.options.length}</strong> Site pages</button>
+          <button onClick={() => navigate("policy")}><strong>{entries.filter((item) => item.status === "published").length}</strong> Published resources across inventories</button>
+          <button onClick={() => navigate("inbox")}><strong>{pending}</strong> Suggestions to review</button>
+        </div>
+        <h2>Manage site content</h2>
+        <div className="studio-directory">{contentCollections.map((name) => navigation(name, inventoryLabels[name]))}</div>
+      </> : children}
+    </div>
+  </div>;
+}
+
+type PageVersions = { draft: PageCopy; published: PageCopy | null };
+
+export function PageEditor({ onPublish }: { onPublish: (page: EditablePage, copy: PageCopy) => void }) {
+  const [page, setPage] = useState<EditablePage>("home");
+  const [versions, setVersions] = useState<Partial<Record<EditablePage, PageVersions>>>();
+  const [copy, setCopy] = useState(pageCopy.home);
+  const [feedback, setFeedback] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    let active = true;
+    api("/api/v1/studio/pages").then(({ pages }) => {
+      if (!active) return;
+      setVersions(pages);
+      setCopy(pages.home?.draft ?? pageCopy.home);
+    }).catch((reason: Error) => { if (active) setError(reason.message); });
+    return () => { active = false; };
+  }, []);
+
+  const save = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const publish = (event.nativeEvent as SubmitEvent).submitter?.getAttribute("value") === "publish";
+    setSaving(true);
+    setError("");
+    setFeedback("");
+    try {
+      const result = await api(`/api/v1/studio/pages/${page}`, {
+        method: "PUT", body: JSON.stringify({ copy, publish })
+      });
+      const saved: PageCopy = result.copy;
+      setVersions((current) => ({ ...current, [page]: { draft: saved, published: publish ? saved : current?.[page]?.published ?? null } }));
+      setCopy(saved);
+      if (publish) onPublish(page, saved);
+      setFeedback(publish ? "Published to this workspace" : "Draft saved");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not save this page");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return <>
+    <h1>Site pages</h1>
+    <p>Edit the title and introduction visitors see at the top of each page</p>
+    {error && <p className="error" role="alert">{error}</p>}
+    {feedback && <p role="status">{feedback}</p>}
+    <form className="studio-page-form" onSubmit={save}>
+      <fieldset disabled={!versions || saving}>
+        <label>Page<select value={page} onChange={(event) => {
+          const next = editablePageSchema.parse(event.target.value);
+          setPage(next);
+          setCopy(versions?.[next]?.draft ?? pageCopy[next]);
+          setFeedback("");
+          setError("");
+        }}>{editablePageSchema.options.map((name) => <option key={name} value={name}>{name === "home" ? "Homepage" : pageCopy[name].title}</option>)}</select></label>
+        <label>Page title<input required minLength={2} maxLength={120} value={copy.title} onChange={(event) => setCopy({ ...copy, title: event.target.value })} /></label>
+        <label>Introduction<textarea required minLength={10} maxLength={900} rows={5} value={copy.intro} onChange={(event) => setCopy({ ...copy, intro: event.target.value })} /></label>
+        <div className="actions"><button type="submit" value="draft">Save draft</button><button className="primary" type="submit" value="publish">Publish to workspace</button></div>
+      </fieldset>
+      <section className="studio-preview" aria-label="Page copy preview">
+        <p>Preview</p><h2>{copy.title}</h2><p>{copy.intro}</p>
+      </section>
+    </form>
+  </>;
+}
 
 type Option = { value: string; label: string };
 type Field = { key: string; label: string; kind: "text" | "textarea" | "url" | "date" | "time" | "checkbox" | "select" | "multi"; options?: Option[] | ((content: ContentBundle) => Option[]); required?: boolean };
@@ -50,13 +156,14 @@ const defaults = (collection: ContentCollection): Record<string, unknown> => {
 
 type Editing = { id: string | null; status: ContentStatus; values: Record<string, unknown> };
 
-export function CmsManager({ content, reload }: { content: ContentBundle; reload: () => Promise<void> }) {
-  const [collection, setCollection] = useState<ContentCollection>("policy");
+export function CmsManager({ collection, content, reload }: { collection: ContentCollection; content: ContentBundle; reload: () => Promise<void> }) {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
   const [editing, setEditing] = useState<Editing | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const meta = collectionMeta[collection];
-  const items = content[collection];
+  const items = content[collection].filter((item) => (!status || item.status === status) && item.title.toLowerCase().includes(query.trim().toLowerCase()));
 
   const open = (item: ContentItem | null) => { setMessage(""); setError(""); setEditing(item ? { id: item.id, status: item.status === "archived" ? "draft" : item.status, values: { ...defaults(collection), ...item.data } } : { id: null, status: "draft", values: defaults(collection) }); };
   const save = async (event: React.FormEvent) => {
@@ -92,8 +199,14 @@ export function CmsManager({ content, reload }: { content: ContentBundle; reload
 
   return (
     <div className="cms">
-      <div className="filters" role="tablist" aria-label="Content inventories">{contentCollections.map((name) => <button key={name} role="tab" aria-selected={collection === name} aria-pressed={collection === name} onClick={() => { setCollection(name); setEditing(null); setMessage(""); setError(""); }}>{collectionMeta[name].label} ({content[name].filter((i) => i.status !== "archived").length})</button>)}</div>
+      <h1>{inventoryLabels[collection]}</h1>
       <p>{meta.hint}</p>
+      <div className="two">
+        <label>Search by title<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+        <label>Status<select value={status} onChange={(event) => setStatus(event.target.value)}>
+          <option value="">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="archived">Archived</option>
+        </select></label>
+      </div>
       <div className="actions"><button className="primary" onClick={() => open(null)}>Add {meta.single}</button></div>
       {message && <p className="success" role="status">{message}</p>}
       {error && <p className="error" role="alert">{error}</p>}

@@ -27,7 +27,6 @@ h1, h2, h3, h4 { line-height: 1.08; letter-spacing: -.035em }
 .app { min-height: 100vh; display: flex; flex-direction: column }
 main { flex: 1 }
 .shell, .home-shell { width: min(calc(100% - 48px), 1180px); margin-inline: auto }
-.initiative-shell { width: min(calc(100% - 48px), 1140px); margin-inline: auto }
 .eyebrow, .hero-eyebrow, .status { margin: 0; font-size: .72rem; font-weight: 700; letter-spacing: .15em; line-height: 1.4; text-transform: uppercase }
 .eyebrow, .status { color: var(--red-dark) }
 .lead { font-size: 1.15rem }
@@ -152,9 +151,7 @@ main { flex: 1 }
 .text-button { min-height: 0; padding: 0; border: 0; background: transparent; text-decoration: underline; cursor: pointer }
 
 /* Teaching and research */
-.experience-hero { min-height: 570px; display: flex; align-items: flex-end; padding-block: clamp(5rem, 11vw, 8rem) 4rem; color: #fff; background: var(--ink) }
-.teaching-hero { background: linear-gradient(120deg, rgba(23,23,23,.98), rgba(23,23,23,.72)), radial-gradient(circle at 80% 25%, #e31837 0 12%, transparent 12%), #171717 }
-.research-hero { background: linear-gradient(120deg, rgba(23,23,23,.98), rgba(23,23,23,.7)), repeating-linear-gradient(90deg, transparent 0 90px, rgba(255,255,255,.08) 90px 91px), #9c1027 }
+.experience-hero { display: flex; align-items: flex-end; padding-block: clamp(3.5rem, 8vw, 6rem) 3rem; color: #fff }
 .experience-hero .eyebrow { color: #ffbec9 }
 .experience-hero h1 { max-width: 850px; margin: 1rem 0; font-size: clamp(3.5rem, 8vw, 7rem) }
 .experience-lede { max-width: 760px; margin: 0; font-size: clamp(1.15rem, 2.2vw, 1.55rem) }
@@ -166,10 +163,9 @@ main { flex: 1 }
 .section-heading .eyebrow { margin-bottom: .7rem }
 .editorial-routes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; padding: 1px; background: var(--line) }
 .editorial-routes article { min-height: 280px; padding: 1.5rem; background: var(--wash) }
-.editorial-routes article > span, .check-list article > span, .portfolio-list article > span { color: var(--red); font-size: .72rem; font-weight: 700; letter-spacing: .1em }
 .editorial-routes h3 { margin: 3.5rem 0 1rem; font-size: 1.5rem }
 .editorial-routes p { color: var(--muted); font-size: .88rem }
-.dark-band, .red-band, .initiative-authority { padding-block: clamp(4rem, 8vw, 6.5rem); color: #fff }
+.dark-band, .red-band { padding-block: clamp(4rem, 8vw, 6.5rem); color: #fff }
 .dark-band { background: var(--ink) }
 .red-band { background: var(--red-dark) }
 .split-band { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(2rem, 8vw, 7rem); align-items: start }
@@ -182,34 +178,70 @@ main { flex: 1 }
 .check-list h3 { margin: 0 0 .5rem; font-size: 1.6rem }
 .check-list p { max-width: 840px; margin: 0; color: var(--muted) }
 
-/* Initiative */
-.initiative-hero { position: relative; isolation: isolate; min-height: 43rem; overflow: hidden; display: flex; align-items: flex-end; padding: clamp(5rem, 11vw, 8rem) 0 4rem; background: linear-gradient(110deg, rgba(10,10,10,.98), rgba(10,10,10,.72)), repeating-linear-gradient(90deg, transparent 0 110px, rgba(255,255,255,.07) 110px 111px), var(--red-dark); color: #fff }
-.initiative-art { position: absolute; right: -3vw; top: -4rem; z-index: -1; color: transparent; font-size: min(42vw, 38rem); font-weight: 700; letter-spacing: -.15em; line-height: 1; -webkit-text-stroke: 1px rgba(255,255,255,.22) }
-.initiative-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: clamp(3rem, 8vw, 8rem); align-items: end }
-.initiative-copy h1 { max-width: 10ch; margin: 0 0 1.4rem; font-size: clamp(3.8rem, 8vw, 7.2rem) }
-.initiative-copy p { max-width: 38ch; font-size: clamp(1.18rem, 2.3vw, 1.55rem) }
-.initiative-copy button { margin-top: 1.2rem }
-.initiative-snapshot { padding: 1.5rem; background: rgba(10,10,10,.9) }
-.snapshot-status { display: flex; align-items: center; gap: .6rem; margin: 0 0 1rem; font-size: .82rem; font-weight: 700 }
-.snapshot-status span { width: .65rem; height: .65rem; border-radius: 50%; background: #ffbf47 }
-.initiative-snapshot dl { margin: 0 }
-.initiative-snapshot dl > div { padding: 1rem 0; border-top: 1px solid #555 }
-.initiative-snapshot dt { color: #bbb; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase }
-.initiative-snapshot dd { margin: .4rem 0 0; font-size: .88rem }
-.initiative-overview { padding-block: 3.5rem; background: #fff }
-.initiative-overview p { max-width: 980px; margin: 0; font-size: clamp(1.45rem, 2.6vw, 2.15rem); line-height: 1.35 }
-.initiative-body { padding-block: clamp(4rem, 8vw, 7rem) }
-.initiative-prose { max-width: 850px }
-.initiative-prose h2 { margin: .9rem 0 1rem; font-size: clamp(2.4rem, 4.5vw, 4rem) }
-.initiative-prose h2:not(:first-of-type) { margin-top: 4rem }
-.initiative-prose p:not(.eyebrow) { color: var(--text); font-size: 1.12rem }
-.initiative-portfolio { padding-block: clamp(4rem, 8vw, 7rem); background: var(--wash) }
-.portfolio-list { border-top: 1px solid #c7c5c1 }
-.portfolio-list article { min-height: 150px; padding: 1.5rem 0; display: grid; grid-template-columns: 4rem 1fr auto; gap: 1.5rem; align-items: center; border-bottom: 1px solid #c7c5c1 }
-.portfolio-list h3 { margin: .3rem 0; font-size: 1.6rem }
-.portfolio-list p { max-width: 720px; margin: 0; color: var(--muted) }
-.portfolio-list button { padding: .6rem 0; border: 0; border-bottom: 1px solid var(--red); background: transparent; font-weight: 700; cursor: pointer }
-.initiative-authority { background: var(--ink) }
+.experience-hero {
+  --banner-position: 50% 50%;
+  min-height: clamp(22rem, 42vw, 32rem);
+  background: linear-gradient(95deg, rgba(19, 15, 18, .94), rgba(19, 15, 18, .58)),
+    url("https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2026/10/Campus-Walk-East_360_8192x4096-scaled.jpg") var(--banner-position) / cover,
+    #352a2e;
+}
+.teaching-hero { --banner-position: 30% 46% }
+.research-hero { --banner-position: 62% 44% }
+.study-hero { --banner-position: 18% 42% }
+.partner-hero { --banner-position: 86% 55% }
+.work-hero .button { margin-top: 1.5rem }
+.workplace-examples, .work-source { padding-block: clamp(3rem, 6vw, 5rem) }
+.workplace-examples > h2, .work-source h2 { margin: 0 0 1.75rem; font-size: clamp(2rem, 4vw, 3.4rem) }
+.task-notes { display: grid; gap: clamp(1.25rem, 4vw, 3rem); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)) }
+.task-notes h3 { margin: 0 0 .55rem }
+.task-notes p { margin: 0 0 .5rem; color: var(--text) }
+.work-source { background: var(--wash) }
+.experience-page .section { padding-block: clamp(2.5rem, 5vw, 4.75rem) }
+.editorial-routes { gap: 1.5rem; background: transparent }
+.editorial-routes article { min-height: auto; padding: 0; background: transparent }
+.editorial-routes article h3 { margin: 0 0 .7rem }
+.editorial-routes article > span { display: none }
+.home-page .card { border-radius: .55rem; border-color: #e8e4df }
+.home-hero, .home-hero-art { min-height: clamp(29rem, 43vw, 36rem) }
+.home-hero-art::before { background: linear-gradient(32deg, rgba(99, 5, 22, .9), rgba(152, 7, 31, .55)),
+  url("https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2026/10/Campus-Walk-East_360_8192x4096-scaled.jpg") center / cover }
+.home-hero-art > strong { opacity: .46 }
+.home-route-list { background: #261e21 }
+.home-route-list button { background: transparent }
+
+/* Studio workspace */
+.studio-workspace { display: grid; grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr); min-height: 100vh; background: #f5f5f7 }
+.studio-sidebar { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; padding: 1.75rem 1rem; background: #211b23; color: #fff }
+.studio-sidebar strong { padding: 0 .75rem 1.2rem; font-size: 1.15rem }
+.studio-sidebar p { margin: 1rem .75rem .25rem; color: #ded3dd; font-size: .85rem }
+.studio-sidebar button { padding: .55rem .75rem; text-align: left; border: 0; border-radius: .4rem; background: transparent; color: inherit; cursor: pointer }
+.studio-sidebar button:hover, .studio-sidebar button[aria-current] { background: #503345 }
+.studio-main { min-width: 0; padding: clamp(1rem, 4vw, 3.5rem) }
+.studio-main h1 { margin: 1.25rem 0 .55rem; font-size: clamp(2rem, 4vw, 3.2rem) }
+.studio-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem }
+.studio-main button:not(.primary) { padding: .55rem .8rem; border: 1px solid #d5d2d8; border-radius: .4rem; background: #fff; cursor: pointer }
+.studio-main button:not(.primary):hover { border-color: var(--red-dark) }
+.studio-metrics, .studio-directory { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: .85rem; margin-block: 1.5rem 2.5rem }
+.studio-main .studio-metrics button { text-align: left; padding: 1.25rem }
+.studio-metrics strong { display: block; font-size: 2rem; color: var(--red-dark) }
+.studio-main .request, .studio-main .cms-form, .studio-page-form fieldset, .studio-preview { border: 1px solid #e1dce2; border-radius: .65rem; background: #fff }
+.studio-main .request .actions { margin: 0; align-self: center }
+.studio-main .request h2, .studio-main .request h3 { margin: .45rem 0 }
+.studio-page-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: start }
+.studio-page-form fieldset, .studio-preview { min-width: 0; margin: 0; padding: 1.25rem }
+.studio-page-form fieldset { display: grid; gap: 1rem }
+.studio-preview h2 { margin: .5rem 0 }
+.studio-preview p:first-child { margin: 0; color: var(--muted) }
+.ribbon button:first-of-type { margin-left: auto }
+@media (max-width: 720px) {
+  .home-hero, .home-hero-art { min-height: 0 }
+  .home-hero-art { min-height: 275px }
+  .experience-hero { min-height: 24rem }
+  .studio-workspace, .studio-page-form { grid-template-columns: minmax(0, 1fr) }
+  .studio-sidebar { flex-direction: row; flex-wrap: wrap; padding: .8rem }
+  .studio-sidebar strong { width: 100%; padding-bottom: .25rem }
+  .studio-sidebar p { display: none }
+}
 
 /* Forms and Studio */
 .panel { width: min(calc(100% - 48px), 900px); margin: 3rem auto; padding: 1.5rem; border: 1px solid var(--line); background: #fff }
@@ -248,16 +280,13 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
 }
 
 @media (max-width: 900px) {
-  .initiative-hero { min-height: auto }
-  .initiative-hero-grid { grid-template-columns: 1fr }
-  .initiative-snapshot { max-width: 34rem }
   .home-next-grid { grid-template-columns: 1fr; gap: 0; padding-top: 4rem }
   .home-route-list { margin-top: 3rem }
   .experience-intro, .split-band { grid-template-columns: 1fr; gap: 2rem }
 }
 
 @media (max-width: 720px) {
-  .shell, .home-shell, .initiative-shell, .section, .page-head, .panel, .panel.wide { width: min(calc(100% - 32px), 1180px) }
+  .shell, .home-shell, .section, .page-head, .panel, .panel.wide { width: min(calc(100% - 32px), 1180px) }
   html { scroll-behavior: auto }
   .ribbon { padding-inline: 16px }
   .site-header { padding-inline: 16px }
@@ -279,10 +308,6 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
   .home-next-grid { min-height: 0 }
   .home-route-list { margin-inline: -16px }
   .home-index .home-shell { padding-block: 3.5rem; align-items: flex-start; flex-direction: column }
-  .experience-hero { min-height: 520px }
-  .initiative-copy h1 { font-size: clamp(3rem, 16vw, 4.8rem) }
-  .portfolio-list article { grid-template-columns: 2.5rem 1fr }
-  .portfolio-list article button { grid-column: 2 }
   .check-list article { grid-template-columns: 2.5rem 1fr }
   .two, .role-grid { grid-template-columns: 1fr }
   .studio-head, .request, .event, footer { align-items: flex-start; flex-direction: column }
