@@ -106,7 +106,7 @@ app.post("/api/v1/requests", async (c) => {
   if (c.get("role") !== "external") return jsonError("Only the external demo role can submit suggestions.", 403);
   const body = await c.req.json();
   const parsed = requestSchema.safeParse({ ...body, idempotencyKey: body.idempotencyKey || c.req.header("X-Idempotency-Key") });
-  if (!parsed.success) return jsonError("Check the highlighted event fields.");
+  if (!parsed.success) return jsonError("Check the highlighted fields.");
   const workspaceId = c.get("workspaceId");
   const existing = await c.env.DB.prepare("SELECT response_json FROM idempotency_keys WHERE workspace_id = ? AND key = ?").bind(workspaceId, parsed.data.idempotencyKey).first<{ response_json: string }>();
   if (existing) return c.json(JSON.parse(existing.response_json));
@@ -130,13 +130,20 @@ app.post("/api/v1/studio/requests/:id/actions", async (c) => {
   if (c.get("role") !== "admin") return jsonError("Admin demo role required.", 403);
   const requestId = c.req.param("id");
   const action = (await c.req.json()).action;
-  const request = await c.env.DB.prepare("SELECT * FROM requests WHERE id = ? AND workspace_id = ?").bind(requestId, c.get("workspaceId")).first<{ payload_json: string; status: string }>();
+  const request = await c.env.DB.prepare("SELECT * FROM requests WHERE id = ? AND workspace_id = ?").bind(requestId, c.get("workspaceId")).first<{ payload_json: string; status: string; kind: string }>();
   if (!request) return jsonError("Request not found.", 404);
+  if (request.status !== "received") return jsonError("This request has already been handled.", 409);
   if (action === "decline") {
     await c.env.DB.prepare("UPDATE requests SET status = 'declined', updated_at = ? WHERE id = ? AND workspace_id = ?").bind(now(), requestId, c.get("workspaceId")).run();
     return c.json({ status: "declined" });
   }
-  if (action !== "publish") return jsonError("Supported actions are publish and decline.");
+  if (action === "resolve") {
+    if (request.kind === "event" || request.kind === "training") return jsonError("Calendar items must be published, not resolved.");
+    await c.env.DB.prepare("UPDATE requests SET status = 'resolved', updated_at = ? WHERE id = ? AND workspace_id = ?").bind(now(), requestId, c.get("workspaceId")).run();
+    return c.json({ status: "resolved" });
+  }
+  if (action !== "publish") return jsonError("Supported actions are publish, resolve and decline.");
+  if (request.kind !== "event" && request.kind !== "training") return jsonError("Only events and trainings can be published to the calendar. Mark other changes as resolved.");
   const payload = eventSuggestionSchema.parse(JSON.parse(request.payload_json));
   const eventId = id("event");
   const slug = `${payload.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${eventId.slice(-8)}`;
