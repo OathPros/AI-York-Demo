@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import type { Activity, ContentBundle, ContentItem } from "@ai-york/contracts";
 
-export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide";
+export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "initiative" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide";
 export type Go = (page: Page) => void;
 type Audience = "all" | "students" | "staff";
 
@@ -30,7 +30,7 @@ const dataOptions: { value: string; label: string; hint: string }[] = [
 const activityLabels: Record<Activity, string> = { work: "Work", study: "Study", teach: "Teach", research: "Research" };
 const collectionLabels: Record<string, string> = { policy: "Policy", interpretation: "Guidance", tool: "Tool", event: "Event", community: "Community", training: "Training" };
 
-const ExternalLink = ({ href, children }: { href?: string; children: React.ReactNode }) => (href ? <a className="text-link" href={href} target="_blank" rel="noreferrer">{children} <span aria-hidden="true">↗</span></a> : null);
+const ExternalLink = ({ href, children }: { href?: string; children: React.ReactNode }) => (href ? <a className="text-link" href={href} target="_blank" rel="noreferrer">{children}<span className="visually-hidden"> opens in a new tab</span></a> : null);
 const Empty = ({ children }: { children: React.ReactNode }) => <p className="empty" role="status">{children}</p>;
 
 export function Principles() {
@@ -144,6 +144,61 @@ export function AudiencePage({ kind, content, go }: { kind: keyof typeof audienc
   );
 }
 
+const teachingRoutes = [
+  ["Set expectations", "State when AI is permitted, how students should acknowledge its use, and which course or assessment instructions take priority"],
+  ["Design learning", "Use AI to support learning goals, course materials and inclusive teaching while keeping academic judgement with the instructor"],
+  ["Rethink assessment", "Design authentic assessment, explain acceptable assistance and make room for process, reflection and verification"],
+  ["Build AI literacy", "Help students question outputs, trace sources, recognize bias and understand the limits of generative systems"]
+];
+
+export function TeachingPage({ content, go }: { content: ContentBundle; go: Go }) {
+  return <div className="experience-page teaching-page">
+    <section className="experience-hero teaching-hero"><div className="shell"><p className="eyebrow">Teaching and learning</p><h1>Teaching with AI</h1><p className="experience-lede">Practical guidance for thoughtful course design, clear expectations and learning that keeps people at the centre</p><div className="hero-actions"><a className="button primary" href="#teaching-start">Plan your approach</a><a className="button inverse" href="https://www.yorku.ca/teachingandlearning/gen-ai/" target="_blank" rel="noreferrer">View the source hub</a></div></div></section>
+    <section className="experience-intro shell" id="teaching-start"><div><p className="eyebrow">Start with your course</p><h2>Make the purpose clear</h2></div><p>AI can support learning when its role is connected to course outcomes, students know what is expected, and instructors continue to make academic decisions. Course and assignment instructions always come first</p></section>
+    <section className="route-field shell" aria-labelledby="teaching-routes-title"><div className="section-heading"><p className="eyebrow">Plan your approach</p><h2 id="teaching-routes-title">Four teaching decisions</h2></div><div className="editorial-routes">{teachingRoutes.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
+    <section className="dark-band"><div className="shell split-band"><div><p className="eyebrow">For students</p><h2>Clear instructions build trust</h2></div><div><p>Tell students what kinds of AI assistance are acceptable, what they must disclose, and how their work will be evaluated. Make the expectations specific to the learning task</p><button className="light-link" onClick={() => go("study")}>Explore student guidance <span aria-hidden="true">→</span></button></div></div></section>
+    <GuideFinder content={content} initial={["teach"]} />
+    <ToolsSection content={content} activity="teach" showFilter={false} />
+    <TrainingSection content={content} tags={["teach"]} title="Teaching resources" />
+    <PolicyList content={content} activity="teach" />
+  </div>;
+}
+
+const researchChecks = [
+  ["Research ethics", "Confirm that the proposed use is consistent with the approved protocol, participant consent and any required amendments"],
+  ["Information and privacy", "Classify the information before it enters a tool and avoid identifiable or restricted participant data unless the workflow is explicitly authorized"],
+  ["Research integrity", "Verify claims, citations, calculations and code. Record material AI use when transparency or reproducibility requires it"],
+  ["Agreements and rights", "Check funder, partner, publisher, licence, intellectual property and Indigenous data governance requirements"]
+];
+
+export function ResearchPage({ content }: { content: ContentBundle }) {
+  return <div className="experience-page research-page">
+    <section className="experience-hero research-hero"><div className="shell"><p className="eyebrow">Research and innovation</p><h1>Research with AI</h1><p className="experience-lede">Use AI in ways that protect participants, research integrity, confidential information and the conditions attached to your work</p><div className="hero-actions"><a className="button primary" href="#research-checks">Review the checks</a><a className="button inverse" href="https://www.yorku.ca/research/use-of-artificial-intelligence-york/" target="_blank" rel="noreferrer">View the source page</a></div></div></section>
+    <section className="experience-intro shell"><div><p className="eyebrow">Before you use a tool</p><h2>Start with the research context</h2></div><p>A tool may be suitable for public or synthetic material and still be unsuitable for identifiable data, confidential partner information or a study governed by specific consent. Review the full workflow before moving research material into an AI service</p></section>
+    <section className="research-checks shell" id="research-checks" aria-labelledby="research-checks-title"><div className="section-heading"><p className="eyebrow">Decision framework</p><h2 id="research-checks-title">Four checks before use</h2></div><div className="check-list">{researchChecks.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><div><h3>{title}</h3><p>{text}</p></div></article>)}</div></section>
+    <section className="red-band"><div className="shell split-band"><div><p className="eyebrow">Human participant research</p><h2>Authorization comes before transfer</h2></div><p>Do not place identifiable or restricted participant information in an AI service unless the use is covered by consent, ethics approval and an authorized data environment. De-identification alone may not remove the risk</p></div></section>
+    <GuideFinder content={content} initial={["research"]} />
+    <ToolsSection content={content} activity="research" showFilter={false} />
+    <TrainingSection content={content} tags={["study"]} title="Research learning and support" />
+    <PolicyList content={content} activity="research" />
+  </div>;
+}
+
+export function InitiativePage({ go }: { go: Go }) {
+  const portfolio: [string, string, string, Page][] = [
+    ["Guidance people can use", "One route to activity-based guidance for work, study, teaching and research", "Available in this demonstration", "guide" as Page],
+    ["York approved tools", "Clear access, licence and data-use conditions for supported AI services", "Available in this demonstration", "tools" as Page],
+    ["AI learning", "Connected learning routes for administrators, instructors, students and researchers", "Available in this demonstration", "learning" as Page]
+  ];
+  return <div className="initiative-page">
+    <section className="initiative-hero"><div className="initiative-art" aria-hidden="true">AI</div><div className="initiative-shell initiative-hero-grid"><div className="initiative-copy"><h1>Artificial intelligence initiative</h1><p>Connect institutional guidance, approved tools, learning and responsible adoption across York</p><button className="primary" onClick={() => go("guide")}>Find guidance</button></div><aside className="initiative-snapshot" aria-label="Initiative snapshot"><p className="snapshot-status"><span aria-hidden="true"></span>Status to be confirmed</p><dl><div><dt>Initiative focus</dt><dd>Responsible and useful adoption of artificial intelligence</dd></div><div><dt>Connects</dt><dd>Teaching, research, administrative work, technology and governance</dd></div><div><dt>Intended result</dt><dd>Clearer decisions, safer use and shared institutional learning</dd></div></dl></aside></div></section>
+    <section className="initiative-overview"><div className="initiative-shell"><p>York’s AI work brings together the practical information people need to decide whether a use is appropriate, select an approved service, build capability and understand the rules that apply</p></div></section>
+    <section className="initiative-body initiative-shell"><div className="initiative-prose"><p className="eyebrow">Why this matters</p><h2>A shared route through fast moving change</h2><p>AI affects learning, research and institutional work in different ways. A cohesive experience helps people find the right guidance without requiring them to understand which office owns each part of the answer</p><h2>What changes</h2><p>People can begin with their activity and information type, see relevant conditions, compare supported tools and continue to specialized teaching or research guidance from one connected experience</p></div></section>
+    <section className="initiative-portfolio"><div className="initiative-shell"><div className="section-heading"><p className="eyebrow">Connected work</p><h2>Initiative portfolio</h2></div><div className="portfolio-list">{portfolio.map(([title, text, status, page], index) => <article key={title}><span>0{index + 1}</span><div><p className="status">{status}</p><h3>{title}</h3><p>{text}</p></div><button onClick={() => go(page)}>Explore <span aria-hidden="true">→</span></button></article>)}</div></div></section>
+    <section className="initiative-authority"><div className="initiative-shell split-band"><div><p className="eyebrow">Authority and source material</p><h2>Institutional guidance stays connected</h2></div><div><p>This experience summarizes and routes information while the responsible York offices remain the authoritative owners of policy, standards and operational guidance</p><a className="button inverse" href="https://www.yorku.ca/uit/cio/artificial-intelligence-initiative/" target="_blank" rel="noreferrer">View the CIO source page</a></div></div></section>
+  </div>;
+}
+
 export function IndexPage({ content, go }: { content: ContentBundle; go: Go }) {
   const [query, setQuery] = useState("");
   const [activity, setActivity] = useState("");
@@ -166,20 +221,16 @@ export function NewsPage() {
 }
 
 export function Home({ content, go }: { content: ContentBundle; go: Go }) {
-  const secondary: { page: Page; name: string; text: string; planned?: boolean }[] = [
-    { page: "policies", name: "Policy at a Glance", text: "Plain-language summaries of what's allowed" },
-    { page: "tools", name: "Approved Tools", text: "YU AURA · Microsoft Copilot · Zoom AI · GitHub Copilot" },
-    { page: "events", name: "News & Events", text: "Calendar of AI events and training; news feed planned" },
-    { page: "home", name: "Ask AI @ York", text: "Chatbot grounded in approved content only — planned, not yet available", planned: true }
-  ];
   return (
-    <>
-      <section className="hero-block"><p className="eyebrow">Guidance · Tools · Support</p><h1>AI <span className="accent">@</span> York</h1><p className="lead">York University supports the responsible use of artificial intelligence in work, study, teaching and research. Find clear guidance on what you can do, which tools to use and how to get started.</p><div className="actions"><a className="button primary" href="#guide-title">Find guidance</a><button onClick={() => go("tools")}>Explore AI tools</button></div></section>
-      <section className="section" aria-label="What do you do with AI?"><div className="tiles">{(Object.keys(audiencePages) as (keyof typeof audiencePages)[]).map((key) => <button key={key} className="tile" onClick={() => go(key)}><span className="tile-icon" aria-hidden="true">{audiencePages[key].icon}</span><strong>{audiencePages[key].name}</strong><small>{audiencePages[key].who}</small></button>)}</div><div className="tiles four">{secondary.map((tile) => tile.planned ? <div key={tile.name} className="tile planned"><strong>{tile.name}</strong><small>{tile.text}</small></div> : <button key={tile.name} className="tile" onClick={() => go(tile.page)}><strong>{tile.name}</strong><small>{tile.text}</small></button>)}</div><button className="index-strip" onClick={() => go("index")}><strong>A–Z INDEX</strong> — All {Object.values(content).flat().length} published AI items, searchable and filterable by activity <span aria-hidden="true">→</span></button></section>
+    <div className="home-page">
+      <section className="home-hero" aria-labelledby="home-title"><div className="home-hero-copy"><p className="hero-eyebrow">Guidance tools support</p><h1 id="home-title">AI <em>@</em> York</h1><p>York University supports the responsible use of artificial intelligence in work, study, teaching and research. Find clear guidance on what you can do, which tools to use and how to get started</p><div className="hero-actions"><a className="button dark" href="#guide-title">Find guidance <span aria-hidden="true">→</span></a><button className="button outline" onClick={() => go("tools")}>Explore AI tools <span aria-hidden="true">→</span></button></div></div><div className="home-hero-art" aria-hidden="true"><span className="hero-art-label">AI at York</span><strong>AI</strong><div><span>Responsible use starts with context</span><b>+</b></div></div></section>
+      <section className="home-statement"><div className="home-shell"><p><strong>Start with what you are doing</strong> then check the information involved, the rules that apply and the tool you plan to use</p><button onClick={() => go("initiative")}>Explore York’s AI initiative</button></div></section>
       <Principles />
       <GuideFinder content={content} />
       <ToolsSection content={content} />
+      <section className="home-next"><div className="home-shell home-next-grid"><div><p className="eyebrow">Find your route</p><h2>What will you do with AI</h2><p>Choose the context that best matches your work. Each route brings together practical guidance, policies, approved tools and learning</p></div><div className="home-route-list">{(["study", "teach", "research", "work"] as const).map((key, index) => <button key={key} onClick={() => go(key)}><span>0{index + 1}</span><strong>{audiencePages[key].name}</strong><b aria-hidden="true">→</b></button>)}</div></div></section>
       <TrainingSection content={content} />
-    </>
+      <section className="home-index"><div className="home-shell"><div><p className="eyebrow">Everything in one place</p><h2>Search AI at York</h2><p>Browse all {Object.values(content).flat().length} published guidance items, policies, tools, events, communities and learning resources</p></div><button className="button dark" onClick={() => go("index")}>Open the A to Z index <span aria-hidden="true">→</span></button></div></section>
+    </div>
   );
 }

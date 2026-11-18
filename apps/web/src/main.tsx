@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { changeTypeLabels, changeTypes, contentCollections, type ChangeType, type ContentBundle, type DemoRole, type SuggestionPayload } from "@ai-york/contracts";
 import { api } from "./api";
-import { AudiencePage, CommunityList, EventList, GoverningPage, GuideFinder, Home, IndexPage, NewsPage, PageHeader, PolicyList, TrainingSection, ToolsSection, type Page } from "./hub";
+import { AudiencePage, CommunityList, EventList, GoverningPage, GuideFinder, Home, IndexPage, InitiativePage, NewsPage, PageHeader, PolicyList, ResearchPage, TeachingPage, TrainingSection, ToolsSection, type Page } from "./hub";
 import { CmsManager } from "./studio";
 import "./styles.css";
 
 type Screen = "site" | "role" | "suggest" | "studio" | "receipt";
 type StudioTab = "inbox" | "content";
 type RequestRow = { id: string; kind: ChangeType; status: string; payload: SuggestionPayload & Record<string, string | boolean | undefined>; created_at: string };
-const pages: Page[] = ["home", "study", "teach", "research", "work", "partner", "policies", "tools", "learning", "events", "communities", "news", "governing", "index", "guide"];
+const pages: Page[] = ["home", "study", "teach", "research", "work", "partner", "initiative", "policies", "tools", "learning", "events", "communities", "news", "governing", "index", "guide"];
 const emptyContent = (): ContentBundle => Object.fromEntries(contentCollections.map((name) => [name, []])) as unknown as ContentBundle;
 const pageFromHash = (): Page => { const key = window.location.hash.replace(/^#\/?/, "").split("?")[0] as Page; return pages.includes(key) ? key : "home"; };
 
@@ -87,7 +87,10 @@ function App() {
   const renderPage = () => {
     switch (page) {
       case "home": return <Home content={content} go={go} />;
-      case "study": case "teach": case "research": case "work": case "partner": return <AudiencePage key={page} kind={page} content={content} go={go} />;
+      case "study": case "work": case "partner": return <AudiencePage key={page} kind={page} content={content} go={go} />;
+      case "teach": return <TeachingPage content={content} go={go} />;
+      case "research": return <ResearchPage content={content} />;
+      case "initiative": return <InitiativePage go={go} />;
       case "guide": return <><PageHeader eyebrow="Usage & Guidance" title="Practical guidance, in plain language" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder content={content} /></>;
       case "policies": return <><PageHeader eyebrow="Policy inventory" title="Policies that apply to AI at York" intro="Each entry links to its authoritative source. Guidance on this site points back to these policies." /><PolicyList content={content} /></>;
       case "tools": return <><PageHeader eyebrow="Tools & Access" title="Tools and how to get access" intro="Compare York-approved tools by who can use them and what they are for." /><ToolsSection content={content} /></>;
@@ -100,9 +103,9 @@ function App() {
     }
   };
 
-  const navItems: [Page, string][] = [["home", "Home"], ["study", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["policies", "Policy"], ["tools", "Tools"], ["events", "Events"], ["index", "A–Z"]];
-  return <div className="app"><div className="ribbon"><span>AI @ York · Demonstration site</span><button onClick={suggest}>Suggest a Change</button></div>
-    <header><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}>AI @ York</a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button onClick={suggest}>Suggest a Change</button></nav></header>
+  const navItems: [Page, string][] = [["home", "Home"], ["study", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["initiative", "Initiative"], ["tools", "Tools"]];
+  return <div className="app"><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button></div>
+    <header className="site-header"><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button className="nav-primary" onClick={() => go("guide")}>Can I use AI for this</button></nav></header>
     <main>
       {screen === "site" && <>{error && <p className="error" role="alert">{error}</p>}{renderPage()}</>}
       {screen === "role" && <section className="panel narrow"><p className="eyebrow">Passport York · Demo role selection</p><h1>Choose a role to explore</h1><p>Demo only. Choose a role to explore the prototype. No username, password, Duo prompt or real York session is used.</p><div className="role-grid"><button className="role" onClick={() => (workspaceId ? chooseRole("external") : start())}><strong>External User</strong><span>Suggest an event, training, fix a broken link or tell us what is missing.</span></button><button className="role" onClick={() => (workspaceId ? chooseRole("admin") : start())}><strong>AI @ York Admin</strong><span>Manage the policy, interpretation, tool, event, community and training inventories, and review suggested changes.</span></button></div><button className="text-button" onClick={() => go("home")}>Return to AI @ York</button></section>}
