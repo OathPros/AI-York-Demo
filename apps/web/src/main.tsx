@@ -1,0 +1,95 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
+import type { DemoRole, EventSuggestion, PublicEvent } from "@ai-york/contracts";
+import "./styles.css";
+
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8787";
+type Screen = "home" | "role" | "suggest" | "studio" | "calendar" | "receipt" | "catalogue";
+type CatalogueKind = "activity" | "partners" | "guide" | "policies" | "tools" | "learning" | "news" | "communities" | "index";
+type RequestRow = { id: string; status: string; payload: EventSuggestion; created_at: string };
+type ReferenceCase = { id: string; activity: string; task: string; data: string; title: string; example_use: string; green: string; yellow: string; red: string; tool_ids: string[]; tool_advice: string; sources: string[] };
+type Reference = { tools: Record<string, { name: string; url: string; scope: string }>; sources: Record<string, [string, string]>; cases: ReferenceCase[] };
+
+async function api(path: string, options: RequestInit = {}) {
+  const sessionToken = sessionStorage.getItem("ai-york-session");
+  const response = await fetch(`${API}${path}`, { ...options, headers: { "content-type": "application/json", ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {}), ...(options.headers || {}) } });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error?.message || "The demo service is unavailable.");
+  if (body.sessionToken) sessionStorage.setItem("ai-york-session", body.sessionToken);
+  return body;
+}
+function App() {
+  const [screen, setScreen] = useState<Screen>("home");
+  const [catalogueKind, setCatalogueKind] = useState<CatalogueKind>("guide");
+  const [workspaceId, setWorkspaceId] = useState("");
+  const [role, setRole] = useState<DemoRole>("external");
+  const [events, setEvents] = useState<PublicEvent[]>([]);
+  const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [receipt, setReceipt] = useState<{ reference: string; receiptSecret: string }>();
+  const [visitorLink, setVisitorLink] = useState("");
+  const [reference, setReference] = useState<Reference>();
+  const [guideFilters, setGuideFilters] = useState({ activity: "work", task: "draft", data: "public" });
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ title: "", date: "", startTime: "12:00", endTime: "13:00", allDay: false, timezone: "America/Toronto", organizer: "AI @ York", location: "Online", onlineLink: "", audience: "York community", sourceUrl: "", referringPage: window.location.hash || "#/" });
+  const openCatalogue = (kind: CatalogueKind) => { setCatalogueKind(kind); setScreen("catalogue"); window.history.pushState({}, "", `#/${kind}`); };
+  const refreshEvents = async (id = workspaceId) => { if (!id) return; const data = await api(`/api/v1/public/${id}/events`); setEvents(data.events); };
+  const loadReference = async (id = workspaceId) => { if (!id) return; const data = await api(`/api/v1/public/${id}/reference`); setReference(data.reference); };
+  useEffect(() => {
+    const invite = new URLSearchParams(window.location.hash.split("?")[1] || "").get("invite");
+    const stored = sessionStorage.getItem("ai-york-workspace");
+    const load = async () => {
+      try {
+        if (invite) {
+          const data = await api("/api/v1/demo/redeem", { method: "POST", body: JSON.stringify({ invite }) });
+          setWorkspaceId(data.workspaceId);
+          sessionStorage.setItem("ai-york-workspace", data.workspaceId);
+          window.history.replaceState({}, "", `${window.location.pathname}#/calendar`);
+          await refreshEvents(data.workspaceId);
+          await loadReference(data.workspaceId);
+          setScreen("calendar");
+          return;
+        }
+        if (stored) { setWorkspaceId(stored); await refreshEvents(stored); await loadReference(stored); }
+        const path = window.location.hash.replace(/^#\/?/, "").split("?")[0] as CatalogueKind;
+        if (["activity", "partners", "guide", "policies", "tools", "learning", "news", "communities", "index"].includes(path)) { setCatalogueKind(path); setScreen("catalogue"); }
+      } catch (e) { setError(e instanceof Error ? e.message : "This demo link is unavailable."); }
+    };
+    void load();
+  }, []);
+  const start = async () => { const data = await api("/api/v1/demo/start", { method: "POST" }); setWorkspaceId(data.workspaceId); sessionStorage.setItem("ai-york-workspace", data.workspaceId); await loadReference(data.workspaceId); setScreen("role"); };
+  const chooseRole = async (next: DemoRole) => { await api("/api/v1/demo/role", { method: "POST", body: JSON.stringify({ role: next }) }); setRole(next); setScreen(next === "admin" ? "studio" : "suggest"); };
+  const loadRequests = async () => { const data = await api("/api/v1/studio/requests"); setRequests(data.requests); };
+  const submit = async (event: React.FormEvent) => { event.preventDefault(); setError(""); try { const data = await api("/api/v1/requests", { method: "POST", headers: { "X-Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify({ kind: "event", payload: { type: "event", ...form }, idempotencyKey: crypto.randomUUID() }) }); setReceipt(data); setScreen("receipt"); } catch (e) { setError(e instanceof Error ? e.message : "Please check the form."); } };
+  const publish = async (id: string) => { await api(`/api/v1/studio/requests/${id}/actions`, { method: "POST", body: JSON.stringify({ action: "publish" }) }); await loadRequests(); await refreshEvents(); };
+  const copyVisitorLink = async () => {
+    const data = await api("/api/v1/studio/invites", { method: "POST", body: JSON.stringify({ capability: "visitor" }) });
+    const link = `${window.location.origin}${window.location.pathname}#/calendar?invite=${encodeURIComponent(data.token)}`;
+    setVisitorLink(link);
+    await navigator.clipboard?.writeText(link);
+  };
+  const nav = useMemo(() => <nav><button onClick={() => setScreen("home")}>Home</button><button onClick={() => { setScreen("calendar"); refreshEvents(); }}>Calendar</button><button onClick={() => openCatalogue("guide")}>Explore</button><button onClick={() => setScreen("role")}>Suggest a Change</button></nav>, [workspaceId]);
+  const catalogue = {
+    activity: { label: "Activity pages", title: "AI support for your York activity", intro: "Choose the context that best matches what you are doing. Each pathway brings together guidance, tools, learning and events.", cards: ["Study", "Teach", "Research", "Work"] },
+    partners: { label: "Partner or study at York", title: "Find the right destination", intro: "Explore degrees, certificates, continuing education and partnership routes related to AI at York.", cards: ["Degrees and certificates", "Continuing education", "Partnerships"] },
+    guide: { label: "Guidance", title: "Practical guidance, in plain language", intro: "Start with what you are trying to do, the information involved and the conditions that apply.", cards: ["What to do", "What to avoid", "Sources and next actions"] },
+    policies: { label: "Policy at a glance", title: "Understand the policy context", intro: "Read a demonstration summary, check scope and effective date, and open the authoritative source.", cards: ["Responsible use", "Assessment", "Privacy and data"] },
+    tools: { label: "Tools", title: "Explore AI tools", intro: "Compare tools by activity, eligibility and task. Access conditions and related learning stay visible.", cards: ["Microsoft Copilot", "Research tools", "Creative and productivity tools"] },
+    learning: { label: "Learning", title: "Build confidence through learning", intro: "Choose administrator learning, instructor learning, or degrees and certificates. Scheduled offerings appear on the calendar.", cards: ["Administrator learning", "Instructor learning", "Degrees and certificates"] },
+    news: { label: "News & updates", title: "Latest AI @ York updates", intro: "Browse dated updates and follow the original source for context.", cards: ["What changed", "New guidance", "Community stories"] },
+    communities: { label: "Communities", title: "Find people and places to connect", intro: "Discover groups, joining instructions, contact routes and upcoming events.", cards: ["Teaching community", "Research community", "Student community"] },
+    index: { label: "A–Z index", title: "Search AI @ York", intro: "Search titles, aliases and plain-language questions across the published hub.", cards: ["Search all content", "Filter by activity", "Filter by office and access level"] }
+  }[catalogueKind];
+  const guideResult = reference?.cases.find((item) => item.activity === guideFilters.activity && item.task === guideFilters.task && item.data === guideFilters.data);
+  return <div className="app"><div className="ribbon"><span>AI @ York · Demonstration site</span><button onClick={() => setScreen("role")}>Suggest a Change</button></div><header><a className="brand" onClick={() => setScreen("home")}>AI @ York</a>{nav}</header>
+    <main>
+      {screen === "home" && <><section className="hero"><p className="eyebrow">Practical guidance for York</p><h1>Make informed choices about AI at York.</h1><p>Explore guidance, tools, learning and events. This demonstration connects public information with a small editorial Studio.</p><div className="actions"><button className="primary" onClick={() => setScreen("calendar")}>Explore events</button><button onClick={() => setScreen("role")}>Suggest a change</button></div></section><section className="cards"><article><h2>Study</h2><p>Find support for learning and assessment.</p></article><article><h2>Teach</h2><p>Explore responsible classroom practice.</p></article><article><h2>Research</h2><p>Connect with research guidance and tools.</p></article></section></>}
+      {screen === "home" && <section className="link-grid"><button onClick={() => openCatalogue("activity")}>Study, teach, research and work <span>→</span></button><button onClick={() => openCatalogue("partners")}>Partner or study at York <span>→</span></button><button onClick={() => openCatalogue("guide")}>Guidance <span>→</span></button><button onClick={() => openCatalogue("policies")}>Policy at a glance <span>→</span></button><button onClick={() => openCatalogue("tools")}>Tools <span>→</span></button><button onClick={() => openCatalogue("learning")}>Learning <span>→</span></button><button onClick={() => openCatalogue("news")}>News & updates <span>→</span></button><button onClick={() => openCatalogue("communities")}>Communities <span>→</span></button><button onClick={() => openCatalogue("index")}>A–Z index <span>→</span></button></section>}
+      {screen === "catalogue" && <section className="panel catalogue-page"><p className="eyebrow">{catalogue.label}</p><h1>{catalogue.title}</h1><p>{catalogue.intro}</p>{catalogueKind === "guide" ? <div className="guide-explorer">{!workspaceId && <div className="notice">Start a demo workspace to load the imported guidance dataset.</div>}<div className="two"><label>Activity<select value={guideFilters.activity} onChange={(e) => setGuideFilters({ ...guideFilters, activity: e.target.value })}><option>work</option><option>study</option><option>teach</option><option>research</option></select></label><label>Task<select value={guideFilters.task} onChange={(e) => setGuideFilters({ ...guideFilters, task: e.target.value })}><option>draft</option><option>analyze</option><option>code</option><option>learn</option><option>teach</option><option>research</option></select></label></div><label>Information category<select value={guideFilters.data} onChange={(e) => setGuideFilters({ ...guideFilters, data: e.target.value })}><option>none</option><option>public</option><option>internal</option><option>sensitive</option><option>unsure</option></select></label>{guideResult ? <article className="guide-result"><span className="status">Imported demonstration guidance</span><h2>{guideResult.title}</h2><p>{guideResult.example_use}</p><h3>Recommended approach</h3><p>{guideResult.green}</p><h3>Check before proceeding</h3><p>{guideResult.yellow}</p><h3>Do not</h3><p>{guideResult.red}</p><p>{guideResult.tool_advice}</p><div className="tool-pills">{guideResult.tool_ids.map((toolId) => reference?.tools[toolId] && <a key={toolId} href={reference.tools[toolId].url} target="_blank" rel="noreferrer">{reference.tools[toolId].name}</a>)}</div></article> : <p className="empty">No matching imported case. Suggest an unmet need instead.</p>}</div> : <div className="catalogue-grid">{catalogue.cards.map((card) => <article key={card}><span className="status">Illustrative demo content</span><h2>{card}</h2><p>Owner-reviewed content, source links and related events will appear here as this section is published.</p><button onClick={() => setScreen("role")}>Suggest a change <span>→</span></button></article>)}</div>}</section>}
+      {screen === "role" && <section className="panel narrow"><p className="eyebrow">Passport York · Demo role selection</p><h1>Choose a role to explore</h1><p>Demo only. Choose a role to explore the prototype. No username, password, Duo prompt or real York session is used.</p><div className="role-grid"><button className="role" onClick={() => (workspaceId ? chooseRole("external") : start())}><strong>External User</strong><span>Suggest an event or tell us what is missing.</span></button><button className="role" onClick={() => (workspaceId ? chooseRole("admin") : start())}><strong>AI @ York Admin</strong><span>Review suggestions and publish a calendar entry.</span></button></div><button className="text-button" onClick={() => setScreen("home")}>Return to AI @ York</button></section>}
+      {screen === "suggest" && <section className="panel"><p className="eyebrow">External User</p><h1>Suggest an event</h1><p>Share fictional demonstration content only. Your referring page is prefilled below.</p><form onSubmit={submit}><label>Event title<input required minLength={3} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label><div className="two"><label>Date<input required type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></label><label>Timezone<input required value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} /></label></div><label className="check"><input type="checkbox" checked={form.allDay} onChange={(e) => setForm({ ...form, allDay: e.target.checked })} /> All-day event</label>{!form.allDay && <div className="two"><label>Start time<input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} /></label><label>End time<input type="time" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} /></label></div>}<div className="two"><label>Organizer<input required value={form.organizer} onChange={(e) => setForm({ ...form, organizer: e.target.value })} /></label><label>Audience<input required value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })} /></label></div><label>Location or online link<input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></label><label>Source URL<input type="url" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} /></label><label>Referring page<input readOnly value={form.referringPage} /></label>{error && <p className="error">{error}</p>}<button className="primary" type="submit">Preview and submit</button></form></section>}
+      {screen === "receipt" && <section className="panel narrow"><p className="eyebrow">Received for review</p><h1>Thanks for helping improve AI @ York.</h1><p>Your suggestion has been saved in the demonstration workspace.</p><div className="receipt"><strong>Reference</strong><code>{receipt?.reference}</code><strong>Private receipt secret</strong><code>{receipt?.receiptSecret}</code></div><button className="primary" onClick={() => { setRole("admin"); setScreen("studio"); }}>Switch demo role</button></section>}
+      {screen === "studio" && <section className="panel"><div className="studio-head"><div><p className="eyebrow">AI @ York Studio · Workspace {workspaceId.slice(-8)}</p><h1>Requests inbox</h1></div><button onClick={() => { setRole("external"); setScreen("suggest"); }}>Switch demo role</button></div><p>Review incoming suggestions before they appear publicly.</p><div className="actions"><button onClick={loadRequests}>Refresh inbox</button><button onClick={copyVisitorLink}>Copy visitor link</button></div>{visitorLink && <p className="success">Visitor link copied. It grants public reads and external suggestions, not Studio access.</p>}<div className="request-list">{requests.map((request) => <article className="request" key={request.id}><div><span className="status">{request.status}</span><h2>{request.payload.title}</h2><p>{request.payload.date} · {request.payload.organizer} · {request.payload.audience}</p></div>{request.status === "received" && <button className="primary" onClick={() => publish(request.id)}>Publish event</button>}</article>)}{requests.length === 0 && <p className="empty">No requests loaded. Refresh inbox to check the workspace.</p>}</div></section>}
+      {screen === "calendar" && <section className="panel"><p className="eyebrow">Calendar</p><h1>Upcoming events</h1><p>Published records update on the next fetch. Drafts and declined suggestions are not shown.</p><div className="event-list">{events.map((event) => <article className="event" key={event.id}><p className="eyebrow">{event.date} · {event.timezone}</p><h2>{event.title}</h2><p>{event.organizer} · {event.audience}</p><p>{event.location || event.onlineLink}</p></article>)}{events.length === 0 && <p className="empty">No published events in this workspace yet.</p>}</div></section>}
+    </main><footer><span>AI @ York · Demonstration site</span><a href="https://ai.yorku.ca/" target="_blank" rel="noreferrer">Official AI @ York website</a></footer></div>;
+}
+createRoot(document.getElementById("root")!).render(<React.StrictMode><App /></React.StrictMode>);

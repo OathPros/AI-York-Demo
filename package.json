@@ -1,0 +1,22 @@
+{
+  "name": "ai-york-demo",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "packages/contracts"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:api": "npm --workspace apps/api run dev",
+    "build": "npm --workspace apps/web run build && npm --workspace apps/api run typecheck",
+    "test": "npm --workspace packages/contracts run test && npm --workspace apps/api run test",
+    "typecheck": "npm --workspace apps/web run typecheck && npm --workspace apps/api run typecheck",
+    "db:migrate": "npm --workspace apps/api run db:migrate",
+    "db:seed": "npm --workspace apps/api run db:seed",
+    "import:reference": "node scripts/import-reference.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
