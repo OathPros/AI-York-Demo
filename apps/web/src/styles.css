@@ -319,3 +319,25 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important }
 }
+
+#york-learning-guide h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5rem) }
+#york-learning-guide .section + .section { padding-top: 0 }
+#york-learning-guide .learning-routes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 1rem 1.5rem;
+  padding: 1.2rem;
+  margin: 1.5rem 0 0;
+  list-style: none;
+  background: var(--wash);
+}
+#york-learning-guide .learning-routes a { display: inline-flex; align-items: center; min-height: 44px }
+#york-learning-guide .learning-routes p { margin: 0 }
+:is(#york-learning-guide, .workplace-examples) .learning-steps {
+  display: grid;
+  gap: .85rem;
+  padding-inline-start: 1.5rem;
+  margin-block: 1.35rem;
+}
+:is(#york-learning-guide, .workplace-examples) .learning-steps li::marker { color: var(--red-dark); font-weight: 700 }
+:is(#york-learning-guide, .workplace-examples) .learning-steps p { margin: .25rem 0 0 }

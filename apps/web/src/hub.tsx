@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import type { Activity, ContentBundle, ContentItem, PageCopy } from "@ai-york/contracts";
 import { pageCopy } from "./page-copy";
 import { Calendar, News, Upcoming } from "./updates";
+import { migratedLearningHref, StudyGuidance, TeachingGuidance } from "./learning";
 
 export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide";
 export type Go = (page: Page) => void;
@@ -32,7 +33,12 @@ const dataOptions: { value: string; label: string; hint: string }[] = [
 const activityLabels: Record<Activity, string> = { work: "Work", study: "Study", teach: "Teach", research: "Research" };
 const collectionLabels: Record<string, string> = { policy: "Policy", interpretation: "Guidance", tool: "Tool", event: "Event", community: "Community", training: "Training" };
 
-const ExternalLink = ({ href, children }: { href?: string; children: React.ReactNode }) => (href ? <a className="text-link" href={href} target="_blank" rel="noreferrer">{children}<span className="visually-hidden"> opens in a new tab</span></a> : null);
+function ResourceLink({ href, children }: { href?: string; children: React.ReactNode }) {
+  if (!href) return null;
+  const migrated = migratedLearningHref(href);
+  return migrated ? <a className="text-link" href={migrated}>{children}</a> :
+    <a className="text-link" href={href} target="_blank" rel="noreferrer">{children}<span className="visually-hidden"> opens in a new tab</span></a>;
+}
 const Empty = ({ children }: { children: React.ReactNode }) => <p className="empty" role="status">{children}</p>;
 
 function jumpToSection(event: React.MouseEvent<HTMLAnchorElement>) {
@@ -80,7 +86,7 @@ export function GuideFinder({ content, initial = [] }: { content: ContentBundle;
           <div className="traffic"><div className="ok"><h4>Generally acceptable</h4><p>{item.data.green}</p></div><div className="warn"><h4>Conditions before use</h4><p>{item.data.yellow}</p></div><div className="no"><h4>Not acceptable</h4><p>{item.data.red}</p></div></div>
           <p>{item.data.tool_advice}</p>
           <div className="pills"><strong>Approved tools:</strong>{(item.data.tool_ids as string[]).map((id) => toolById(id)).filter(Boolean).map((tool) => <a key={tool!.id} href={tool!.data.url} target="_blank" rel="noreferrer">{tool!.data.name}</a>)}</div>
-          <div className="pills"><strong>Policy and sources:</strong>{(item.data.sources as string[]).map((id) => policyById(id)).filter(Boolean).map((policy) => <a key={policy!.id} href={policy!.data.url} target="_blank" rel="noreferrer">{policy!.data.title}</a>)}</div>
+          <div className="pills"><strong>Policy and sources:</strong>{(item.data.sources as string[]).map((id) => policyById(id)).filter(Boolean).map((policy) => <ResourceLink key={policy!.id} href={policy!.data.url}>{policy!.data.title}</ResourceLink>)}</div>
           {item.data.approval_note && <p className="notice">{item.data.approval_note}</p>}
         </article>
       ) : <Empty key={activity}>No reviewed guidance for {activityLabels[activity]} with this task and information type yet. Use Suggest a Change to tell us what is missing.</Empty>)}</div>}
@@ -99,7 +105,7 @@ export function ToolsSection({ content, activity, showFilter = true }: { content
       <p className="eyebrow">York-approved tools</p><h2 id="tools-title">The right tools for you</h2>
       <p className="lead">These tools respect and protect York data in ways commercially available tools do not. Access depends on your role and licence.</p>
       {showFilter && <div className="filters" role="group" aria-label="Filter by access">{([["all", "All tools"], ["students", "For students"], ["staff", "Faculty and staff"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)}>{label}</button>)}</div>}
-      <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><h3>{tool.data.name}</h3><p>{tool.data.scope}</p><ExternalLink href={tool.data.url}>Access and requirements</ExternalLink></article>)}</div>
+      <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><h3>{tool.data.name}</h3><p>{tool.data.scope}</p><ResourceLink href={tool.data.url}>Access and requirements</ResourceLink></article>)}</div>
       {tools.length === 0 && <Empty>No tools match this view yet.</Empty>}
     </section>
   );
@@ -116,7 +122,7 @@ export function TrainingSection({ content, tags, title = "AI learning at York" }
       <p className="eyebrow">Go further</p><h2 id="training-title">{title}</h2>
       <p className="lead">Understand how AI works, learn to use York-approved tools, and develop practical skills for your role.</p>
       {!tags && <div className="filters" role="group" aria-label="Filter AI learning resources">{trainingFilters.map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>)}</div>}
-      <div className="grid">{items.map((item) => <article className="card" key={item.id}><span className="status">{item.data.format}</span><h3>{item.title}</h3>{item.data.summary && <p>{item.data.summary}</p>}<ExternalLink href={item.data.url}>Open resource</ExternalLink></article>)}</div>
+      <div className="grid">{items.map((item) => <article className="card" key={item.id}><span className="status">{item.data.format}</span><h3>{item.title}</h3>{item.data.summary && <p>{item.data.summary}</p>}<ResourceLink href={item.data.url}>Open resource</ResourceLink></article>)}</div>
       {items.length === 0 && <Empty>No training matches that focus yet. Choose another category.</Empty>}
     </section>
   );
@@ -124,7 +130,7 @@ export function TrainingSection({ content, tags, title = "AI learning at York" }
 
 export function PolicyList({ content, activity }: { content: ContentBundle; activity?: Activity }) {
   const items = content.policy.filter((policy) => !activity || (policy.data.activities as string[]).includes(activity));
-  return <section className="section" aria-labelledby="policy-title"><p className="eyebrow">Policy inventory</p><h2 id="policy-title">Policies and guidelines that apply</h2><div className="grid">{items.map((policy) => <article className="card" key={policy.id}><h3>{policy.data.title}</h3><p>{policy.data.summary || "Summary to be added by an editor."}</p>{(policy.data.owner || policy.data.effectiveDate) && <p className="quiet">{[policy.data.owner, policy.data.effectiveDate && `Effective ${policy.data.effectiveDate}`].filter(Boolean).join(" · ")}</p>}<ExternalLink href={policy.data.url}>Open the authoritative source</ExternalLink></article>)}</div>{items.length === 0 && <Empty>No policies are listed for this area yet.</Empty>}</section>;
+  return <section className="section" aria-labelledby="policy-title"><p className="eyebrow">Policy inventory</p><h2 id="policy-title">Policies and guidelines that apply</h2><div className="grid">{items.map((policy) => <article className="card" key={policy.id}><h3>{policy.data.title}</h3>{policy.data.summary && <p>{policy.data.summary}</p>}{(policy.data.owner || policy.data.effectiveDate) && <p className="quiet">{[policy.data.owner, policy.data.effectiveDate && `Effective ${policy.data.effectiveDate}`].filter(Boolean).join(" · ")}</p>}<ResourceLink href={policy.data.url}>{migratedLearningHref(policy.data.url || "") ? "Read the guide" : "Open the authoritative source"}</ResourceLink></article>)}</div>{items.length === 0 && <Empty>No policies are listed for this area yet.</Empty>}</section>;
 }
 
 export function EventList({ content }: { content: ContentBundle }) {
@@ -137,7 +143,7 @@ export function EventList({ content }: { content: ContentBundle }) {
 
 export function CommunityList({ content, activity }: { content: ContentBundle; activity?: Activity }) {
   const items = content.community.filter((c) => !activity || (c.data.activities as string[]).length === 0 || (c.data.activities as string[]).includes(activity));
-  return <section className="section" aria-labelledby="community-title"><p className="eyebrow">Communities</p><h2 id="community-title">Find people and places to connect</h2><div className="grid">{items.map((c) => <article className="card" key={c.id}><h3>{c.data.name}</h3><p>{c.data.summary}</p>{c.data.contact && <p className="quiet">Contact: {c.data.contact}</p>}<ExternalLink href={c.data.url}>Join or learn more</ExternalLink></article>)}</div>{items.length === 0 && <Empty>No communities are listed yet. Admins add them in Studio, or you can suggest one.</Empty>}</section>;
+  return <section className="section" aria-labelledby="community-title"><p className="eyebrow">Communities</p><h2 id="community-title">Find people and places to connect</h2><div className="grid">{items.map((c) => <article className="card" key={c.id}><h3>{c.data.name}</h3><p>{c.data.summary}</p>{c.data.contact && <p className="quiet">Contact: {c.data.contact}</p>}<ResourceLink href={c.data.url}>Join or learn more</ResourceLink></article>)}</div>{items.length === 0 && <Empty>No communities are listed yet. Admins add them in Studio, or you can suggest one.</Empty>}</section>;
 }
 
 export function PageHeader({ eyebrow, title, intro, children }: { eyebrow: string; title: string; intro: string; children?: React.ReactNode }) {
@@ -151,20 +157,11 @@ export function AudiencePage({ kind, content, go, copy = pageCopy[kind] }: { kin
       <section className={`experience-hero ${kind}-hero`}><div className="shell">
         <h1>{copy.title}</h1><p className="experience-lede">{copy.intro}</p>
       </div></section>
-      {kind === "study" && <section className="shell workplace-examples"><h2>Before you use AI on an assignment</h2>
-        <div className="task-notes">
-          <article><h3>Read the course instructions</h3><p>Check the assignment for permitted uses and ask your instructor before using AI if the instructions are unclear</p></article>
-          <article><h3>Practise without sharing coursework</h3><p>Ask for a practice question or an explanation using a fictional example. Keep private course material and personal information out of prompts unless authorized</p></article>
-          <article><h3>Verify and acknowledge your use</h3><p>Check every citation and claim and follow the course instructions for disclosing AI assistance</p></article>
-        </div>
-        <div className="field-example"><h3>Try an active recall exercise</h3><p>Using a topic you are allowed to share, ask for five practice questions with the answers held back. Answer them on your own, then check the feedback against your course notes</p>
-          <ExternalLink href="https://www.yorku.ca/teachingandlearning/gen-ai/for-students/">Read York’s student guidance</ExternalLink>
-        </div>
-      </section>}
+      {kind === "study" && <StudyGuidance />}
       {kind === "partner" && <section className="shell workplace-examples"><h2>Find the right route</h2>
         <div className="task-notes">
           <article><h3>Find a degree or certificate</h3><p>Use the program links below to compare admissions requirements and delivery options</p></article>
-          <article><h3>Explore research partnerships</h3><p>Start with York Research and Innovation to identify researchers, research strengths and ways to collaborate</p><ExternalLink href="https://www.yorku.ca/research/">Contact York Research and Innovation</ExternalLink></article>
+          <article><h3>Explore research partnerships</h3><p>Start with York Research and Innovation to identify researchers, research strengths and ways to collaborate</p><ResourceLink href="https://www.yorku.ca/research/">Contact York Research and Innovation</ResourceLink></article>
         </div>
         <div className="field-example"><h3>Prepare a partnership brief</h3><p>Describe the problem, the people it affects, the expertise you need and a possible first project. Flag data access, ownership and funding questions before anyone shares private material</p></div>
       </section>}
@@ -178,25 +175,19 @@ export function AudiencePage({ kind, content, go, copy = pageCopy[kind] }: { kin
   );
 }
 
-const teachingRoutes = [
-  ["Set expectations", "State when AI is permitted, how students should acknowledge its use, and which course or assessment instructions take priority"],
-  ["Design learning", "Use AI to support learning goals, course materials and inclusive teaching while keeping academic judgement with the instructor"],
-  ["Rethink assessment", "Design authentic assessment, explain acceptable assistance and make room for process, reflection and verification"],
-  ["Build AI literacy", "Help students question outputs, trace sources, recognize bias and understand the limits of generative systems"]
-];
-
-export function TeachingPage({ content, go, copy = pageCopy.teach }: { content: ContentBundle; go: Go; copy?: PageCopy }) {
+export function TeachingPage({ content, copy = pageCopy.teach }: { content: ContentBundle; copy?: PageCopy }) {
   return <div className="experience-page teaching-page">
-    <section className="experience-hero teaching-hero"><div className="shell"><p className="eyebrow">Teaching and learning</p><h1>{copy.title}</h1><p className="experience-lede">{copy.intro}</p><div className="hero-actions"><a className="button primary" href="#teaching-start" onClick={jumpToSection}>Plan your approach</a><a className="button inverse" href="https://www.yorku.ca/teachingandlearning/gen-ai/" target="_blank" rel="noreferrer">View the source hub</a></div></div></section>
-    <section className="experience-intro shell" id="teaching-start"><div><p className="eyebrow">Start with your course</p><h2>Make the purpose clear</h2></div><p>AI can support learning when its role is connected to course outcomes, students know what is expected, and instructors continue to make academic decisions. Course and assignment instructions always come first</p></section>
-    <section className="route-field shell" aria-labelledby="teaching-routes-title"><div className="section-heading"><p className="eyebrow">Plan your approach</p><h2 id="teaching-routes-title">Four teaching decisions</h2></div><div className="editorial-routes">{teachingRoutes.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
-    <section className="dark-band"><div className="shell split-band"><div><p className="eyebrow">For students</p><h2>Clear instructions build trust</h2></div><div><p>Tell students what kinds of AI assistance are acceptable, what they must disclose, and how their work will be evaluated. Make the expectations specific to the learning task</p><button className="light-link" onClick={() => go("study")}>Explore student guidance <span aria-hidden="true">→</span></button></div></div></section>
-    <section className="shell field-example">
-      <h2>Write an assignment level AI statement</h2>
-      <p>For each assignment, name the permitted tasks, explain what students must produce independently, and say how they should disclose AI use</p>
-      <p>Example for a course that permits brainstorming. You may use AI to generate questions about your topic. Write your own argument, verify every citation and include a short note describing the tool and how you used it</p>
-      <ExternalLink href="https://www.yorku.ca/teachingcommons/artificial-intelligence-ai-pedagogies/">Find teaching support</ExternalLink>
+    <section className="experience-hero teaching-hero">
+      <div className="shell">
+        <p className="eyebrow">Teaching and learning</p>
+        <h1>{copy.title}</h1><p className="experience-lede">{copy.intro}</p>
+        <div className="hero-actions">
+          <a className="button primary" href="#teaching-practice-heading" onClick={jumpToSection}>Plan your approach</a>
+          <a className="button inverse" href="#/learning">AI fundamentals</a>
+        </div>
+      </div>
     </section>
+    <TeachingGuidance />
     <GuideFinder content={content} initial={["teach"]} />
     <ToolsSection content={content} activity="teach" showFilter={false} />
     <TrainingSection content={content} tags={["teach"]} title="Teaching resources" />
@@ -220,7 +211,7 @@ export function ResearchPage({ content, copy = pageCopy.research }: { content: C
     <section className="shell field-example">
       <h2>Plan a literature screening workflow</h2>
       <p>Use approved public metadata to test search terms and draft screening criteria. Have a researcher confirm each inclusion decision against the original source and log the tool, date, version and checks in the project records</p>
-      <ExternalLink href="https://researchguides.library.yorku.ca/genairesearch">Open the library guide to generative AI in research</ExternalLink>
+      <ResourceLink href="https://researchguides.library.yorku.ca/genairesearch">Open the library guide to generative AI in research</ResourceLink>
     </section>
     <GuideFinder content={content} initial={["research"]} />
     <ToolsSection content={content} activity="research" showFilter={false} />
@@ -259,7 +250,7 @@ export function WorkPage({ content, copy = pageCopy.work }: { content: ContentBu
     <section className="work-source"><div className="shell">
       <h2>York’s AI initiative</h2>
       <p>The Office of the CIO connects responsible adoption with the guidelines, supported technology and training staff need for day to day work</p>
-      <ExternalLink href="https://www.yorku.ca/uit/cio/artificial-intelligence-initiative/">Read the CIO initiative</ExternalLink>
+      <ResourceLink href="https://www.yorku.ca/uit/cio/artificial-intelligence-initiative/">Read the CIO initiative</ResourceLink>
     </div></section>
   </div>;
 }
@@ -278,7 +269,7 @@ export function IndexPage({ content, go }: { content: ContentBundle; go: Go }) {
 }
 
 export function GoverningPage() {
-  return <><PageHeader eyebrow="Governing bodies" title="Who governs AI at York" intro="York's AI Roundtable fosters cross-divisional communication and collaboration on AI implications, and advises on policies and strategies for responsible engagement with AI in teaching and learning, research and operations." /><section className="section"><p className="notice">Placeholder: the committees, offices and contacts that own each policy are not yet recorded in the CMS. Editors will add them once the inventory is confirmed.</p><ExternalLink href="https://www.yorku.ca/ai-at-york/">AI @ York official website</ExternalLink></section></>;
+  return <><PageHeader eyebrow="Governing bodies" title="Who governs AI at York" intro="York's AI Roundtable fosters cross-divisional communication and collaboration on AI implications, and advises on policies and strategies for responsible engagement with AI in teaching and learning, research and operations." /><section className="section"><p className="notice">Placeholder: the committees, offices and contacts that own each policy are not yet recorded in the CMS. Editors will add them once the inventory is confirmed.</p><ResourceLink href="https://www.yorku.ca/ai-at-york/">AI @ York official website</ResourceLink></section></>;
 }
 
 export function NewsPage() {

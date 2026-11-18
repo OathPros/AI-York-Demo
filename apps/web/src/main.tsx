@@ -6,6 +6,7 @@ import { AudiencePage, CommunityList, EventList, GoverningPage, GuideFinder, Hom
 import { CmsManager, PageEditor, StudioShell, type StudioView } from "./studio";
 import type { PublishedPages } from "./page-copy";
 import "./styles.css";
+import { LearningGuide } from "./learning";
 
 type Screen = "site" | "role" | "suggest" | "studio" | "receipt";
 
@@ -124,13 +125,13 @@ function App() {
     switch (page) {
       case "home": return <Home content={content} go={go} copy={publishedPages.home} />;
       case "study": case "partner": return <AudiencePage key={page} kind={page} content={content} go={go} copy={publishedPages[page]} />;
-      case "teach": return <TeachingPage content={content} go={go} copy={publishedPages.teach} />;
+      case "teach": return <TeachingPage content={content} copy={publishedPages.teach} />;
       case "research": return <ResearchPage content={content} copy={publishedPages.research} />;
       case "work": return <WorkPage content={content} copy={publishedPages.work} />;
       case "guide": return <><PageHeader eyebrow="Usage & Guidance" title="Practical guidance, in plain language" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder content={content} /></>;
       case "policies": return <><PageHeader eyebrow="Policy inventory" title="Policies that apply to AI at York" intro="Each entry links to its authoritative source. Guidance on this site points back to these policies." /><PolicyList content={content} /></>;
       case "tools": return <><PageHeader eyebrow="Tools & Access" title="Tools and how to get access" intro="Compare York-approved tools by who can use them and what they are for." /><ToolsSection content={content} /></>;
-      case "learning": return <TrainingSection content={content} />;
+      case "learning": return <><LearningGuide /><TrainingSection content={content} title="Courses workshops and resources" /></>;
       case "events": return <EventList content={content} />;
       case "communities": return <CommunityList content={content} />;
       case "news": return <NewsPage />;
@@ -139,7 +140,7 @@ function App() {
     }
   };
 
-  const navItems: [Page, string][] = [["home", "Home"], ["study", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["tools", "Tools"], ["events", "Calendar"], ["news", "News"]];
+  const navItems: [Page, string][] = [["home", "Home"], ["learning", "Learning"], ["teach", "Teaching"], ["research", "Research"], ["work", "Work"], ["tools", "Tools"], ["events", "Calendar"], ["news", "News"]];
   return <div className="app">{screen !== "studio" && <><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button><button onClick={openStudio}>Open Studio</button></div>
     <header className="site-header"><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button className="nav-primary" onClick={() => go("guide")}>Can I use AI for this</button></nav></header></>}
     <main>
