@@ -1,7 +1,7 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { getCookie, setCookie } from "hono/cookie";
-import { eventSuggestionSchema, requestSchema, roleSchema, type DemoRole } from "@ai-york/contracts";
+import { contentCollectionSchema, contentCollections, contentSchemas, contentWriteSchema, eventSuggestionSchema, requestSchema, roleSchema, type ContentBundle, type ContentCollection, type ContentItem, type ContentStatus, type DemoRole } from "@ai-york/contracts";
 
 type AppEnv = { Bindings: Env; Variables: { workspaceId: string; role: DemoRole } };
 const app = new Hono<AppEnv>();
@@ -32,7 +32,7 @@ app.use("*", async (c, next) => {
   }
   if (c.req.method === "OPTIONS") {
     c.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Idempotency-Key");
-    c.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    c.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     return c.body(null, 204);
   }
   await next();
@@ -146,35 +146,82 @@ app.post("/api/v1/studio/requests/:id/actions", async (c) => {
   if (request.kind !== "event" && request.kind !== "training") return jsonError("Only events and trainings can be published to the calendar. Mark other changes as resolved.");
   const payload = eventSuggestionSchema.parse(JSON.parse(request.payload_json));
   const eventId = id("event");
-  const slug = `${payload.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${eventId.slice(-8)}`;
+  const { referringPage: _referringPage, ...eventData } = payload;
+  const data = { ...eventData, summary: "Published from an AI @ York demo suggestion." };
   await c.env.DB.batch([
-    c.env.DB.prepare("INSERT INTO events (id, workspace_id, slug, title, payload_json, lifecycle, created_at) VALUES (?, ?, ?, ?, ?, 'published', ?)").bind(eventId, c.get("workspaceId"), slug, payload.title, JSON.stringify({ ...payload, summary: "Published from an AI @ York demo suggestion." }), now()),
+    c.env.DB.prepare("INSERT INTO content_items (workspace_id, collection, id, title, status, data_json, created_at, updated_at) VALUES (?, 'event', ?, ?, 'published', ?, ?, ?)").bind(c.get("workspaceId"), eventId, payload.title, JSON.stringify(data), now(), now()),
     c.env.DB.prepare("UPDATE requests SET status = 'published', resulting_event_id = ?, updated_at = ? WHERE id = ? AND workspace_id = ?").bind(eventId, now(), requestId, c.get("workspaceId"))
   ]);
-  return c.json({ status: "published", event: { id: eventId, slug } });
+  return c.json({ status: "published", event: { id: eventId } });
 });
 
-app.get("/api/v1/public/:workspaceId/events", async (c) => {
-  const rows = await c.env.DB.prepare("SELECT id, slug, title, payload_json FROM events WHERE workspace_id = ? AND lifecycle = 'published' ORDER BY json_extract(payload_json, '$.date')").bind(c.req.param("workspaceId")).all();
-  return c.json({ events: rows.results.map((row) => ({ id: row.id, slug: row.slug, title: row.title, ...JSON.parse(String(row.payload_json)), status: "published" })) });
-});
-
-app.get("/api/v1/public/:workspaceId/events/:slug", async (c) => {
-  const row = await c.env.DB.prepare("SELECT id, slug, title, payload_json FROM events WHERE workspace_id = ? AND slug = ? AND lifecycle = 'published'").bind(c.req.param("workspaceId"), c.req.param("slug")).first<{ id: string; slug: string; title: string; payload_json: string }>();
-  if (!row) return jsonError("Event not found.", 404);
-  return c.json({ event: { id: row.id, slug: row.slug, title: row.title, ...JSON.parse(row.payload_json), status: "published" } });
-});
-
-app.get("/api/v1/public/:workspaceId/reference", async (c) => {
-  const rows = await c.env.DB.prepare("SELECT id, kind, payload_json FROM reference_content ORDER BY kind, id").all<{ id: string; kind: string; payload_json: string }>();
-  const reference = { tools: {} as Record<string, unknown>, sources: {} as Record<string, unknown>, cases: [] as unknown[] };
-  for (const row of rows.results) {
-    const payload = JSON.parse(row.payload_json);
-    if (row.kind === "tool") reference.tools[row.id] = payload;
-    else if (row.kind === "source") reference.sources[row.id] = payload;
-    else reference.cases.push(payload);
+type ContentRow = { workspace_id: string; collection: ContentCollection; id: string; title: string; status: ContentStatus; data_json: string };
+async function loadContent(db: D1Database, workspaceId: string | null, includeUnpublished: boolean) {
+  const rows = await db.prepare("SELECT workspace_id, collection, id, title, status, data_json FROM content_items WHERE workspace_id IN ('base', ?) ORDER BY workspace_id = 'base' DESC, rowid").bind(workspaceId ?? "base").all<ContentRow>();
+  const merged = new Map<string, ContentRow>();
+  for (const row of rows.results) merged.set(`${row.collection}|${row.id}`, row);
+  const bundle = Object.fromEntries(contentCollections.map((name) => [name, [] as ContentItem[]])) as unknown as ContentBundle;
+  for (const row of merged.values()) {
+    if (!includeUnpublished && row.status !== "published") continue;
+    bundle[row.collection].push({ id: row.id, collection: row.collection, title: row.title, status: row.status, origin: row.workspace_id === "base" ? "base" : "workspace", data: JSON.parse(row.data_json) });
   }
-  return c.json({ reference });
+  bundle.event.sort((a, b) => String(a.data.date).localeCompare(String(b.data.date)));
+  return bundle;
+}
+
+app.get("/api/v1/public/content", async (c) => c.json({ content: await loadContent(c.env.DB, null, false) }));
+app.get("/api/v1/public/:workspaceId/content", async (c) => c.json({ content: await loadContent(c.env.DB, c.req.param("workspaceId"), false) }));
+
+function parseCollection(name: string) {
+  const parsed = contentCollectionSchema.safeParse(name);
+  return parsed.success ? parsed.data : null;
+}
+function itemTitle(data: Record<string, unknown>) { return String(data.title ?? data.name ?? ""); }
+
+app.get("/api/v1/studio/content", async (c) => {
+  if (c.get("role") !== "admin") return jsonError("Admin demo role required.", 403);
+  return c.json({ content: await loadContent(c.env.DB, c.get("workspaceId"), true) });
+});
+
+async function saveContent(c: Context<AppEnv>, collection: ContentCollection, itemId: string, isCreate: boolean) {
+  const body = contentWriteSchema.safeParse(await c.req.json().catch(() => null));
+  if (!body.success) return jsonError("Send a status and data object.");
+  const data = contentSchemas[collection].safeParse(body.data.data);
+  if (!data.success) return jsonError(`Check the fields: ${data.error.issues.map((issue) => `${issue.path.join(".") || "data"} ${issue.message}`).join("; ")}`);
+  const workspaceId = c.get("workspaceId");
+  if (!isCreate) {
+    const visible = await c.env.DB.prepare("SELECT 1 AS ok FROM content_items WHERE workspace_id IN ('base', ?) AND collection = ? AND id = ?").bind(workspaceId, collection, itemId).first();
+    if (!visible) return jsonError("Item not found.", 404);
+  }
+  await c.env.DB.prepare("INSERT INTO content_items (workspace_id, collection, id, title, status, data_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(workspace_id, collection, id) DO UPDATE SET title = excluded.title, status = excluded.status, data_json = excluded.data_json, updated_at = excluded.updated_at")
+    .bind(workspaceId, collection, itemId, itemTitle(data.data), body.data.status, JSON.stringify(data.data), now(), now()).run();
+  return c.json({ id: itemId, status: body.data.status }, isCreate ? 201 : 200);
+}
+
+app.post("/api/v1/studio/content/:collection", async (c) => {
+  if (c.get("role") !== "admin") return jsonError("Admin demo role required.", 403);
+  const collection = parseCollection(c.req.param("collection"));
+  if (!collection) return jsonError("Unknown collection.", 404);
+  return saveContent(c, collection, id(collection), true);
+});
+
+app.put("/api/v1/studio/content/:collection/:itemId", async (c) => {
+  if (c.get("role") !== "admin") return jsonError("Admin demo role required.", 403);
+  const collection = parseCollection(c.req.param("collection"));
+  if (!collection) return jsonError("Unknown collection.", 404);
+  return saveContent(c, collection, c.req.param("itemId"), false);
+});
+
+app.delete("/api/v1/studio/content/:collection/:itemId", async (c) => {
+  if (c.get("role") !== "admin") return jsonError("Admin demo role required.", 403);
+  const collection = parseCollection(c.req.param("collection"));
+  if (!collection) return jsonError("Unknown collection.", 404);
+  const workspaceId = c.get("workspaceId");
+  const row = await c.env.DB.prepare("SELECT title, data_json FROM content_items WHERE workspace_id IN ('base', ?) AND collection = ? AND id = ? ORDER BY workspace_id = 'base' LIMIT 1").bind(workspaceId, collection, c.req.param("itemId")).first<{ title: string; data_json: string }>();
+  if (!row) return jsonError("Item not found.", 404);
+  await c.env.DB.prepare("INSERT INTO content_items (workspace_id, collection, id, title, status, data_json, created_at, updated_at) VALUES (?, ?, ?, ?, 'archived', ?, ?, ?) ON CONFLICT(workspace_id, collection, id) DO UPDATE SET status = 'archived', updated_at = excluded.updated_at")
+    .bind(workspaceId, collection, c.req.param("itemId"), row.title, row.data_json, now(), now()).run();
+  return c.json({ status: "archived" });
 });
 
 export default app;

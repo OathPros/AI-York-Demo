@@ -98,3 +98,74 @@ export type PublicEvent = {
   type?: "event" | "training";
   status: "published";
 };
+
+export const contentCollections = ["policy", "interpretation", "tool", "event", "community", "training"] as const;
+export const contentCollectionSchema = z.enum(contentCollections);
+export type ContentCollection = z.infer<typeof contentCollectionSchema>;
+export const contentStatusSchema = z.enum(["draft", "published", "archived"]);
+export type ContentStatus = z.infer<typeof contentStatusSchema>;
+export const activitySchema = z.enum(["study", "teach", "research", "work"]);
+export type Activity = z.infer<typeof activitySchema>;
+export const dataClassSchema = z.enum(["none", "public", "internal", "sensitive", "unsure"]);
+
+const text = (max: number) => z.string().trim().max(max);
+const linkOrBlank = z.string().trim().url().max(500).or(z.literal(""));
+const activities = z.array(activitySchema).max(4);
+
+export const policyItemSchema = z.object({
+  title: text(200).min(3),
+  summary: text(2000).default(""),
+  url: linkOrBlank.default(""),
+  owner: text(200).default(""),
+  effectiveDate: text(40).default(""),
+  activities
+});
+export const interpretationItemSchema = z.object({
+  title: text(200).min(3),
+  activity: activitySchema,
+  task: text(40).min(2),
+  taskLabel: text(200).default(""),
+  data: dataClassSchema,
+  example_use: text(1000).default(""),
+  green: text(2000).default(""),
+  yellow: text(2000).default(""),
+  red: text(2000).default(""),
+  tool_ids: z.array(z.string().max(80)).max(20),
+  tool_advice: text(2000).default(""),
+  sources: z.array(z.string().max(80)).max(20),
+  approval_note: text(1000).default("")
+});
+export const toolItemSchema = z.object({
+  name: text(200).min(2),
+  url: linkOrBlank.default(""),
+  scope: text(2000).default(""),
+  audience: z.enum(["all", "students", "staff"]),
+  activities
+});
+export const eventItemSchema = eventSuggestionSchema.omit({ referringPage: true }).extend({ summary: text(1000).default("") });
+export const communityItemSchema = z.object({
+  name: text(200).min(2),
+  summary: text(2000).default(""),
+  url: linkOrBlank.default(""),
+  contact: text(200).default(""),
+  activities
+});
+export const trainingItemSchema = z.object({
+  title: text(200).min(3),
+  summary: text(2000).default(""),
+  url: linkOrBlank.default(""),
+  format: text(200).default(""),
+  tags: z.array(z.enum(["basics", "work", "teach", "study", "tools", "partner"])).max(6)
+});
+export const contentSchemas = {
+  policy: policyItemSchema,
+  interpretation: interpretationItemSchema,
+  tool: toolItemSchema,
+  event: eventItemSchema,
+  community: communityItemSchema,
+  training: trainingItemSchema
+} as const;
+export const contentWriteSchema = z.object({ status: contentStatusSchema, data: z.record(z.unknown()) });
+
+export type ContentItem = { id: string; collection: ContentCollection; title: string; status: ContentStatus; origin: "base" | "workspace"; data: Record<string, any> };
+export type ContentBundle = Record<ContentCollection, ContentItem[]>;

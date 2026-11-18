@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:migrate": "wrangler d1 migrations apply DB --local",
-    "db:seed": "wrangler d1 execute DB --local --file=fixtures/seed.sql && wrangler d1 execute DB --local --file=fixtures/reference-content.sql"
+    "db:seed": "wrangler d1 execute DB --local --file=fixtures/seed.sql && wrangler d1 execute DB --local --file=fixtures/reference-content.sql && wrangler d1 execute DB --local --file=fixtures/cms-base.sql"
   },
   "dependencies": {
     "@ai-york/contracts": "*",
