@@ -122,15 +122,21 @@ export function GuideFinder({ content, initial = [] }: { content: ContentBundle;
 function toolVisible(tool: ContentItem, audience: Audience) { return audience === "all" || tool.data.audience === "all" || tool.data.audience === audience; }
 const audienceLabel: Record<string, string> = { all: "Students, faculty and staff", students: "Students", staff: "Faculty and staff" };
 
-export function ToolsSection({ content, activity, showFilter = true }: { content: ContentBundle; activity?: Activity; showFilter?: boolean }) {
+export function ToolsSection({ content, activity, showFilter = true, standalone = false }: { content: ContentBundle; activity?: Activity; showFilter?: boolean; standalone?: boolean }) {
   const [audience, setAudience] = useState<Audience>("all");
   const tools = content.tool.filter((tool) => toolVisible(tool, audience) && (!activity || (tool.data.activities as string[]).includes(activity)));
+  const Title = standalone ? "h1" : "h2";
+  const ToolTitle = standalone ? "h2" : "h3";
   return (
-    <section className="section" aria-labelledby="tools-title">
-      <p className="eyebrow">York-approved tools</p><h2 id="tools-title">The right tools for you</h2>
-      <p className="lead">These tools respect and protect York data in ways commercially available tools do not. Access depends on your role and licence.</p>
+    <section className={standalone ? "section tools-page" : "section"} aria-labelledby="tools-title">
+      <p className="eyebrow">York-approved tools</p>
+      <Title id="tools-title">{standalone ? "Tools and how to get access" : "The right tools for you"}</Title>
+      <p className="lead">
+        {standalone && "Compare York-approved tools by who can use them and what they are for. "}
+        These tools respect and protect York data in ways commercially available tools do not. Access depends on your role and licence
+      </p>
       {showFilter && <div className="filters" role="group" aria-label="Filter by access">{([["all", "All tools"], ["students", "For students"], ["staff", "Faculty and staff"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)}>{label}</button>)}</div>}
-      <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><h3>{tool.data.name}</h3><p>{tool.data.scope}</p><ResourceLink href={tool.data.url}>Access and requirements</ResourceLink></article>)}</div>
+      <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><ToolTitle>{tool.data.name}</ToolTitle><p>{tool.data.scope}</p><ResourceLink href={tool.data.url}>Access and requirements</ResourceLink></article>)}</div>
       {tools.length === 0 && <Empty>No tools match this view yet.</Empty>}
     </section>
   );
