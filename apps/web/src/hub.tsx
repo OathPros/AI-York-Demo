@@ -16,11 +16,11 @@ const principles = [
   ["Respect rights", "Consider authorship, consent, fairness and intellectual property and academic integrity"]
 ];
 const dataOptions: { value: string; label: string; hint: string }[] = [
-  { value: "none", label: "General", hint: "Brainstorming, asking questions or generating content without sharing documents, personal details or non-public information." },
-  { value: "public", label: "Public", hint: "Material anyone can access, such as published York web pages, public reports or openly available journal articles." },
-  { value: "internal", label: "Internal York", hint: "Non-public workplace or academic material, such as internal procedures, unpublished drafts or internal service documents." },
-  { value: "sensitive", label: "Sensitive", hint: "Personal, confidential or regulated information, such as student or employee records, identifiable research data or confidential financial information." },
-  { value: "unsure", label: "Unsure", hint: "Use this if a document combines different kinds of information, or you cannot tell whether it is public, internal or restricted." }
+  { value: "none", label: "General", hint: "Brainstorming, asking questions or generating content without sharing documents, personal details or non-public information" },
+  { value: "public", label: "Public", hint: "Material anyone can access, such as published York web pages, public reports or openly available journal articles" },
+  { value: "internal", label: "Internal York", hint: "Non-public workplace or academic material, such as internal procedures, unpublished drafts or internal service documents" },
+  { value: "sensitive", label: "Sensitive", hint: "Personal, confidential or regulated information, such as student or employee records, identifiable research data or confidential financial information" },
+  { value: "unsure", label: "Unsure", hint: "Use this if a document combines different kinds of information, or you cannot tell whether it is public, internal or restricted" }
 ];
 const activityLabels: Record<Activity, string> = { work: "Work", study: "Study", teach: "Teach", research: "Research" };
 const collectionLabels: Record<string, string> = { policy: "Policy", interpretation: "Guidance", tool: "Tool", event: "Event", community: "Community", training: "Training" };
@@ -67,11 +67,44 @@ export function GuideFinder({ content, initial = [] }: { content: ContentBundle;
       <h2 id="guide-title">Can I use AI for this?</h2>
       <p className="lead">Guidance tailored around your work. Find out which AI tools are appropriate, what rules apply and how to get started.</p>
       <div className="journey">
-        <fieldset><legend><span className="num">01</span>I'm using AI to: <small>Choose one or more</small></legend><div className="choices">{(Object.keys(activityLabels) as Activity[]).map((activity) => <label key={activity} className="choice"><input type="checkbox" checked={acts.includes(activity)} onChange={() => toggle(activity)} /> {activityLabels[activity]}</label>)}</div></fieldset>
-        <div><label htmlFor="guide-task"><span className="num">02</span>AI will help me</label><select id="guide-task" value={task} disabled={tasks.length === 0} onChange={(e) => setTask(e.target.value)}><option value="">{tasks.length === 0 ? "Choose an activity first" : "Choose a task"}</option>{tasks.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></div>
-        <fieldset disabled={!task}><legend><span className="num">03</span>I'll share the following information with AI</legend><div className="choices">{dataOptions.map((option) => <label key={option.value} className="choice"><input type="radio" name="guide-data" checked={data === option.value} onChange={() => setData(option.value)} /> {option.label}<small className="hint">{option.hint}</small></label>)}</div></fieldset>
+        <fieldset aria-describedby="guide-activity-help">
+          <legend>I'm using AI to</legend>
+          <p className="journey-help" id="guide-activity-help">Choose one or more</p>
+          <div className="activity-choices">
+            {(Object.keys(activityLabels) as Activity[]).map((activity) => (
+              <label key={activity} className="activity-choice">
+                <input type="checkbox" checked={acts.includes(activity)} onChange={() => toggle(activity)} />
+                {activityLabels[activity]}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <div>
+          <label htmlFor="guide-task">AI will help me</label>
+          <div className="journey-select">
+            <select id="guide-task" value={task} disabled={tasks.length === 0} onChange={(e) => setTask(e.target.value)}>
+              <option value="">{tasks.length === 0 ? "Choose an activity first" : "Choose a task"}</option>
+              {tasks.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+            </select>
+          </div>
+        </div>
+        <fieldset disabled={!task}>
+          <legend>I'll share the following information with AI</legend>
+          <div className="data-choices">
+            {dataOptions.map((option) => (
+              <label key={option.value} className="data-choice">
+                <input type="radio" name="guide-data" checked={data === option.value} onChange={() => setData(option.value)}
+                  aria-labelledby={`guide-data-${option.value}-label`} aria-describedby={`guide-data-${option.value}-hint`} />
+                <span>
+                  <strong id={`guide-data-${option.value}-label`}>{option.label}</strong>
+                  <span className="data-hint" id={`guide-data-${option.value}-hint`}>{option.hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       </div>
-      <div className="status-line" role="status" aria-live="polite">{ready ? `Showing guidance for ${acts.map((a) => activityLabels[a]).join(", ")}.` : "Choose an activity, a task and the information involved. Guidance appears automatically."}</div>
+      <div className="status-line guide-status" role="status">{ready ? `Showing guidance for ${acts.map((a) => activityLabels[a]).join(", ")}` : "Choose an activity, a task and the information involved. Guidance appears automatically"}</div>
       {ready && <div className="results">{results.map(({ activity, item }) => item ? (
         <article className="result" key={activity}>
           <span className="status">{activityLabels[activity]}</span><h3>{item.title}</h3><p>{item.data.example_use}</p>
@@ -201,18 +234,20 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
       <Principles />
       <GuideFinder content={content} />
       <ToolsSection content={content} />
-      <section className="section home-updates" aria-labelledby="home-updates-title">
-        <h2 id="home-updates-title">News and events</h2>
-        <div className="home-updates-grid">
-          <div>
-            <h3>Latest news</h3>
-            <News compact />
-            <a className="text-link" href="#/news">See all news</a>
-          </div>
-          <div>
-            <h3>Upcoming events</h3>
-            <Upcoming events={content.event} />
-            <a className="text-link" href="#/events">Open the calendar</a>
+      <section className="home-updates" aria-labelledby="home-updates-title">
+        <div className="section">
+          <h2 id="home-updates-title">News and events</h2>
+          <div className="home-updates-grid">
+            <div>
+              <h3>Latest news</h3>
+              <News compact />
+              <a className="text-link" href="#/news">See all news</a>
+            </div>
+            <div>
+              <h3>Upcoming events</h3>
+              <Upcoming events={content.event} />
+              <a className="text-link" href="#/events">Open the calendar</a>
+            </div>
           </div>
         </div>
       </section>
