@@ -74,9 +74,9 @@ main { flex: 1 }
 
 .section { width: min(calc(100% - 48px), 1180px); margin-inline: auto; padding-block: clamp(2.2rem, 5vw, 4.3rem) }
 .section > .eyebrow { margin-bottom: .8rem }
-.section > h2, .section-heading h2 { margin: 0; font-size: clamp(2.45rem, 4.5vw, 4.2rem) }
+.section > h2 { margin: 0; font-size: clamp(2.45rem, 4.5vw, 4.2rem) }
 .section > .lead { max-width: 760px; margin: 1rem 0 2.2rem; color: var(--muted) }
-:is(.home-page, .experience-page) > .section + .section { padding-top: .85rem }
+.home-page > .section + .section { padding-top: .85rem }
 .principles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; margin: 2.4rem 0 0; padding: 1px; background: #d7d6d3; list-style: none }
 .principles article { padding: 1.25rem; background: var(--wash) }
 .principles .num { display: block; margin-bottom: .8rem; color: var(--red-dark); font-size: .7rem; font-weight: 700; letter-spacing: .1em }
@@ -144,51 +144,16 @@ main { flex: 1 }
 .index-list li { padding: .8rem 1rem; border: 1px solid var(--line) }
 .text-button { min-height: 0; padding: 0; border: 0; background: transparent; text-decoration: underline; cursor: pointer }
 
-/* Teaching and research */
+/* Partner page */
 .experience-hero { min-height: clamp(18rem, 35vw, 27rem); padding-block: 3rem }
-.experience-hero .eyebrow { color: #ffbec9 }
 .experience-hero h1 { margin: .6rem 0; font-size: clamp(2.6rem, 6vw, 5rem) }
 .experience-lede { max-width: 760px; margin: 0; font-size: clamp(1.15rem, 2.2vw, 1.55rem) }
-.experience-intro { display: grid; grid-template-columns: .75fr 1.25fr; gap: clamp(1.5rem, 4vw, 4rem); padding-block: clamp(2.2rem, 5vw, 3.8rem) }
-.experience-intro h2 { margin: .8rem 0 0; font-size: clamp(2.5rem, 5vw, 4.5rem) }
-.experience-intro > p { margin: 0; font-size: clamp(1.15rem, 2.1vw, 1.6rem); line-height: 1.45 }
-.route-field, .research-checks { padding-bottom: clamp(2.2rem, 5vw, 3.8rem) }
-.section-heading { margin-bottom: 2rem }
-.section-heading .eyebrow { margin-bottom: .7rem }
-.editorial-routes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; padding: 1px; background: var(--line) }
-.editorial-routes article { min-height: 280px; padding: 1.5rem; background: var(--wash) }
-.editorial-routes h3 { margin: 3.5rem 0 1rem; font-size: 1.5rem }
-.editorial-routes p { color: var(--muted); font-size: .88rem }
-.dark-band, .red-band { padding-block: clamp(2.2rem, 5vw, 4rem); color: #fff }
-.dark-band { background: var(--ink) }
-.red-band { background: var(--red-dark) }
-.split-band { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(2rem, 8vw, 7rem); align-items: start }
-.split-band .eyebrow { color: #ffbec9 }
-.split-band h2 { margin: 1rem 0 0; font-size: clamp(2.4rem, 4.5vw, 4rem) }
-.split-band p { margin-top: 0; font-size: 1.08rem }
-.light-link { min-height: 0; padding: .4rem 0; border: 0; border-bottom: 1px solid #fff; background: transparent; color: #fff; font-weight: 700; cursor: pointer }
-.check-list { border-top: 1px solid var(--line) }
-.check-list article { min-height: 132px; padding: 1.6rem 0; display: grid; grid-template-columns: 5rem 1fr; gap: 1rem; border-bottom: 1px solid var(--line) }
-.check-list h3 { margin: 0 0 .5rem; font-size: 1.6rem }
-.check-list p { max-width: 840px; margin: 0; color: var(--muted) }
-
-.teaching-hero { --banner: url("./assets/banners/teach.webp"); --banner-position: 42% }
-.research-hero { --banner: url("./assets/banners/research.webp"); --banner-position: 45% }
-.study-hero { --banner: url("./assets/banners/study.webp"); --banner-position: 57% }
 .partner-hero { --banner: url("./assets/banners/partner.webp"); --banner-position: 58% }
-.work-hero { --banner: url("./assets/banners/work.webp"); --banner-position: 53% }
-.work-hero .button { margin-top: 1.5rem }
-.workplace-examples, .work-source { padding-block: clamp(3rem, 6vw, 5rem) }
-.workplace-examples > h2, .work-source h2 { margin: 0 0 1.75rem; font-size: clamp(2rem, 4vw, 3.4rem) }
+.workplace-examples { padding-block: clamp(3rem, 6vw, 5rem) }
+.workplace-examples > h2 { margin: 0 0 1.75rem; font-size: clamp(2rem, 4vw, 3.4rem) }
 .task-notes { display: grid; gap: clamp(1.25rem, 4vw, 3rem); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)) }
 .task-notes h3 { margin: 0 0 .55rem }
 .task-notes p { margin: 0 0 .5rem; color: var(--text) }
-.work-source { background: var(--wash) }
-.experience-page .section { padding-block: clamp(2.5rem, 5vw, 4.75rem) }
-.editorial-routes { gap: 1.5rem; background: transparent }
-.editorial-routes article { min-height: auto; padding: 0; background: transparent }
-.editorial-routes article h3 { margin: 0 0 .7rem }
-.editorial-routes article > span { display: none }
 .home-page .card { border-radius: .55rem; border-color: #e8e4df }
 .home-route-list { background: #261e21 }
 .home-route-list button { background: transparent }
@@ -284,13 +249,11 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
   .site-header nav { justify-content: flex-start }
   .principles { grid-template-columns: repeat(3, 1fr) }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
-  .editorial-routes { grid-template-columns: repeat(2, 1fr) }
 }
 
 @media (max-width: 900px) {
   .home-next-grid { grid-template-columns: 1fr; gap: 0; padding-top: 4rem }
   .home-route-list { margin-top: 3rem }
-  .experience-intro, .split-band { grid-template-columns: 1fr; gap: 2rem }
 }
 
 @media (max-width: 720px) {
@@ -304,14 +267,13 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
   .home-hero, .experience-hero { background-image: linear-gradient(0deg, rgba(15, 12, 13, .94), rgba(15, 12, 13, .57) 72%), var(--banner) }
   .home-statement .home-shell { padding-block: 1.2rem; align-items: flex-start; flex-direction: column }
   .section { padding-block: 2.5rem }
-  .principles, .grid, .editorial-routes { grid-template-columns: 1fr }
-  .principles article, .card, .editorial-routes article { min-height: 0 }
+  .principles, .grid { grid-template-columns: 1fr }
+  .principles article, .card { min-height: 0 }
   .choices, .traffic { grid-template-columns: 1fr }
   .home-next-grid { min-height: 0 }
   .home-updates-grid { grid-template-columns: minmax(0, 1fr) }
   .home-route-list { margin-inline: -16px }
   .home-index .home-shell { padding-block: 3.5rem; align-items: flex-start; flex-direction: column }
-  .check-list article { grid-template-columns: 2.5rem 1fr }
   .two, .role-grid { grid-template-columns: 1fr }
   .studio-head, .request, .event, footer { align-items: flex-start; flex-direction: column }
 }
@@ -333,11 +295,11 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
 }
 #york-learning-guide .learning-routes a { display: inline-flex; align-items: center; min-height: 44px }
 #york-learning-guide .learning-routes p { margin: 0 }
-:is(#york-learning-guide, .workplace-examples) .learning-steps {
+#york-learning-guide .learning-steps {
   display: grid;
   gap: .85rem;
   padding-inline-start: 1.5rem;
   margin-block: 1.35rem;
 }
-:is(#york-learning-guide, .workplace-examples) .learning-steps li::marker { color: var(--red-dark); font-weight: 700 }
-:is(#york-learning-guide, .workplace-examples) .learning-steps p { margin: .25rem 0 0 }
+#york-learning-guide .learning-steps li::marker { color: var(--red-dark); font-weight: 700 }
+#york-learning-guide .learning-steps p { margin: .25rem 0 0 }

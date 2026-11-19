@@ -4,14 +4,18 @@ const migratedRoutes: Record<string, string> = {
   "/teachingandlearning/gen-ai": "#/learning",
   "/teachingandlearning/gen-ai/gen-ai-101": "#/learning",
   "/teachingandlearning/gen-ai/for-students": "#/study",
-  "/teachingandlearning/gen-ai/for-faculty": "#/teach"
+  "/teachingandlearning/gen-ai/for-faculty": "#/teach",
+  "/teachingandlearning/gen-ai/graduate-studies-resources": "#/study",
+  "/research/use-of-artificial-intelligence-york": "#/research",
+  "/uit/cio/artificial-intelligence-initiative": "#/work",
+  "/uit/faculty-and-staff-services/ai": "#/work"
 };
 
-export function migratedLearningHref(href: string) {
+export function migratedResourceHref(href: string) {
   try {
     const url = new URL(href);
     if (url.host === "www.yorku.ca" || url.host === "yorku.ca") {
-      return migratedRoutes[url.pathname.replace(/\/+$/, "")];
+      return migratedRoutes[url.pathname.replace(/\/+$/, "").toLowerCase()];
     }
   } catch {
     // Relative and malformed URLs do not identify a migrated York page.
@@ -48,42 +52,4 @@ export function LearningGuide() {
       <p><a className="text-link" href="#/tools">Compare York supported tools</a></p>
     </section>
   </div>;
-}
-
-export function StudyGuidance() {
-  return <section className="shell workplace-examples" aria-labelledby="study-guidance-heading">
-    <h2 id="study-guidance-heading">Use AI within course rules</h2>
-    <ol className="learning-steps">
-      <li><strong>Check the rules for this assignment</strong><p>Read the course outline and assignment instructions. Ask your instructor if brainstorming, translation, proofreading, debugging or using a writing assistant is unclear. Permission to use AI for practice may differ from permission to use it on an assessment</p></li>
-      <li><strong>Choose a use that helps you learn</strong><p>When permitted, ask for practice questions, a hint, a second explanation or feedback on a draft. Solve the problem or write the argument yourself. Follow the same checks for take-home tests, quizzes, lab work and code</p></li>
-      <li><strong>Protect course material and personal information</strong><p>Use public or fictional examples when possible. Get permission before sharing course slides, unpublished materials or someone else’s work. Check instructor approval, consent and privacy requirements before recording or transcribing a class</p></li>
-      <li><strong>Verify and disclose your use</strong><p>Open and read every source you plan to cite. Check calculations and make sure you can explain your reasoning. Follow your course’s directions for acknowledgement, citation and records of prompts or outputs</p></li>
-    </ol>
-    <div className="field-example">
-      <h3>Try an active recall exercise</h3>
-      <p>Ask for five questions on a topic you may share, with answers held back. Answer them on your own, then check the feedback against your notes</p>
-      <h3>Keep a simple disclosure record</h3>
-      <p>If your instructor asks for a disclosure, record the tool, the task it helped with and what you verified or changed. For example, I used Copilot to generate practice questions. I checked them against the course notes and wrote my submission independently</p>
-    </div>
-    <p><a className="text-link" href="#/learning">Review the AI fundamentals</a></p>
-  </section>;
-}
-
-export function TeachingGuidance() {
-  return <section className="shell workplace-examples" aria-labelledby="teaching-practice-heading">
-    <h2 id="teaching-practice-heading">Design a course approach</h2>
-    <ol className="learning-steps">
-      <li><strong>Start from the learning outcome</strong><p>Identify the thinking or skill students must demonstrate independently. Decide which steps could benefit from AI practice and where using it would bypass the intended learning</p></li>
-      <li><strong>Publish permitted uses for each assessment</strong><p>Show examples of allowed and restricted assistance, the expected disclosure, and how the work will be assessed. Explain whether the rules differ for brainstorming, translating, editing, coding or generating answers</p></li>
-      <li><strong>Make the learning visible</strong><p>Ask for an annotated draft, source notes, a short explanation of decisions or a comparison between an AI answer and course evidence. Give students a way to demonstrate the same learning if they lack access or need an accessible alternative</p></li>
-      <li><strong>Protect student work and review the results</strong><p>Use fictional examples when drafting materials or rubrics. Keep grades, submissions and accommodations out of unauthorized tools. Review examples and rubrics for accuracy, bias and accessibility, and keep grading decisions with instructors</p></li>
-    </ol>
-    <div className="field-example">
-      <h3>Example assignment statement</h3>
-      <p>You may use AI to brainstorm research questions for this assignment. Write your own argument, verify every citation, and include a brief note identifying the tool and how it helped you. Use course readings and your own analysis as evidence</p>
-      <p>For an activity that teaches evaluation, give everyone the same sample AI answer. Ask students to verify its claims and explain two changes using course sources</p>
-    </div>
-    <p><a className="text-link" href="#/study">Share the student guide</a></p>
-    <p><a className="text-link" href="https://www.yorku.ca/teachingcommons/artificial-intelligence-ai-pedagogies/">Find Teaching Commons workshops</a></p>
-  </section>;
 }
