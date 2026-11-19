@@ -198,6 +198,9 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
         </div>
       </section>
       <section className="home-statement"><div className="home-shell"><p><strong>Start with what you are doing</strong> then check the information involved, the rules that apply and the tool you plan to use</p><button onClick={() => go("work")}>Explore AI at work</button></div></section>
+      <Principles />
+      <GuideFinder content={content} />
+      <ToolsSection content={content} />
       <section className="section home-updates" aria-labelledby="home-updates-title">
         <h2 id="home-updates-title">News and events</h2>
         <div className="home-updates-grid">
@@ -213,9 +216,6 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
           </div>
         </div>
       </section>
-      <Principles />
-      <GuideFinder content={content} />
-      <ToolsSection content={content} />
       <section className="home-next">
         <div className="home-shell home-next-grid">
           <div><h2>Find guidance for your role</h2><p>Get practical examples, policy links and tools for the work you do</p></div>
