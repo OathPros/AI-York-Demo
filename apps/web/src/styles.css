@@ -83,27 +83,99 @@ main { flex: 1 }
 .principles h3 { margin: 0 0 .9rem; font-size: 1.4rem }
 .principles p { margin: 0; color: #555; font-size: .84rem }
 
-.guide .journey { display: grid; gap: 1.4rem; margin-top: 2rem; padding: clamp(1.5rem, 4vw, 3rem); border: 1px solid var(--line); background: #fff; box-shadow: 0 18px 55px rgba(0,0,0,.045) }
-.journey fieldset { min-width: 0; margin: 0; padding: 0; border: 0 }
-.journey legend, .journey label[for] { display: block; margin-bottom: .75rem; font-weight: 700 }
-.num { margin-right: .6rem; color: var(--red); font-size: .72rem; font-weight: 700 }
-.choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem }
-.choice { position: relative; display: flex; align-items: flex-start; gap: .5rem; min-width: 0; min-height: 54px; padding: .8rem; border: 1px solid #d7d7d5; background: #fff; font-size: .88rem; font-weight: 600 }
-.choice:has(input:checked) { border-color: var(--red); background: var(--red); color: #fff }
-.choice input { flex: 0 0 auto; width: auto; margin-top: .25rem }
-.hint { display: block; margin-top: .3rem; font-size: .72rem; font-weight: 400 }
-.journey select, select, input, textarea { width: 100%; min-height: 48px; padding: .7rem .8rem; border: 1px solid #aaa; border-radius: 0; background: #fff }
+/* Guidance finder */
+.guide .journey {
+  display: grid;
+  gap: clamp(1.65rem, 4vw, 2.65rem);
+  padding: clamp(1.15rem, 4vw, 3rem);
+  border-radius: clamp(1.25rem, 3vw, 2rem);
+  background: #f7f3f4;
+}
+.guide fieldset { min-width: 0; margin: 0; padding: 0; border: 0 }
+.guide legend, .guide label[for] {
+  display: block;
+  margin-bottom: .7rem;
+  padding: 0;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+.guide .journey-help { margin: -.55rem 0 .8rem; color: var(--muted); font-size: .95rem }
+.guide .activity-choices { display: flex; flex-wrap: wrap; gap: .6rem }
+.guide .activity-choice, .guide .data-choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: .7rem;
+  min-width: 0;
+  min-height: 46px;
+  border: 1px solid #d8cfd2;
+  background: #fff;
+  cursor: pointer;
+}
+.guide .activity-choice { align-items: center; padding: .55rem 1rem; border-radius: 2rem; font-weight: 700 }
+.guide .data-choices, .guide .traffic {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: .75rem;
+}
+.guide .data-choice { padding: .9rem 1rem; border-radius: .9rem; overflow-wrap: anywhere }
+.guide .data-choice strong { display: block }
+.guide .data-hint { display: block; margin-top: .25rem; color: var(--text); font-size: .95rem }
+.guide .journey input {
+  width: 1.1rem;
+  height: 1.1rem;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--red-dark);
+}
+.guide .data-choice input { margin-top: .2rem }
+.guide :is(.activity-choice, .data-choice):has(input:enabled):hover { border-color: var(--red-dark) }
+.guide :is(.activity-choice, .data-choice):has(input:checked:enabled) { border-color: var(--red-dark); background: #fce6eb }
+.guide .data-choice:has(input:disabled) { background: #f9f6f7; cursor: default }
+.guide .journey-select { position: relative }
+.guide .journey-select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 1.15rem;
+  width: .55rem;
+  height: .55rem;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+select, input, textarea { width: 100%; min-height: 48px; padding: .7rem .8rem; border: 1px solid #aaa; border-radius: 0; background: #fff }
+.guide select {
+  appearance: none;
+  min-height: 54px;
+  padding: .8rem 2.65rem .8rem 1rem;
+  border: 1px solid #a69ba0;
+  border-radius: .9rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+.guide select:enabled { cursor: pointer }
+.guide select:disabled { background: #f9f6f7; color: var(--muted); opacity: 1 }
 .status-line { margin-top: 1rem; color: var(--muted); font-size: .85rem }
-.results { display: grid; gap: 1rem; margin-top: 1rem }
-.result { padding: 1.5rem; border-left: 7px solid var(--red); background: var(--wash) }
-.result h3 { margin: .35rem 0; font-size: 1.6rem }
-.traffic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 1.3rem 0; background: var(--line) }
-.traffic > div { padding: 1rem; background: #fff }
-.traffic h4 { margin: 0 0 .5rem; font-size: 1rem }
-.traffic p { margin: 0; font-size: .86rem }
-.traffic .ok { border-top: 5px solid #176b3a }
-.traffic .warn { border-top: 5px solid #c77700 }
-.traffic .no { border-top: 5px solid #a00 }
+.guide .guide-status { padding-inline: .2rem; font-size: .95rem }
+.guide .results { display: grid; gap: 1rem; margin-top: 1rem }
+.guide .result {
+  padding: clamp(1.15rem, 4vw, 2.5rem);
+  border: 1px solid #e9e0e3;
+  border-radius: 1.25rem;
+}
+.guide .result h3 { margin: .55rem 0; font-size: clamp(1.5rem, 3vw, 2.2rem) }
+.guide .traffic { margin-block: 1.3rem }
+.guide .traffic > div { min-width: 0; padding: 1rem; border-radius: .8rem }
+.guide .traffic h4 { margin: 0 0 .5rem; font-size: 1.08rem }
+.guide .traffic p { margin: 0 }
+.guide .traffic .ok { background: #eaf5ee; color: #204f34 }
+.guide .traffic .warn { background: #fff3dc; color: #634712 }
+.guide .traffic .no { background: #faeaed; color: #782339 }
+.guide .result .pills a { border-color: #ded1d5; border-radius: 1rem }
 .pills { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .8rem 0 }
 .pills a, .pills span, .pills li { padding: .35rem .6rem; border: 1px solid #bbb; background: #fff; font-size: .82rem; text-decoration: none }
 
@@ -162,9 +234,17 @@ main { flex: 1 }
 .field-example { margin-block: 1.5rem .5rem; padding: clamp(1rem, 3vw, 1.75rem); background: var(--wash); border-inline-start: 4px solid var(--red-dark) }
 .field-example h2, .field-example h3 { margin: 0 0 .5rem }
 .field-example p { margin: .5rem 0 }
+.home-page .home-updates { background: #261e21; color: #fff }
+.home-updates .quiet, .home-updates .event-agenda > p { color: #ebdfe3 }
 .home-updates-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 5vw, 4rem); margin-top: 1.65rem }
 .home-updates-grid h3 { margin: 0 0 .7rem; font-size: 1.35rem }
-.home-updates-grid > div > .text-link { display: inline-block; margin-top: 1rem }
+.home-updates-grid > div > .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: .65rem;
+  color: #ffd3dc;
+}
 .updates-page h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5rem) }
 .updates-filters { display: flex; flex-wrap: wrap; gap: .8rem; margin-bottom: 1.3rem }
 .updates-filters label { flex: 1 1 11rem; max-width: 19rem; min-width: 0 }
@@ -175,6 +255,41 @@ main { flex: 1 }
 .update-item a { justify-self: start }
 .update-tags { display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; margin: .25rem 0 0; padding: 0 }
 .update-tags li { padding: .15rem .55rem; background: var(--wash); color: #424242; border-radius: 1rem; font-size: .82rem }
+.news-feed > .quiet { margin: 0 0 1rem }
+.news-feed .news-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 23rem), 1fr));
+  gap: 1rem;
+}
+.news-feed--compact .news-cards { grid-template-columns: minmax(0, 1fr) }
+.news-feed .news-card, .home-updates .update-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .7rem;
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 1.65rem);
+  border: 1px solid #e9e1e3;
+  border-radius: 1rem;
+  background: #fff;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.news-feed .news-card { box-shadow: 0 4px 16px rgb(51 22 30 / .06) }
+.news-feed .news-card:focus-within { border-color: var(--red-dark) }
+.news-card .update-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem .85rem }
+.news-card .update-meta span { padding: .2rem .65rem; border-radius: 1rem; background: #fbeaf0 }
+.news-card .update-meta time { color: var(--muted); font-weight: 600 }
+.news-card h2 { font-size: clamp(1.4rem, 2.6vw, 1.8rem) }
+.news-card > .update-tags { margin-top: auto; padding-top: .15rem }
+.news-card > .text-link, .home-updates .update-item > .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.home-updates .event-agenda { display: grid; gap: 1rem }
+.home-updates .event-agenda .update-item { background: #f8eff1 }
+.news-feed .updates-filters select { border-radius: .65rem; color: var(--ink) }
 .calendar-layout { max-width: 58rem }
 .calendar-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .5rem; margin-bottom: .6rem }
 .calendar-toolbar h2 { margin: 0; text-align: center; font-size: clamp(1.4rem, 4vw, 2rem) }
@@ -269,7 +384,6 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
   .section { padding-block: 2.5rem }
   .principles, .grid { grid-template-columns: 1fr }
   .principles article, .card { min-height: 0 }
-  .choices, .traffic { grid-template-columns: 1fr }
   .home-next-grid { min-height: 0 }
   .home-updates-grid { grid-template-columns: minmax(0, 1fr) }
   .home-route-list { margin-inline: -16px }

@@ -30,7 +30,7 @@ export function News({ compact = false }: { compact?: boolean }) {
   const [source, setSource] = useState("");
   const items = news.filter((item) => (!topic || item.activities.some((tag) => tag === topic)) && (!source || item.source === source));
   const Heading = compact ? "h4" : "h2";
-  return <div className="news-feed">
+  return <div className={compact ? "news-feed news-feed--compact" : "news-feed"}>
     {!compact && <div className="updates-filters">
       <TopicSelect value={topic} change={setTopic} />
       <label>Source<select value={source} onChange={(event) => setSource(event.target.value)}>
@@ -39,13 +39,20 @@ export function News({ compact = false }: { compact?: boolean }) {
       </select></label>
     </div>}
     <p className="quiet">Demo stories illustrate how updates from different York sources could appear here</p>
-    {(compact ? items.slice(0, 2) : items).map((item) => <article className="update-item" key={item.title}>
-      <p className="update-meta">{item.source} <span aria-hidden="true">·</span> <time dateTime={item.date}>{dateLabel(item.date)}</time></p>
-      <Heading>{item.title}</Heading>
-      <p>{item.summary}</p>
-      <Tags activities={item.activities} />
-      <a className="text-link" href={item.url}>Visit {item.source}</a>
-    </article>)}
+    <div className="news-cards">
+      {(compact ? items.slice(0, 2) : items).map((item) => (
+        <article className="update-item news-card" key={item.title}>
+          <p className="update-meta">
+            <span>{item.source}</span>
+            <time dateTime={item.date}>{dateLabel(item.date)}</time>
+          </p>
+          <Heading>{item.title}</Heading>
+          <p>{item.summary}</p>
+          <Tags activities={item.activities} />
+          <a className="text-link" href={item.url}>Visit {item.source}</a>
+        </article>
+      ))}
+    </div>
     {!items.length && <p role="status">No stories match these filters</p>}
   </div>;
 }
