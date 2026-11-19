@@ -1,0 +1,76 @@
+.policies-reports .documents-intro h1 {
+  margin: 0;
+  font-size: clamp(2.75rem, 6vw, 5rem);
+}
+
+.policies-reports .documents-intro p { color: var(--muted) }
+.policies-reports .document-section { margin-block-start: clamp(2.2rem, 5vw, 4rem) }
+.policies-reports .document-section > h2 { margin: 0 0 1.1rem; font-size: clamp(1.7rem, 3vw, 2.6rem) }
+.policies-reports .document-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));
+  gap: 1rem;
+}
+.policies-reports .document-card {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1rem, 3vw, 1.65rem);
+  border: 1px solid #ded6d8;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+.policies-reports .document-card:hover,
+.policies-reports .document-card:focus-within { border-color: var(--red-dark) }
+.policies-reports .document-card h3 { margin: .65rem 0; font-size: clamp(1.35rem, 2.5vw, 1.75rem) }
+.policies-reports .document-meta { margin: 0; color: var(--muted); font-size: .875rem; font-weight: 600 }
+.policies-reports .document-meta span { color: var(--red-dark); margin-inline-end: .6rem }
+.policies-reports .document-overview { margin: 0 0 1rem; color: var(--text) }
+.policies-reports .document-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem 1rem; margin-top: auto }
+.policies-reports .document-actions button,
+.policies-reports .document-reader-header button {
+  min-height: 44px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  padding: .4rem .85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.policies-reports .document-actions button::after { position: absolute; inset: 0; content: "" }
+.policies-reports .document-actions button:hover,
+.policies-reports .document-reader-header button:hover { background: var(--red-dark); border-color: var(--red-dark) }
+.policies-reports .document-actions a,
+.policies-reports .document-reader-header a { display: inline-flex; align-items: center; min-height: 44px }
+.policies-reports .document-actions a { position: relative }
+.policies-reports .document-related { margin-top: 1rem; padding: .4rem 1rem; background: var(--wash) }
+.policies-reports .document-related summary { min-height: 44px; padding-block: .55rem; cursor: pointer; font-weight: 700 }
+.policies-reports .document-related summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px }
+.policies-reports .document-related li + li { margin-top: .65rem }
+.policies-reports .document-related li p { margin: .2rem 0 0 }
+.policies-reports .document-reader {
+  box-sizing: border-box;
+  width: min(70rem, calc(100% - 2rem));
+  max-width: none;
+  height: min(60rem, calc(100dvh - 2rem));
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+.policies-reports .document-reader[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) }
+.policies-reports .document-reader::backdrop { background: rgb(23 16 20 / .72) }
+.policies-reports .document-reader-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .25rem 1rem;
+  padding: clamp(.75rem, 2vw, 1.25rem);
+  background: var(--wash);
+}
+.policies-reports .document-reader-header > div { flex: 1 1 12rem; min-width: 0 }
+.policies-reports .document-reader-header h2 { margin: .3rem 0 0; font-size: clamp(1.25rem, 3vw, 2rem) }
+.policies-reports .document-reader iframe { width: 100%; height: 100%; min-height: 12rem; border: 0; background: #fff }

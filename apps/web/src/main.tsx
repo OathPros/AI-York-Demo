@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { changeTypeLabels, changeTypes, contentCollections, type ChangeType, type ContentBundle, type DemoRole, type SuggestionPayload } from "@ai-york/contracts";
 import { api } from "./api";
-import { CommunityList, EventList, GoverningPage, GuideFinder, Home, IndexPage, NewsPage, PageHeader, PartnerPage, PolicyList, TrainingSection, ToolsSection, type Page } from "./hub";
+import { CommunityList, EventList, GoverningPage, GuideFinder, Home, IndexPage, NewsPage, PageHeader, PartnerPage, TrainingSection, ToolsSection, type Page } from "./hub";
 import { CmsManager, PageEditor, StudioShell, type StudioView } from "./studio";
 import type { PublishedPages } from "./page-copy";
 import "./styles.css";
 import { LearningGuide } from "./learning";
 import { AudienceGuide } from "./audience-guides";
+import { PoliciesReportsPage } from "./policies-reports";
 
 type Screen = "site" | "role" | "suggest" | "studio" | "receipt";
 
@@ -129,7 +130,7 @@ function App() {
         return <AudienceGuide key={page} kind={page} copy={publishedPages[page]} />;
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
       case "guide": return <><PageHeader eyebrow="Usage & Guidance" title="Practical guidance, in plain language" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder content={content} /></>;
-      case "policies": return <><PageHeader eyebrow="Policy inventory" title="Policies that apply to AI at York" intro="Each entry links to its authoritative source. Guidance on this site points back to these policies." /><PolicyList content={content} /></>;
+      case "policies": return <PoliciesReportsPage sources={content.policy} />;
       case "tools": return <ToolsSection content={content} standalone />;
       case "learning": return <><LearningGuide /><TrainingSection content={content} title="Courses workshops and resources" /></>;
       case "events": return <EventList content={content} />;
@@ -140,7 +141,7 @@ function App() {
     }
   };
 
-  const navItems: [Page, string][] = [["home", "Home"], ["study", "Study"], ["teach", "Teach"], ["research", "Research"], ["work", "Work"], ["learning", "Learning"], ["tools", "Tools"], ["events", "Calendar"], ["news", "News"]];
+  const navItems: [Page, string][] = [["home", "Home"], ["study", "Study"], ["teach", "Teach"], ["research", "Research"], ["work", "Work"], ["learning", "Learning"], ["tools", "Tools"], ["policies", "Policies and reports"], ["events", "Calendar"], ["news", "News"]];
   return <div className="app">{screen !== "studio" && <><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button><button onClick={openStudio}>Open Studio</button></div>
     <header className="site-header"><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button className="nav-primary" onClick={() => go("guide")}>Can I use AI for this</button></nav></header></>}
     <main>
