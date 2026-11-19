@@ -159,11 +159,6 @@ export function TrainingSection({ content, tags, title = "AI learning at York" }
   );
 }
 
-export function PolicyList({ content, activity }: { content: ContentBundle; activity?: Activity }) {
-  const items = content.policy.filter((policy) => !activity || (policy.data.activities as string[]).includes(activity));
-  return <section className="section" aria-labelledby="policy-title"><p className="eyebrow">Policy inventory</p><h2 id="policy-title">Policies and guidelines that apply</h2><div className="grid">{items.map((policy) => <article className="card" key={policy.id}><h3>{policy.data.title}</h3>{policy.data.summary && <p>{policy.data.summary}</p>}{(policy.data.owner || policy.data.effectiveDate) && <p className="quiet">{[policy.data.owner, policy.data.effectiveDate && `Effective ${policy.data.effectiveDate}`].filter(Boolean).join(" · ")}</p>}<ResourceLink href={policy.data.url}>{migratedResourceHref(policy.data.url || "") ? "Read the guide" : "Open the authoritative source"}</ResourceLink></article>)}</div>{items.length === 0 && <Empty>No policies are listed for this area yet.</Empty>}</section>;
-}
-
 export function EventList({ content }: { content: ContentBundle }) {
   return <section className="section updates-page">
     <h1>AI calendar</h1>
