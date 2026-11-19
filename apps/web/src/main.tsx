@@ -130,7 +130,7 @@ function App() {
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
       case "guide": return <><PageHeader eyebrow="Usage & Guidance" title="Practical guidance, in plain language" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder content={content} /></>;
       case "policies": return <><PageHeader eyebrow="Policy inventory" title="Policies that apply to AI at York" intro="Each entry links to its authoritative source. Guidance on this site points back to these policies." /><PolicyList content={content} /></>;
-      case "tools": return <><PageHeader eyebrow="Tools & Access" title="Tools and how to get access" intro="Compare York-approved tools by who can use them and what they are for." /><ToolsSection content={content} /></>;
+      case "tools": return <ToolsSection content={content} standalone />;
       case "learning": return <><LearningGuide /><TrainingSection content={content} title="Courses workshops and resources" /></>;
       case "events": return <EventList content={content} />;
       case "communities": return <CommunityList content={content} />;
