@@ -5,7 +5,7 @@ import { pageCopy } from "./page-copy";
 
 export type StudioView = "overview" | "pages" | "inbox" | ContentCollection;
 const inventoryLabels: Record<ContentCollection, string> = {
-  policy: "Policies", interpretation: "Interpretations", tool: "Tools", event: "Events",
+  policy: "POLICY", interpretation: "Interpretations", tool: "Tools", event: "Events",
   community: "Communities", training: "Training"
 };
 
