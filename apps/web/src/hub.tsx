@@ -263,7 +263,6 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
         </div>
       </section>
       <TrainingSection content={content} />
-      <section className="home-index"><div className="home-shell"><div><p className="eyebrow">Everything in one place</p><h2>Search AI at York</h2><p>Browse all {Object.values(content).flat().length} published guidance items, policies, tools, events, communities and learning resources</p></div><button className="button dark" onClick={() => go("index")}>Open the A to Z index <span aria-hidden="true">→</span></button></div></section>
     </div>
   );
 }

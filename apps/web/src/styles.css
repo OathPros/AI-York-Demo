@@ -199,10 +199,6 @@ select, input, textarea { width: 100%; min-height: 48px; padding: .7rem .8rem; b
 .home-route-list button:hover { background: #242424 }
 .home-route-list button span { color: #ffbec9; font-size: .72rem; letter-spacing: .1em }
 .home-route-list button strong { font-size: 1.3rem }
-.home-index { background: var(--wash) }
-.home-index .home-shell { min-height: 250px; display: flex; align-items: center; justify-content: space-between; gap: 2rem }
-.home-index h2 { margin: .5rem 0; font-size: clamp(2.3rem, 4vw, 3.5rem) }
-.home-index p { max-width: 680px }
 
 /* Audience and supporting pages */
 .page-head { width: min(calc(100% - 48px), 1180px); margin-inline: auto; padding-block: clamp(3.5rem, 7vw, 6.5rem); border: 0; background: #fff }
@@ -388,7 +384,6 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
   .home-next-grid { min-height: 0 }
   .home-updates-grid { grid-template-columns: minmax(0, 1fr) }
   .home-route-list { margin-inline: -16px }
-  .home-index .home-shell { padding-block: 3.5rem; align-items: flex-start; flex-direction: column }
   .two, .role-grid { grid-template-columns: 1fr }
   .studio-head, .request, .event, footer { align-items: flex-start; flex-direction: column }
 }
