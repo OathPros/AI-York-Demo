@@ -131,43 +131,32 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
     }
   }, [section]);
 
-  return <div className="section policies-reports">
+  return <div className="section policies-reports governance-landing">
     <header className="documents-intro">
       <h1>Policy, governance and community</h1>
-      <p className="lead">Explore the demonstration policy, reports, governance and communities of practice.</p>
+      <p className="lead">Explore the demonstration policy, governance groups and communities.</p>
       <nav className="filters catalog-filters" aria-label="Governance sections">
-        {[["policy", "Policy"], ["reports", "Reports"], ["roundtables", "Roundtables"], ["working-groups", "Working groups"], ["community", "Communities"]].map(([id, label]) =>
+        {[["roundtables", "Roundtable"], ["policy", "Policy"], ["working-groups", "Working groups"], ["community", "Communities"], ["reports", "Reports"]].map(([id, label]) =>
           <a key={id} href={`#/governance?section=${id}`}>{label}</a>)}
       </nav>
     </header>
-    <section id="governance-policy" className="document-section" aria-labelledby="policy-heading">
-      <h2 id="policy-heading">Policy</h2>
-      <p className="notice">Discussion draft for demonstration only, not an approved York policy. Studio edits appear here in this browser only; they are not shared or published to other users.</p>
-      <iframe className="public-policy-frame" src={`${import.meta.env.BASE_URL}policy-studio.html?view=public`} title="AI policy demonstration document" />
-      <details className="document-related">
-        <summary>Related official source documents</summary>
-        <ul>
-          {policies.map(({ url, title }) => <li key={url}><a className="text-link" href={url}>{title}</a></li>)}
-          {related.map(({ id, title, data }) => (
-            <li key={id}>
-              <a className="text-link" href={data.url}>{data.title || title}</a>
-              {data.summary && <p>{data.summary.replace(/\.$/, "")}</p>}
-            </li>
-          ))}
-        </ul>
-      </details>
-    </section>
-    <section id="governance-reports" className="document-section" aria-labelledby="reports-heading">
-      <h2 id="reports-heading">Reports</h2>
-      <DocumentCards records={reports} open={setOpenDocument} />
-    </section>
-    <section id="governance-roundtables" className="document-section" aria-labelledby="roundtables-heading">
-      <h2 id="roundtables-heading">Roundtables</h2>
-      <GroupCards section="roundtables" open={setOpenGroup} />
-    </section>
+    <div className="governance-top">
+      <section id="governance-roundtables" aria-labelledby="roundtables-heading">
+        <h2 id="roundtables-heading">Roundtable</h2>
+        <GroupCards section="roundtables" open={setOpenGroup} />
+      </section>
+      <section id="governance-policy" aria-labelledby="policy-heading">
+        <h2 id="policy-heading">Policy</h2>
+        <p className="policy-preview-notice">Demo discussion draft, not approved York policy. Studio edits appear in this browser only and are not shared.</p>
+        <iframe className="public-policy-frame" src={`${import.meta.env.BASE_URL}policy-studio.html?view=public&compact=1`} title="AI policy demonstration document" />
+        <div className="policy-preview-actions">
+          <a className="text-link" href={`${import.meta.env.BASE_URL}policy-studio.html?view=public`} target="_blank" rel="noreferrer">Open full policy<span className="visually-hidden"> (opens in a new tab)</span></a>
+          <a className="text-link" href="#/governance?section=policy-sources">Official policy sources</a>
+        </div>
+      </section>
+    </div>
     <section id="governance-working-groups" className="document-section" aria-labelledby="working-groups-heading">
       <h2 id="working-groups-heading">Working groups</h2>
-      <p>These groups emerged from the AI Roundtable to identify priorities in three areas.</p>
       <GroupCards section="working-groups" open={setOpenGroup} />
     </section>
     <section id="governance-community" className="document-section" aria-labelledby="community-heading">
@@ -177,6 +166,22 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
         <h3>{item.data.name}</h3><p>{item.data.summary}</p>{item.data.contact && <p>Contact: {item.data.contact}</p>}
         {item.data.url && <a className="text-link" href={item.data.url}>Join or learn more</a>}
       </article>)}</div></>}
+    </section>
+    <details id="governance-policy-sources" className="document-related">
+      <summary>Related official policy documents</summary>
+      <ul>
+        {policies.map(({ url, title }) => <li key={url}><a className="text-link" href={url}>{title}</a></li>)}
+        {related.map(({ id, title, data }) => (
+          <li key={id}>
+            <a className="text-link" href={data.url}>{data.title || title}</a>
+            {data.summary && <p>{data.summary.replace(/\.$/, "")}</p>}
+          </li>
+        ))}
+      </ul>
+    </details>
+    <section id="governance-reports" className="document-section" aria-labelledby="reports-heading">
+      <h2 id="reports-heading">Reports</h2>
+      <DocumentCards records={reports} open={setOpenDocument} />
     </section>
     {openDocument && <DocumentReader record={openDocument} close={() => setOpenDocument(null)} />}
     {openGroup && <GroupOverview group={openGroup} close={() => setOpenGroup(null)} />}

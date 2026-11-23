@@ -3,6 +3,7 @@
 
 const publicView=new URLSearchParams(location.search).get('view')==='public';
 if(publicView)document.body.classList.add('public-view');
+if(publicView&&new URLSearchParams(location.search).get('compact')==='1')document.body.classList.add('public-compact');
 const STORAGE='policy-studio-pages-v2-named-sources';
 let demo;
 try{demo=JSON.parse(localStorage.getItem(STORAGE))||structuredClone(INITIAL)}catch{demo=structuredClone(INITIAL)}
@@ -125,5 +126,7 @@ $('#role').onchange=async e=>{actor=e.target.value;await load()};$('#advance').o
 .public-view #workspace{display:block;min-height:0}
 .public-view #workspace>main{max-width:none;padding:0}
 .public-view .policy-document{border:0;box-shadow:none}
+.public-compact .policy-document{padding:16px 20px}
+.public-compact .policy-document h1{font-size:clamp(23px,5vw,30px);letter-spacing:-.6px;margin:6px 0 10px}
 @media print{header,.notice,.demo-controls,aside,#metrics,.document-toolbar,.document-actions,.document-interpretations>button{display:none!important}#workspace{display:block}main{padding:0}.policy-document{border:0;box-shadow:none;padding:0;max-width:none}}
 </style></body></html>

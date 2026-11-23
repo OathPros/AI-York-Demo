@@ -1,17 +1,26 @@
+.governance-landing { padding-top: clamp(1.25rem, 3vw, 2rem) }
 .policies-reports .documents-intro h1 {
   margin: 0;
-  font-size: clamp(2.75rem, 6vw, 5rem);
+  font-size: clamp(2.2rem, 4vw, 3.25rem);
 }
 
-.policies-reports .documents-intro p { color: var(--muted) }
-.policies-reports .document-section { margin-block-start: clamp(2.2rem, 5vw, 4rem) }
-.policies-reports .document-section > h2 { margin: 0 0 1.1rem; font-size: clamp(1.7rem, 3vw, 2.6rem) }
-.public-policy-frame { display: block; width: 100%; height: 75vh; min-height: 32rem; border: 1px solid var(--line); background: #fff }
+.policies-reports .documents-intro p { margin: .4rem 0 0; color: var(--muted) }
+.policies-reports .documents-intro .filters { margin: .75rem 0 0 }
+.governance-top { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.5rem; margin-block-start: 1.5rem }
+.governance-top > section { min-width: 0 }
+.policies-reports .document-section { margin-block-start: clamp(1.25rem, 2vw, 1.75rem) }
+.policies-reports .document-section > h2, .governance-top h2 { margin: 0 0 .75rem; font-size: clamp(1.5rem, 2.5vw, 2rem) }
+.policy-preview-notice { margin: 0 0 .5rem; font-size: .9rem; color: var(--muted) }
+.public-policy-frame { display: block; width: 100%; height: 10rem; border: 1px solid var(--line); background: #fff }
+.policy-preview-actions { display: flex; flex-wrap: wrap; gap: 0 1.25rem }
+.policy-preview-actions a { display: inline-flex; align-items: center; min-height: 44px }
 .policies-reports .document-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));
   gap: 1rem;
 }
+.policies-reports #governance-working-groups .document-cards,
+.policies-reports #governance-community .document-cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)) }
 .policies-reports .document-card {
   position: relative;
   min-width: 0;
@@ -102,3 +111,7 @@
 .group-page > section h2 { margin-bottom: .75rem; font-size: clamp(1.7rem, 3vw, 2.4rem) }
 .group-members { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; list-style: none }
 .group-members li { padding: .5rem .8rem; background: var(--wash); border: 1px solid var(--line) }
+
+@media (max-width: 760px) {
+  .governance-top { grid-template-columns: minmax(0, 1fr) }
+}
