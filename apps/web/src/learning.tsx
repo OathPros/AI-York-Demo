@@ -26,7 +26,7 @@ export function migratedResourceHref(href: string) {
 export function LearningGuide() {
   return <div id="york-learning-guide">
     <section className="section" aria-labelledby="learning-heading">
-      <h1 id="learning-heading">AI learning at York</h1>
+      <h1 id="learning-heading">AI training at York</h1>
       <p className="lead">Learn how generative AI works, then apply it to studying, teaching or a task in your role</p>
       <ul className="learning-routes">
         <li><a className="text-link" href="#/study">Study with AI</a><p>Check course rules and use AI for practice</p></li>

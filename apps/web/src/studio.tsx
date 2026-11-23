@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { contentCollections, editablePageSchema, type ContentBundle, type ContentCollection, type ContentItem, type ContentStatus, type EditablePage, type PageCopy } from "@ai-york/contracts";
 import { api } from "./api";
 import { pageCopy } from "./page-copy";
+import { programLevel, trainingActivities } from "./catalog";
 
 export type StudioView = "overview" | "pages" | "inbox" | ContentCollection;
 const inventoryLabels: Record<ContentCollection, string> = {
@@ -150,7 +151,9 @@ export const collectionMeta: Record<ContentCollection, { label: string; single: 
     { key: "name", label: "Name", kind: "text", required: true }, { key: "summary", label: "Description", kind: "textarea" }, { key: "url", label: "Joining link", kind: "url" }, { key: "contact", label: "Contact", kind: "text" }, activityField] },
   training: { label: "Training inventory", single: "training", hint: "Courses, workshops, guides and credentials.", fields: [
     { key: "title", label: "Title", kind: "text", required: true }, { key: "summary", label: "Description", kind: "textarea" }, { key: "url", label: "Link", kind: "url" }, { key: "format", label: "Format", kind: "text" },
-    { key: "tags", label: "Shown under", kind: "multi", options: [{ value: "basics", label: "Getting started" }, { value: "work", label: "Administrative / work" }, { value: "teach", label: "Teaching" }, { value: "study", label: "Study & research" }, { value: "tools", label: "Tool how-tos" }, { value: "partner", label: "Degrees & certificates" }] }] }
+    activityField,
+    { key: "tags", label: "Resource topics and type", kind: "multi", options: [{ value: "basics", label: "Getting started" }, { value: "work", label: "Administrative / work" }, { value: "teach", label: "Teaching" }, { value: "study", label: "Study" }, { value: "tools", label: "Tool how-tos" }, { value: "partner", label: "Program or certificate" }] },
+    { key: "programLevel", label: "Program level (when applicable)", kind: "select", options: [{ value: "unspecified", label: "Not specified" }, { value: "undergraduate", label: "Undergraduate" }, { value: "graduate", label: "Graduate" }, { value: "certificate", label: "Certificate" }] }] }
 };
 
 const defaults = (collection: ContentCollection): Record<string, unknown> => {
@@ -174,7 +177,7 @@ export function CmsManager({ collection, content, reload }: { collection: Conten
   const meta = collectionMeta[collection];
   const items = content[collection].filter((item) => (!status || item.status === status) && item.title.toLowerCase().includes(query.trim().toLowerCase()));
 
-  const open = (item: ContentItem | null) => { setMessage(""); setError(""); setEditing(item ? { id: item.id, status: item.status === "archived" ? "draft" : item.status, values: { ...defaults(collection), ...item.data } } : { id: null, status: "draft", values: defaults(collection) }); };
+  const open = (item: ContentItem | null) => { setMessage(""); setError(""); setEditing(item ? { id: item.id, status: item.status === "archived" ? "draft" : item.status, values: { ...defaults(collection), ...item.data, ...(collection === "training" ? { activities: trainingActivities(item), programLevel: programLevel(item) } : {}) } } : { id: null, status: "draft", values: defaults(collection) }); };
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!editing) return;

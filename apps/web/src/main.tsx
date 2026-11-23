@@ -1,25 +1,25 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { changeTypeLabels, changeTypes, contentCollections, type ChangeType, type ContentBundle, type DemoRole, type SuggestionPayload } from "@ai-york/contracts";
+import { activitySchema, changeTypeLabels, changeTypes, contentCollections, type ChangeType, type ContentBundle, type DemoRole, type SuggestionPayload } from "@ai-york/contracts";
 import { api } from "./api";
-import { CommunityList, EventList, GoverningPage, GuideFinder, Home, IndexPage, NewsPage, PageHeader, PartnerPage, TrainingSection, ToolsSection, type Page } from "./hub";
+import { EventList, Home, IndexPage, NewsPage, PartnerPage, ToolsSection, type Page } from "./hub";
 import { CmsManager, PageEditor, PolicyStudio, StudioShell, type StudioView } from "./studio";
 import type { PublishedPages } from "./page-copy";
 import "./styles.css";
-import { LearningGuide } from "./learning";
-import { AudienceGuide } from "./audience-guides";
-import { PoliciesReportsPage } from "./policies-reports";
+import { GuidancePage, ProgramsPage, TrainingPage } from "./information-architecture";
+import { GovernancePage } from "./policies-reports";
 
 type Screen = "site" | "role" | "suggest" | "studio" | "receipt";
 
 type RequestRow = { id: string; kind: ChangeType; status: string; payload: SuggestionPayload & Record<string, string | boolean | undefined>; created_at: string };
-const pages: Page[] = ["home", "study", "teach", "research", "work", "partner", "policies", "tools", "learning", "events", "communities", "news", "governing", "index", "guide"];
+const pages: Page[] = ["home", "study", "teach", "research", "work", "partner", "policies", "tools", "learning", "events", "communities", "news", "governing", "index", "guide", "guidance", "training", "programs", "governance"];
 const emptyContent = (): ContentBundle => Object.fromEntries(contentCollections.map((name) => [name, []])) as unknown as ContentBundle;
 const pageFromHash = (): Page => { const key = window.location.hash.replace(/^#\/?/, "").split("?")[0] as Page; return String(key) === "initiative" ? "work" : pages.includes(key) ? key : "home"; };
 
 function App() {
   const [screen, setScreen] = useState<Screen>("site");
   const [page, setPage] = useState<Page>(pageFromHash());
+  const [hash, setHash] = useState(window.location.hash);
   const [workspaceId, setWorkspaceId] = useState("");
   const [role, setRole] = useState<DemoRole>("external");
   const [content, setContent] = useState<ContentBundle>(emptyContent());
@@ -44,15 +44,21 @@ function App() {
   const [changeType, setChangeType] = useState<ChangeType>("event");
   const isCalendarType = changeType === "event" || changeType === "training";
 
-  const go = useCallback((next: Page) => { setPage(next); setScreen("site"); window.history.pushState({}, "", `#/${next}`); window.scrollTo(0, 0); }, []);
+  const go = useCallback((next: Page) => { const nextHash = `#/${next}`; setPage(next); setHash(nextHash); setScreen("site"); window.history.pushState({}, "", nextHash); window.scrollTo(0, 0); }, []);
+  const navigateLink = (event: React.MouseEvent<HTMLAnchorElement>, next: Page) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    go(next);
+  };
   const loadContent = useCallback(async (id = workspaceId) => { const data = await api(id ? `/api/v1/public/${id}/content` : "/api/v1/public/content"); setContent(data.content); }, [workspaceId]);
   const loadAdminContent = useCallback(async () => { const data = await api("/api/v1/studio/content"); setAdminContent(data.content); await loadContent(); }, [loadContent]);
   const loadRequests = async () => { const data = await api("/api/v1/studio/requests"); setRequests(data.requests); };
 
   useEffect(() => {
-    const onPop = () => { setPage(pageFromHash()); setScreen("site"); };
+    const onPop = () => { setPage(pageFromHash()); setHash(window.location.hash); setScreen("site"); };
     window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    window.addEventListener("hashchange", onPop);
+    return () => { window.removeEventListener("popstate", onPop); window.removeEventListener("hashchange", onPop); };
   }, []);
   useEffect(() => {
     const invite = new URLSearchParams(window.location.hash.split("?")[1] || "").get("invite");
@@ -65,6 +71,7 @@ function App() {
           sessionStorage.setItem("ai-york-workspace", data.workspaceId);
           window.history.replaceState({}, "", `${window.location.pathname}#/events`);
           setPage("events");
+          setHash("#/events");
           await loadContent(data.workspaceId);
           return;
         }
@@ -123,27 +130,34 @@ function App() {
     else suggest();
   };
 
+  const params = new URLSearchParams(hash.split("?")[1] || "");
+  const selectedActivity = activitySchema.safeParse(params.get("activity"));
+  const activity = selectedActivity.success ? selectedActivity.data : undefined;
+  const requestedLevel = params.get("level");
+  const level = requestedLevel === "undergraduate" || requestedLevel === "graduate" || requestedLevel === "certificate" ? requestedLevel : undefined;
+  const governanceSection = params.get("section") || (page === "communities" ? "community" : page === "governing" ? "roundtables" : undefined);
+
   const renderPage = () => {
     switch (page) {
       case "home": return <Home content={content} go={go} copy={publishedPages.home} />;
       case "study": case "teach": case "research": case "work":
-        return <AudienceGuide key={page} kind={page} copy={publishedPages[page]} />;
+        return <GuidancePage content={content} activity={page} copies={publishedPages} />;
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
-      case "guide": return <><PageHeader eyebrow="Usage & Guidance" title="Practical guidance, in plain language" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder content={content} /></>;
-      case "policies": return <PoliciesReportsPage sources={content.policy} />;
+      case "guide": case "guidance": return <GuidancePage content={content} activity={activity} copies={publishedPages} />;
+      case "policies": case "governing": case "communities": case "governance": return <GovernancePage content={content} section={governanceSection} />;
       case "tools": return <ToolsSection content={content} standalone />;
-      case "learning": return <><LearningGuide /><TrainingSection content={content} title="Courses workshops and resources" /></>;
+      case "learning": case "training": return <TrainingPage content={content} activity={activity} />;
+      case "programs": return <ProgramsPage content={content} level={level} />;
       case "events": return <EventList content={content} />;
-      case "communities": return <CommunityList content={content} />;
       case "news": return <NewsPage />;
-      case "governing": return <GoverningPage />;
       case "index": return <IndexPage content={content} go={go} />;
     }
   };
 
-  const navItems: [Page, string][] = [["home", "Home"], ["study", "Study"], ["teach", "Teach"], ["research", "Research"], ["work", "Work"], ["learning", "Learning"], ["tools", "Tools"], ["policies", "Policies and reports"], ["events", "Calendar"], ["news", "News"]];
+  const navItems: [Page, string][] = [["guidance", "Guidance"], ["training", "Training"], ["programs", "Programs"], ["tools", "Tools"], ["governance", "Policy & community"], ["events", "Calendar"], ["news", "News"]];
+  const currentNav: Page = ["study", "teach", "research", "work", "guide"].includes(page) ? "guidance" : page === "learning" ? "training" : ["policies", "governing", "communities"].includes(page) ? "governance" : page;
   return <div className="app">{screen !== "studio" && <><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button><button onClick={openStudio}>Open Studio</button></div>
-    <header className="site-header"><a className="brand" href="#/home" onClick={(e) => { e.preventDefault(); go("home"); }}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <button key={key} aria-current={screen === "site" && page === key ? "page" : undefined} onClick={() => go(key)}>{label}</button>)}<button className="nav-primary" onClick={() => go("guide")}>Can I use AI for this</button></nav></header></>}
+    <header className="site-header"><a className="brand" href="#/home" aria-label="AI @ York home" onClick={(e) => navigateLink(e, "home")}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <a key={key} href={`#/${key}`} aria-current={screen === "site" && currentNav === key ? "page" : undefined} onClick={(e) => navigateLink(e, key)}>{label}</a>)}<a className="nav-primary" href="#/guidance" onClick={(e) => navigateLink(e, "guidance")}>Can I use AI for this</a></nav></header></>}
     <main>
       {screen === "site" && <>{error && <p className="error" role="alert">{error}</p>}{renderPage()}</>}
       {screen === "role" && <section className="panel narrow"><p className="eyebrow">Passport York · Demo role selection</p><h1>Choose a role to explore</h1><p>Demo only. Choose a role to explore the prototype. No username, password, Duo prompt or real York session is used.</p>{error && <p className="error" role="alert">{error}</p>}<div className="role-grid"><button className="role" onClick={() => chooseRole("external")}><strong>External User</strong><span>Suggest an event, training, fix a broken link or tell us what is missing.</span></button><button className="role" onClick={() => chooseRole("admin")}><strong>AI @ York Admin</strong><span>Manage the policy, interpretation, tool, event, community and training inventories, and review suggested changes.</span></button></div><button className="text-button" onClick={() => go("home")}>Return to AI @ York</button></section>}

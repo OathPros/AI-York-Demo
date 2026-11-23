@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import type { ContentItem } from "@ai-york/contracts";
+import type { ContentBundle } from "@ai-york/contracts";
 import "./policies-reports.css";
 
 type DocumentRecord = {
@@ -113,22 +113,39 @@ function DocumentReader({ record, close }: { record: DocumentRecord; close: () =
   </dialog>;
 }
 
-export function PoliciesReportsPage({ sources }: { sources: ContentItem[] }) {
+export function GovernancePage({ content, section }: { content: ContentBundle; section?: string }) {
   const [openDocument, setOpenDocument] = useState<DocumentRecord | null>(null);
   const featuredUrls = new Set(policies.map(({ url }) => url));
-  const related = sources.filter(({ data }) => data.url && !featuredUrls.has(data.url));
+  const related = content.policy.filter(({ data }) => data.url && !featuredUrls.has(data.url));
+
+  useEffect(() => {
+    if (section) {
+      const target = document.getElementById(`governance-${section}`);
+      if (target) {
+        target.tabIndex = -1;
+        target.focus({ preventScroll: true });
+        target.scrollIntoView();
+      }
+    }
+  }, [section]);
 
   return <div className="section policies-reports">
     <header className="documents-intro">
-      <h1>Policies and reports</h1>
-      <p className="lead">Read York policies and guidelines that apply to AI use and explore research on AI in higher education</p>
+      <h1>Policy, governance and community</h1>
+      <p className="lead">Explore the demonstration policy, reports, governance and communities of practice.</p>
+      <nav className="filters catalog-filters" aria-label="Governance sections">
+        {[["policy", "Policy"], ["reports", "Reports"], ["roundtables", "Roundtables"], ["working-groups", "Working groups"], ["community", "Communities of practice"]].map(([id, label]) =>
+          <a key={id} href={`#/governance?section=${id}`}>{label}</a>)}
+      </nav>
     </header>
-    <section className="document-section" aria-labelledby="policies-heading">
-      <h2 id="policies-heading">Policies and guidelines</h2>
-      <DocumentCards records={policies} open={setOpenDocument} />
-      {related.length > 0 && <details className="document-related">
-        <summary>Related guidance and policy sources</summary>
+    <section id="governance-policy" className="document-section" aria-labelledby="policy-heading">
+      <h2 id="policy-heading">Policy</h2>
+      <p className="notice">Discussion draft for demonstration only, not an approved York policy. Studio edits appear here in this browser only; they are not shared or published to other users.</p>
+      <iframe className="public-policy-frame" src={`${import.meta.env.BASE_URL}policy-studio.html?view=public`} title="AI policy demonstration document" />
+      <details className="document-related">
+        <summary>Related official source documents</summary>
         <ul>
+          {policies.map(({ url, title }) => <li key={url}><a className="text-link" href={url}>{title}</a></li>)}
           {related.map(({ id, title, data }) => (
             <li key={id}>
               <a className="text-link" href={data.url}>{data.title || title}</a>
@@ -136,11 +153,28 @@ export function PoliciesReportsPage({ sources }: { sources: ContentItem[] }) {
             </li>
           ))}
         </ul>
-      </details>}
+      </details>
     </section>
-    <section className="document-section" aria-labelledby="reports-heading">
+    <section id="governance-reports" className="document-section" aria-labelledby="reports-heading">
       <h2 id="reports-heading">Reports</h2>
       <DocumentCards records={reports} open={setOpenDocument} />
+    </section>
+    <section id="governance-roundtables" className="document-section" aria-labelledby="roundtables-heading">
+      <h2 id="roundtables-heading">Roundtables</h2>
+      <p>York's AI Roundtable fosters cross-divisional communication and collaboration on AI implications, and advises on policies and strategies for responsible engagement with AI in teaching and learning, research and operations.</p>
+      <a className="text-link" href="https://www.yorku.ca/ai-at-york/">Visit the official AI @ York website</a>
+    </section>
+    <section id="governance-working-groups" className="document-section" aria-labelledby="working-groups-heading">
+      <h2 id="working-groups-heading">Working groups</h2>
+      <p>Working group details have not yet been added to this demonstration.</p>
+    </section>
+    <section id="governance-community" className="document-section" aria-labelledby="community-heading">
+      <h2 id="community-heading">Communities of practice</h2>
+      <div className="grid">{content.community.map((item) => <article className="card" key={item.id}>
+        <h3>{item.data.name}</h3><p>{item.data.summary}</p>{item.data.contact && <p>Contact: {item.data.contact}</p>}
+        {item.data.url && <a className="text-link" href={item.data.url}>Join or learn more</a>}
+      </article>)}</div>
+      {content.community.length === 0 && <p>No communities are listed yet. Admins can add them in Studio, or you can suggest one.</p>}
     </section>
     {openDocument && <DocumentReader record={openDocument} close={() => setOpenDocument(null)} />}
   </div>;

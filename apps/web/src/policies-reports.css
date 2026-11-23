@@ -6,6 +6,7 @@
 .policies-reports .documents-intro p { color: var(--muted) }
 .policies-reports .document-section { margin-block-start: clamp(2.2rem, 5vw, 4rem) }
 .policies-reports .document-section > h2 { margin: 0 0 1.1rem; font-size: clamp(1.7rem, 3vw, 2.6rem) }
+.public-policy-frame { display: block; width: 100%; height: 75vh; min-height: 32rem; border: 1px solid var(--line); background: #fff }
 .policies-reports .document-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));

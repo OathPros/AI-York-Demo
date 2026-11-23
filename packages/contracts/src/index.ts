@@ -166,7 +166,9 @@ export const trainingItemSchema = z.object({
   summary: text(2000).default(""),
   url: linkOrBlank.default(""),
   format: text(200).default(""),
-  tags: z.array(z.enum(["basics", "work", "teach", "study", "tools", "partner"])).max(6)
+  tags: z.array(z.enum(["basics", "work", "teach", "study", "tools", "partner"])).max(6),
+  activities: activities.optional(),
+  programLevel: z.enum(["undergraduate", "graduate", "certificate", "unspecified"]).optional()
 });
 export const contentSchemas = {
   policy: policyItemSchema,

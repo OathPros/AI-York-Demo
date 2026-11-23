@@ -3,8 +3,9 @@ import type { Activity, ContentBundle, ContentItem, PageCopy } from "@ai-york/co
 import { pageCopy } from "./page-copy";
 import { Calendar, News, Upcoming } from "./updates";
 import { migratedResourceHref } from "./learning";
+import { isProgram } from "./catalog";
 
-export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide";
+export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide" | "guidance" | "training" | "programs" | "governance";
 export type Go = (page: Page) => void;
 type Audience = "all" | "students" | "staff";
 
@@ -25,7 +26,7 @@ const dataOptions: { value: string; label: string; hint: string }[] = [
 const activityLabels: Record<Activity, string> = { work: "Work", study: "Study", teach: "Teach", research: "Research" };
 const collectionLabels: Record<string, string> = { policy: "Policy", interpretation: "Guidance", tool: "Tool", event: "Event", community: "Community", training: "Training" };
 
-function ResourceLink({ href, children }: { href?: string; children: React.ReactNode }) {
+export function ResourceLink({ href, children }: { href?: string; children: React.ReactNode }) {
   if (!href) return null;
   const migrated = migratedResourceHref(href);
   return migrated ? <a className="text-link" href={migrated}>{children}</a> :
@@ -142,11 +143,11 @@ export function ToolsSection({ content, activity, showFilter = true, standalone 
   );
 }
 
-const trainingFilters = [["all", "All resources"], ["basics", "Getting started"], ["work", "Administrative"], ["teach", "Teaching"], ["study", "Study & research"], ["tools", "Tool how-tos"], ["partner", "Degrees & certificates"]] as const;
+const trainingFilters = [["all", "All resources"], ["basics", "Getting started"], ["work", "Administrative"], ["teach", "Teaching"], ["study", "Study & research"], ["tools", "Tool how-tos"]] as const;
 
 export function TrainingSection({ content, tags, title = "AI learning at York" }: { content: ContentBundle; tags?: string[]; title?: string }) {
   const [filter, setFilter] = useState("all");
-  const base = tags ? content.training.filter((item) => (item.data.tags as string[]).some((tag) => tags.includes(tag))) : content.training;
+  const base = tags ? content.training.filter((item) => (item.data.tags as string[]).some((tag) => tags.includes(tag))) : content.training.filter((item) => !isProgram(item));
   const items = filter === "all" ? base : base.filter((item) => (item.data.tags as string[]).includes(filter));
   return (
     <section className="section" aria-labelledby="training-title">

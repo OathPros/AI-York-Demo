@@ -42,10 +42,12 @@ main { flex: 1 }
 .brand b { color: var(--red) }
 .brand small { padding-left: .85rem; border-left: 1px solid #ccc; color: var(--muted); font-size: .65rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase }
 .site-header nav { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 1.35rem }
-.site-header nav button { min-height: 42px; padding: .4rem .1rem; border: 0; border-bottom: 3px solid transparent; background: transparent; font-size: .8rem; font-weight: 600; cursor: pointer }
-.site-header nav button:hover, .site-header nav button[aria-current="page"] { color: var(--red-dark); border-bottom-color: var(--red) }
+.site-header nav a { display: inline-flex; align-items: center; min-height: 42px; padding: .4rem .1rem; border: 0; border-bottom: 3px solid transparent; background: transparent; font-size: .8rem; font-weight: 600; text-decoration: none }
+.site-header nav a:hover, .site-header nav a[aria-current="page"] { color: var(--red-dark); border-bottom-color: var(--red) }
 .site-header nav .nav-primary { padding: .65rem .9rem; border: 1px solid var(--ink); background: var(--ink); color: #fff }
 .site-header nav .nav-primary:hover { border-color: var(--red); background: var(--red); color: #fff }
+.catalog-filters a { display: inline-flex; align-items: center; min-height: 44px; padding: .5rem .85rem; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 600 }
+.catalog-filters a:hover, .catalog-filters a[aria-current="page"] { border-color: var(--red-dark); background: var(--red-dark); color: #fff }
 
 .button, button.primary { display: inline-flex; align-items: center; justify-content: center; gap: 1.5rem; padding: .75rem 1.15rem; border: 1px solid var(--ink); background: #fff; font-weight: 700; font-size: .88rem; text-decoration: none; cursor: pointer }
 .button.dark { background: var(--ink); color: #fff }
@@ -375,7 +377,7 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
   .site-header { padding-inline: 16px }
   .brand small { display: none }
   .site-header nav { width: 100%; gap: .4rem 1rem; flex-wrap: wrap; justify-content: flex-start; padding-bottom: .4rem }
-  .site-header nav button { flex: 0 0 auto }
+  .site-header nav a { flex: 0 0 auto }
   .home-hero, .experience-hero { background-image: linear-gradient(0deg, rgba(15, 12, 13, .94), rgba(15, 12, 13, .57) 72%), var(--banner) }
   .home-statement .home-shell { padding-block: 1.2rem; align-items: flex-start; flex-direction: column }
   .section { padding-block: 2.5rem }

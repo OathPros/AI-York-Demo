@@ -159,8 +159,9 @@ const guides: Record<Guide, { audience: string; image: string; topics: Topic[] }
   }
 };
 
-export function AudienceGuide({ kind, copy = pageCopy[kind] }: { kind: Guide; copy?: PageCopy }) {
+export function AudienceGuide({ kind, copy = pageCopy[kind], embedded = false }: { kind: Guide; copy?: PageCopy; embedded?: boolean }) {
   const { audience, image, topics } = guides[kind];
+  const Title = embedded ? "h2" : "h1";
   const root = useRef<HTMLDivElement>(null);
   const headingId = (id: string) => `${kind}-${id}`;
 
@@ -175,7 +176,7 @@ export function AudienceGuide({ kind, copy = pageCopy[kind] }: { kind: Guide; co
       <div className="shell audience-guide__hero-inner">
         <div className="audience-guide__intro">
           <p className="audience-guide__audience">{audience}</p>
-          <h1>{copy.title}</h1>
+          <Title>{copy.title}</Title>
           <p className="audience-guide__lede">{copy.intro}</p>
         </div>
         <img src={image} alt="" />
