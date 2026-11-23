@@ -1,3 +1,10 @@
+.guidance-selector { background: #f5f3ef; border-bottom: 1px solid #e1dce2 }
+.guidance-selector .shell { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; padding-block: .8rem }
+.guidance-selector p { margin: 0; font-weight: 700 }
+.guidance-selector p.guidance-selector__note { flex-basis: 100%; margin-top: -.25rem; font-size: .9rem; font-weight: 400 }
+.guidance-selector nav { display: flex; flex-wrap: wrap; gap: .4rem; flex: 1 }
+.guidance-selector > .shell > .text-link { display: inline-flex; align-items: center; min-height: 44px }
+
 .audience-guide {
   --guide-dark: #251c27;
   --guide-accent: #ffbdc8;
@@ -75,5 +82,8 @@
 }
 
 @media (max-width: 640px) {
+  .guidance-selector .shell { gap: .6rem }
+  .guidance-selector p:not(.guidance-selector__note), .guidance-selector nav { flex-basis: 100% }
+  .guidance-selector nav a { padding-inline: .65rem }
   .audience-guide > .shell, .audience-guide__hero > .shell { width: calc(100% - 32px) }
 }

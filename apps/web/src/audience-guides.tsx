@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import type { PageCopy } from "@ai-york/contracts";
+import type { Activity, PageCopy } from "@ai-york/contracts";
 import { pageCopy } from "./page-copy";
 import studyImage from "./assets/banners/study.webp";
 import teachImage from "./assets/banners/teach.webp";
@@ -7,23 +7,26 @@ import researchImage from "./assets/banners/research.webp";
 import workImage from "./assets/banners/work.webp";
 import "./audience-guides.css";
 
-type Guide = "study" | "teach" | "research" | "work";
+type Guide = Activity;
 type Link = [label: string, href: string];
-type Topic = { id: string; title: string; items: [heading: string, copy: string][]; links?: Link[]; example?: [heading: string, copy: string] };
+type Topic = { activity: Guide; id: string; title: string; items: [heading: string, copy: string][]; links?: Link[]; example?: [heading: string, copy: string] };
 
-const guides: Record<Guide, { audience: string; image: string; topics: Topic[] }> = {
-  study: {
-    audience: "Undergraduate and graduate students",
-    image: studyImage,
-    topics: [
-      { id: "coursework", title: "Course rules and citation", items: [
+const guides: Record<Guide, { audience: string; image: string }> = {
+  study: { audience: "Undergraduate and graduate students", image: studyImage },
+  teach: { audience: "Instructors and graduate supervisors", image: teachImage },
+  research: { audience: "Researchers and research teams", image: researchImage },
+  work: { audience: "Staff and people managers", image: workImage }
+};
+
+const guidanceTopics: Topic[] = [
+      { activity: "study", id: "coursework", title: "Course rules and citation", items: [
         ["Check this assignment", "York’s Academic Conduct Policy treats undocumented or unreferenced use of AI in assessed work as a breach. Documented use is generally permitted unless your instructor restricts it for the course or assessment. Read the course outline and assignment instructions, and ask about unclear uses before you begin"],
         ["Keep a record as you work", "Follow the instructor’s directions for acknowledgement and citation. Keep the tool name, how you used it and what you changed. Save prompts or outputs if required. Open and read the original sources before citing them"]
       ], links: [
         ["Read the Academic Conduct Policy", "https://www.yorku.ca/secretariat/policies/policies/academic-conduct-policy-and-procedures/"],
         ["Get citation help from York Libraries", "https://www.library.yorku.ca/web/research-learn/artificial-intelligence-citing-academic-integrity/"]
       ] },
-      { id: "practice", title: "Study and practise", items: [
+      { activity: "study", id: "practice", title: "Study and practise", items: [
         ["Build independence", "Ask for hints, practice questions or a second explanation using material you can share. Try each task yourself and compare the feedback with your course notes. If an answer seems convincing but misses context or reinforces a stereotype, investigate what it left out"],
         ["Make university easier to navigate", "Use text to speech or a plain language explanation to access material you have permission to share. Ask for an example of a respectful email to an instructor or a study schedule built around your own deadlines"],
         ["Find scholarly sources", "Use AI to suggest keywords and alternate terms. Search the library databases yourself and read any article before relying on it. Get permission before uploading course materials, classmates’ work or class recordings"]
@@ -33,20 +36,14 @@ const guides: Record<Guide, { audience: string; image: string; topics: Topic[] }
         ["Get Copilot with your student account", "https://www.yorku.ca/uit/student-services/ai/"],
         ["Explore LinkedIn Learning at York", "https://www.yorku.ca/services/lil/"]
       ] },
-      { id: "graduate", title: "Theses and graduate milestones", items: [
+      { activity: "study", id: "graduate", title: "Theses and graduate milestones", items: [
         ["Agree on boundaries with your supervisor", "Before using AI to research, create, write or edit a thesis or dissertation, discuss the proposed use with your supervisor or supervisory committee. Clarify expectations for graduate coursework and comprehensive exams separately. Consult your graduate program director if the expectations remain unclear"],
         ["Prepare to explain your contribution", "Keep a record of where AI affected your methods, writing or revisions. Be ready to explain at your defence what you did, what the tool contributed and how the work represents your original contribution"]
       ], links: [
         ["Read the Ontario graduate research considerations", "https://cou.ca/wp-content/uploads/2024/10/OCGS-AI-graduate-research-considerations-FN-Oct-1-2024.pdf"],
         ["Plan an AI research workflow", "#/research"]
-      ] }
-    ]
-  },
-  teach: {
-    audience: "Instructors and graduate supervisors",
-    image: teachImage,
-    topics: [
-      { id: "assessment", title: "Course expectations and assessment", items: [
+      ] },
+      { activity: "teach", id: "assessment", title: "Course expectations and assessment", items: [
         ["Make the rules visible", "State where AI is prohibited, optional or expected for each assessment. Name permitted tasks such as brainstorming, translation or code debugging, and specify how students should document or cite use. Give students who opt out an equivalent way to demonstrate the same learning"],
         ["Design for evidence of learning", "Identify what students need to do independently. Use staged drafts, in-class explanations, simulations or a task grounded in a class discussion. When AI is part of the assessment, give explicit criteria for evaluating its output"],
         ["Handle suspected misuse", "York does not recommend AI detection tools. Their results can be inaccurate and can disproportionately flag multilingual writers. Keep student submissions out of external detectors and use York’s academic integrity support for suspected breaches"]
@@ -54,7 +51,7 @@ const guides: Record<Guide, { audience: string; image: string; topics: Topic[] }
         ["Get academic integrity support for instructors", "https://www.yorku.ca/unit/vpacad/academic-integrity/ai-technology-and-academic-integrity/"],
         ["Use the AI Assessment Scale", "https://open-publishing.org/journals/index.php/jutlp/article/view/810/769"]
       ] },
-      { id: "classroom", title: "AI literacy in class", items: [
+      { activity: "teach", id: "classroom", title: "AI literacy in class", items: [
         ["Make AI visible in familiar tools", "Show where features such as suggested rewrites or summaries use AI. Discuss where the feature fits disciplinary practice, which perspectives it misses and when students might choose to work without it"],
         ["Give everyone the same output to critique", "Bring one generated response into class. Ask groups to compare it with a course reading, trace an unsupported claim and explain a revision. The class can practise evaluating AI without each student needing an account"],
         ["Use AI for practice and feedback", "Try tailored scenarios, role-play or feedback on a fictional sample. Ask students to explain which suggestions they would accept and why"]
@@ -63,42 +60,36 @@ const guides: Record<Guide, { audience: string; image: string; topics: Topic[] }
         ["Explore King’s College London teaching guidance", "https://www.kcl.ac.uk/about/strategy/learning-and-teaching/ai-guidance"],
         ["Find Teaching Commons support", "https://www.yorku.ca/teachingcommons/artificial-intelligence-ai-pedagogies/"]
       ] },
-      { id: "preparation", title: "Course preparation and feedback", items: [
+      { activity: "teach", id: "preparation", title: "Course preparation and feedback", items: [
         ["Draft materials you can review", "Generate an initial outline, rubric or bank of comments using fictional examples and material you may share. Check disciplinary accuracy, accessibility and alignment with learning outcomes. Personalize feedback and keep grades, accommodation details and identifiable submissions out of unauthorized tools"],
         ["Explain your own use", "Tell students where AI shaped the materials or activity, why you used it and how you checked the result. Ask for student feedback if the design creates an unexpected access barrier"]
       ], links: [["Explore inclusive course design ideas", "https://learningdesignviews.educ.ubc.ca/inclusive-content-and-ai/"]] },
-      { id: "supervision", title: "Graduate supervision", items: [
+      { activity: "teach", id: "supervision", title: "Graduate supervision", items: [
         ["Set expectations at the start", "Discuss where AI fits your discipline and which uses are appropriate at each milestone. Talk through data sovereignty, rights, privacy and bias using the student’s proposed workflow. Consult the graduate program or scholarly body when norms are unclear"],
         ["Revisit the agreement", "Ask for a record of material AI use and discuss how it will be explained in writing and at the defence. Revisit the agreement when the student changes tools, data or methods"]
-      ], links: [["Read about AI and academic supervision", "https://universityaffairs.ca/career-advice/career-advice-article/ai-higher-education-and-the-future-of-academic-supervision/"]] }
-    ]
-  },
-  research: {
-    audience: "Researchers and research teams",
-    image: researchImage,
-    topics: [
-      { id: "approvals", title: "Ethics and data approvals", items: [
+      ], links: [["Read about AI and academic supervision", "https://universityaffairs.ca/career-advice/career-advice-article/ai-higher-education-and-the-future-of-academic-supervision/"]] },
+      { activity: "research", id: "approvals", title: "Ethics and data approvals", items: [
         ["Review the proposed workflow before collecting data", "Identify what will enter the tool, where it will be processed and stored, who can access it and how long it will be retained. For human participant research, check the approved protocol and consent. Consult Research Ethics about any required amendment before changing the workflow"],
         ["Protect restricted material", "Keep identifiable participant material, confidential partner information and embargoed drafts out of unauthorized services. Check data use agreements, licences, Indigenous data governance and data sovereignty requirements. Removing names alone may leave people identifiable"]
       ], links: [
         ["Contact York Research Ethics", "https://www.yorku.ca/research/research-ethics/human-participants-in-research/"],
         ["Find cybersecurity guidance for academia", "https://www.cyber.gc.ca/en/academia"]
       ] },
-      { id: "methods", title: "Research methods and reporting", items: [
+      { activity: "research", id: "methods", title: "Research methods and reporting", items: [
         ["Pilot before using research data", "Test a search, analysis or data cleaning method on synthetic inputs or material you are authorized to share. For literature screening, check the search against original publications and have a researcher confirm inclusion decisions"],
         ["Make the method reproducible", "Record the tool and version, purpose, inputs, material outputs and independent checks. Verify references, calculations and code. Describe material AI use when reporting your methods and check the destination journal’s disclosure and authorship rules"]
       ], links: [
         ["Open the York Libraries guide to using generative AI in research", "https://researchguides.library.yorku.ca/genairesearch"],
         ["Explore the York Libraries AI research guide", "https://researchguides.library.yorku.ca/AI"]
       ] },
-      { id: "funding", title: "Grant applications and peer review", items: [
+      { activity: "research", id: "funding", title: "Grant applications and peer review", items: [
         ["Check the funding opportunity before using AI", "Read the funding opportunity’s instructions. The federal agencies hold applicants responsible for the accuracy and completeness of the application and for verifying and acknowledging every source. Keep confidential proposal material out of tools that cannot protect it"],
         ["Protect confidential review", "Federal research funding agencies prohibit using public, online or institutionally deployed generative AI tools to review funding applications. CIHR also prohibits automated transcription and summaries during peer review meetings and related discussions. Disability accommodations require CIHR approval in advance"]
       ], links: [
         ["Read federal granting agency guidance", "https://science.ised-isde.canada.ca/site/science/en/interagency-research-funding/policies-and-guidelines/guidance-use-artificial-intelligence-development-and-review-research-grant-proposals"],
         ["Read the CIHR peer review meeting policy", "https://cihr-irsc.gc.ca/e/54129.html"]
       ] },
-      { id: "community", title: "AI research at York", items: [
+      { activity: "research", id: "community", title: "AI research at York", items: [
         ["Find research groups", "York teams study how to design trustworthy AI systems, how people learn and create with digital tools, and how emerging technologies shape society. Explore the research groups below to identify potential collaborators"],
         ["Take research into practice", "Contact Innovation York for commercialization support, Osgoode’s IP Innovation Clinic for intellectual property resources or Lassonde’s BEST program for entrepreneurship"]
       ], links: [
@@ -113,30 +104,26 @@ const guides: Record<Guide, { audience: string; image: string; topics: Topic[] }
         ["IP Innovation Clinic", "https://www.yorku.ca/osgoode/ip-innovation-clinic/"],
         ["Lassonde BEST entrepreneurship program", "https://lassonde.yorku.ca/best/"],
         ["Explore AI degrees and certificates", "#/partner"]
-      ] }
-    ]
-  },
-  work: {
-    audience: "Staff and people managers",
-    image: workImage,
-    topics: [
-      { id: "decide", title: "Decide when AI fits", items: [
-        ["Start with low risk work", "Discuss your use with your supervisor and obtain management approval. Start with a template that uses fictional details, an agenda or a published page you have rights to use. Have a person who knows the work check the output for errors, bias and suitability"],
+      ] },
+      { activity: "work", id: "decide", title: "Decide when AI fits", items: [
+        ["Start with low risk work", "Discuss your use with your supervisor and obtain management approval. Start with a template that uses fictional details and no York data. Have a person who knows the work check the output for errors, bias and suitability"],
         ["Get oversight before higher impact work", "Discuss public communications, strategic decisions, meeting transcription and code that touches York systems or data with your supervisor before using AI. Identify AI-generated content in outward-facing communications and have an accountable person approve it. Involve Information Security for new integrations"],
         ["Keep people responsible for decisions", "York’s guidelines prohibit AI impersonation and expert or critical decisions without human oversight. Keep decisions about students or employees with the people and processes authorized to make them"]
       ], links: [
         ["Read York’s administrative AI guidelines", "https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2025/07/Generative-AI-Guidelines_r2.1_July_2_2025.pdf"],
         ["Check a workplace scenario", "#/guide"]
       ] },
-      { id: "data", title: "Handle York information", items: [
+      { activity: "work", id: "data", title: "Handle York information", items: [
         ["Classify the input before sharing it", "Public information is intended for public access. Internal information includes non-public procedures and work drafts. Confidential information includes unpublished proposals, contracts and internal financial reports. Regulated information includes health, payment and student records"],
+        ["Keep York data out of public AI platforms", "UIT directs staff not to enter York University data into public AI platforms. Use York-sanctioned tools approved for secure use and check any additional authorization required for the information involved"],
         ["Check the exact tool and configuration", "A personal or unsigned-in account lacks York’s enterprise protections. Use only approved tools with non-public York information. The administrative guidelines require explicit authorization through York’s assessment process before you enter personal, confidential or regulated information. Request a risk assessment before using a new chatbot or meeting assistant with York data"]
       ], links: [
+        ["Read UIT’s AI services guidance", "https://www.yorku.ca/uit/faculty-and-staff-services/ai/"],
         ["Read York’s information classification standard", "https://www.yorku.ca/secretariat/policies/policies/information-security-classification-standard/"],
         ["Check York’s Microsoft 365 data handling rules", "https://www.yorku.ca/uit/faculty-and-staff-services/microsoft-365-for-faculty-and-staff/handling-university-data-in-microsoft-365/"],
         ["Start a cyber threat and risk assessment", "https://www.yorku.ca/uit/infosec/ctra/"]
       ] },
-      { id: "access", title: "Get workplace tools", items: [
+      { activity: "work", id: "access", title: "Get workplace tools", items: [
         ["Copilot in a browser or Microsoft 365", "For browser chat, sign in with Passport York and confirm the Enterprise Data Protection shield. For Copilot inside Word, Excel, Outlook or Teams, ask UIT Administration for a paid Microsoft 365 Copilot licence and confirm the charge with your cost centre"],
         ["York managed assistants and coding tools", "For a YU AURA assistant, ask UIT about access, approved data sources and permissions for your use case. For York coding work, check eligibility for the university’s GitHub Copilot licence and keep institutional code out of personal accounts"],
         ["Meeting summaries in Zoom", "Enable Zoom AI Companion only for a suitable meeting. Notify participants, get consent and leave it off if anyone objects. Review the summary for accuracy, share it outside the meeting only on a need-to-know basis and delete it when it is no longer needed"]
@@ -148,19 +135,22 @@ const guides: Record<Guide, { audience: string; image: string; topics: Topic[] }
         ["Set up Zoom AI Companion", "https://lthelp.yorku.ca/ai-companion/introduction-to-zoom-ai-companion"],
         ["Read York’s meeting assistant guidelines", "https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2026/02/Guidelines-AI-Chatbots-Assistants.pdf"]
       ] },
-      { id: "training", title: "Workplace training", items: [
+      { activity: "work", id: "training", title: "Workplace training", items: [
         ["Start with a real task and safe inputs", "The York learning package covers Copilot, YU AURA and AURA Chat with how-to guides and recorded sessions. People managers can use the workplace recording to prepare conversations about when a team needs oversight"]
       ], links: [
         ["Open the YU Learn workplace AI package with Passport York", "https://yulearn.yorku.ca/local/yulearn/learning_opportunity.php?id=1651"],
         ["Watch the people managers session with Passport York", "https://yulearn.yorku.ca/local/yulearn/learning_opportunity.php?id=1620"],
         ["Browse UIT’s AI prompt library", "https://www.yorku.ca/uit/faculty-and-staff-services/ai/prompt-library/"]
       ] }
-    ]
-  }
-};
+];
+
+function topicsForActivity(activity: Guide): Topic[] {
+  return guidanceTopics.filter((topic) => topic.activity === activity);
+}
 
 export function AudienceGuide({ kind, copy = pageCopy[kind], embedded = false }: { kind: Guide; copy?: PageCopy; embedded?: boolean }) {
-  const { audience, image, topics } = guides[kind];
+  const { audience, image } = guides[kind];
+  const topics = topicsForActivity(kind);
   const Title = embedded ? "h2" : "h1";
   const root = useRef<HTMLDivElement>(null);
   const headingId = (id: string) => `${kind}-${id}`;

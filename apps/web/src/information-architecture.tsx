@@ -2,25 +2,24 @@ import React from "react";
 import type { Activity, ContentBundle, ContentItem } from "@ai-york/contracts";
 import { AudienceGuide } from "./audience-guides";
 import { isProgram, programLevel, trainingActivities, type ProgramLevel } from "./catalog";
-import { GuideFinder, PageHeader, ResourceLink } from "./hub";
+import { PageHeader, ResourceLink } from "./hub";
 import { LearningGuide } from "./learning";
 import type { PublishedPages } from "./page-copy";
 
 const activities: [Activity, string][] = [["study", "Study"], ["work", "Work"], ["research", "Research"], ["teach", "Teaching"]];
 
-export function GuidancePage({ content, activity, copies }: { content: ContentBundle; activity?: Activity; copies: PublishedPages }) {
+export function GuidancePage({ activity, copies }: { activity?: Activity; copies: PublishedPages }) {
+  const selected = activity ?? "study";
   return <div className="guidance-page">
-    <PageHeader eyebrow="Guidance" title="Guidance for using AI" intro="Explore practical guidance by activity, or check a specific task and the information involved." />
-    <section className="section" aria-labelledby="guidance-activity">
-      <h2 id="guidance-activity">Choose an activity</h2>
-      <nav className="filters catalog-filters" aria-label="Guidance activity">
-        <a href="#/guidance" aria-current={!activity ? "page" : undefined}>All activities</a>
-        {activities.map(([value, label]) => <a key={value} href={`#/guidance?activity=${value}`} aria-current={activity === value ? "page" : undefined}>{label}</a>)}
+    <div className="guidance-selector"><div className="shell">
+      <p>Guidance for your activity</p>
+      <nav className="catalog-filters" aria-label="Guidance activity">
+        {activities.map(([value, label]) => <a key={value} href={`#/guidance?activity=${value}`} aria-current={selected === value ? "page" : undefined}>{label}</a>)}
       </nav>
-      {!activity && <p>Select an activity to explore its detailed guidance below, or use the scenario finder.</p>}
-    </section>
-    <GuideFinder key={activity ?? "all"} content={content} initial={activity ? [activity] : []} />
-    {activity && <AudienceGuide key={activity} kind={activity} copy={copies[activity]} embedded />}
+      <a className="text-link" href={`#/guide?activity=${selected}`}>Check a specific use of AI</a>
+      <p className="guidance-selector__note">Curated from linked sources; check them for the latest guidance.</p>
+    </div></div>
+    <AudienceGuide key={selected} kind={selected} copy={copies[selected]} />
   </div>;
 }
 

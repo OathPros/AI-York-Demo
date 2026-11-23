@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { activitySchema, changeTypeLabels, changeTypes, contentCollections, type ChangeType, type ContentBundle, type DemoRole, type SuggestionPayload } from "@ai-york/contracts";
 import { api } from "./api";
-import { EventList, Home, IndexPage, NewsPage, PartnerPage, ToolsSection, type Page } from "./hub";
+import { EventList, GuideFinder, Home, IndexPage, NewsPage, PageHeader, PartnerPage, ToolsSection, type Page } from "./hub";
 import { CmsManager, PageEditor, PolicyStudio, StudioShell, type StudioView } from "./studio";
 import type { PublishedPages } from "./page-copy";
 import "./styles.css";
@@ -141,9 +141,10 @@ function App() {
     switch (page) {
       case "home": return <Home content={content} go={go} copy={publishedPages.home} />;
       case "study": case "teach": case "research": case "work":
-        return <GuidancePage content={content} activity={page} copies={publishedPages} />;
+        return <GuidancePage activity={page} copies={publishedPages} />;
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
-      case "guide": case "guidance": return <GuidancePage content={content} activity={activity} copies={publishedPages} />;
+      case "guide": return <div><PageHeader eyebrow="Usage & Guidance" title="Check a specific use of AI" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder key={activity ?? "all"} content={content} initial={activity ? [activity] : []} /></div>;
+      case "guidance": return <GuidancePage activity={activity} copies={publishedPages} />;
       case "policies": case "governing": case "communities": case "governance": return <GovernancePage content={content} section={governanceSection} />;
       case "tools": return <ToolsSection content={content} standalone />;
       case "learning": case "training": return <TrainingPage content={content} activity={activity} />;
@@ -157,7 +158,7 @@ function App() {
   const navItems: [Page, string][] = [["guidance", "Guidance"], ["training", "Training"], ["programs", "Programs"], ["tools", "Tools"], ["governance", "Policy & community"], ["events", "Calendar"], ["news", "News"]];
   const currentNav: Page = ["study", "teach", "research", "work", "guide"].includes(page) ? "guidance" : page === "learning" ? "training" : ["policies", "governing", "communities"].includes(page) ? "governance" : page;
   return <div className="app">{screen !== "studio" && <><div className="ribbon"><span>AI @ York demonstration site</span><button onClick={suggest}>Suggest a change</button><button onClick={openStudio}>Open Studio</button></div>
-    <header className="site-header"><a className="brand" href="#/home" aria-label="AI @ York home" onClick={(e) => navigateLink(e, "home")}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <a key={key} href={`#/${key}`} aria-current={screen === "site" && currentNav === key ? "page" : undefined} onClick={(e) => navigateLink(e, key)}>{label}</a>)}<a className="nav-primary" href="#/guidance" onClick={(e) => navigateLink(e, "guidance")}>Can I use AI for this</a></nav></header></>}
+    <header className="site-header"><a className="brand" href="#/home" aria-label="AI @ York home" onClick={(e) => navigateLink(e, "home")}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <a key={key} href={`#/${key}`} aria-current={screen === "site" && currentNav === key ? "page" : undefined} onClick={(e) => navigateLink(e, key)}>{label}</a>)}<a className="nav-primary" href="#/guide" onClick={(e) => navigateLink(e, "guide")}>Can I use AI for this</a></nav></header></>}
     <main>
       {screen === "site" && <>{error && <p className="error" role="alert">{error}</p>}{renderPage()}</>}
       {screen === "role" && <section className="panel narrow"><p className="eyebrow">Passport York · Demo role selection</p><h1>Choose a role to explore</h1><p>Demo only. Choose a role to explore the prototype. No username, password, Duo prompt or real York session is used.</p>{error && <p className="error" role="alert">{error}</p>}<div className="role-grid"><button className="role" onClick={() => chooseRole("external")}><strong>External User</strong><span>Suggest an event, training, fix a broken link or tell us what is missing.</span></button><button className="role" onClick={() => chooseRole("admin")}><strong>AI @ York Admin</strong><span>Manage the policy, interpretation, tool, event, community and training inventories, and review suggested changes.</span></button></div><button className="text-button" onClick={() => go("home")}>Return to AI @ York</button></section>}
