@@ -1,7 +1,7 @@
 import React from "react";
 import type { Activity, ContentBundle, ContentItem } from "@ai-york/contracts";
 import { AudienceGuide } from "./audience-guides";
-import { isProgram, programLevel, trainingActivities, type ProgramLevel } from "./catalog";
+import { catalogDescription, isProgram, programLevel, programsForPage, trainingActivities, type ProgramLevel } from "./catalog";
 import { PageHeader, ResourceLink } from "./hub";
 import { LearningGuide } from "./learning";
 import type { PublishedPages } from "./page-copy";
@@ -26,8 +26,8 @@ export function GuidancePage({ activity, copies }: { activity?: Activity; copies
 function CatalogCards({ items, showLevel = false, training = false }: { items: ContentItem[]; showLevel?: boolean; training?: boolean }) {
   const Title = training ? "h2" : "h3";
   return <div className="grid">{items.map((item) => <article className="card" key={item.id}>
-    <span className="status">{showLevel ? (programLevel(item) === "unspecified" ? "Level not specified" : programLevel(item)) : item.data.format}</span>
-    <Title>{item.title}</Title>{item.data.summary && <p>{item.data.summary}</p>}
+    <span className="status">{showLevel ? (programLevel(item) === "unspecified" ? (item.data.format || "Program resource") : programLevel(item)) : item.data.format}</span>
+    <Title>{item.title}</Title>{catalogDescription(item) && <p>{catalogDescription(item)}</p>}
     <ResourceLink href={item.data.url}>Open resource</ResourceLink>
   </article>)}</div>;
 }
@@ -51,7 +51,7 @@ export function TrainingPage({ content, activity }: { content: ContentBundle; ac
 const levels: [Exclude<ProgramLevel, "unspecified">, string][] = [["undergraduate", "Undergraduate"], ["graduate", "Graduate"], ["certificate", "Certificates"]];
 
 export function ProgramsPage({ content, level }: { content: ContentBundle; level?: Exclude<ProgramLevel, "unspecified"> }) {
-  const items = content.training.filter((item) => isProgram(item) && (!level || programLevel(item) === level));
+  const items = programsForPage(content.training).filter((item) => !level || programLevel(item) === level);
   return <div className="programs-page">
     <PageHeader eyebrow="Formal study" title="AI programs" intro="Explore degrees and certificates. Check each program's official page for admission and current details." />
     <section className="section" aria-labelledby="programs-title">

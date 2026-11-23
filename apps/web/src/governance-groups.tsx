@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 type GroupSection = "roundtables" | "working-groups" | "community";
 export type Group = {
@@ -23,7 +23,6 @@ const groups: Group[] = [
       "Bring perspectives from teaching and learning, research, and university operations together to shape York's approach to AI.",
       "Set policy direction and coordinate responsible AI guidance, drawing on the priorities and advice of its working groups."
     ],
-    note: "The mandate and example membership are presented for this demonstration.",
     exampleMembers: ["Gandalf", "Galadriel", "Elrond", "Aragorn"],
     source: "https://www.yorku.ca/ai-at-york/"
   },
@@ -34,7 +33,7 @@ const groups: Group[] = [
       "Identify priorities, opportunities and risks for AI in student and administrative services, and bring recommendations to the AI Roundtable.",
       "Consider how responsible AI can support services while protecting information and keeping people accountable for decisions."
     ],
-    note: "This is a short-term working group. An extension to its term and mandate has been discussed but is not confirmed. The detailed mandate below is illustrative.",
+    note: "The working group sets near-term priorities; its future term and mandate are under discussion.",
     exampleMembers: ["Samwise Gamgee", "Éowyn", "Faramir", "Merry Brandybuck"]
   },
   {
@@ -44,7 +43,7 @@ const groups: Group[] = [
       "Identify priorities and recommendations for AI in teaching and learning for the AI Roundtable.",
       "Consider learning, assessment, academic integrity and equitable access as AI practices evolve."
     ],
-    note: "This is a short-term working group. An extension to its term and mandate has been discussed but is not confirmed. The detailed mandate below is illustrative.",
+    note: "The working group sets near-term priorities; its future term and mandate are under discussion.",
     exampleMembers: ["Arwen", "Bilbo Baggins", "Pippin Took", "Treebeard"]
   },
   {
@@ -54,7 +53,7 @@ const groups: Group[] = [
       "Identify research-related AI priorities and recommendations for the AI Roundtable.",
       "Consider research methods, data stewardship, ethics and the supports research teams need to use AI responsibly."
     ],
-    note: "This is a short-term working group. An extension to its term and mandate has been discussed but is not confirmed. The detailed mandate below is illustrative.",
+    note: "The working group sets near-term priorities; its future term and mandate are under discussion.",
     exampleMembers: ["Gimli", "Legolas", "Frodo Baggins", "Radagast"]
   },
   {
@@ -64,7 +63,6 @@ const groups: Group[] = [
       "Connect people working with data and analytics to share knowledge and explore common challenges.",
       "Explore how AI intersects with data management, responsible practice and the university's data needs."
     ],
-    note: "This overview is illustrative; the community's detailed mandate is to be confirmed.",
     confirmedMembers: ["Patrick Cernea, Chair (OIPA)"],
     exampleMembers: ["Gandalf", "Rosie Cotton", "Faramir"]
   },
@@ -87,7 +85,6 @@ const groups: Group[] = [
       "Bring administrative employees together to exchange examples, questions and lessons about AI in their work.",
       "Support shared learning about appropriate tools, information handling and human oversight."
     ],
-    note: "This proposed overview is illustrative; the community's detailed mandate is to be confirmed.",
     exampleMembers: ["Éowyn", "Bilbo Baggins", "Gimli"]
   }
 ];
@@ -123,25 +120,22 @@ export function GroupOverview({ group, close }: { group: Group; close: () => voi
   </dialog>;
 }
 
-export function GroupPage({ id }: { id: string }) {
+export function GroupPage({ id, onRequestJoin }: { id: string; onRequestJoin: (name: string) => void }) {
   const group = groupById(id);
-  const [joinMessage, setJoinMessage] = useState(false);
-  useEffect(() => { window.scrollTo(0, 0); setJoinMessage(false); }, [id]);
+  useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
-  if (!group) return <div className="section policies-reports"><h1>Group not found</h1><p>This group is not available in the demonstration.</p><a className="text-link" href="#/governance">Back to policy and community</a></div>;
+  if (!group) return <div className="section policies-reports"><h1>Group not found</h1><p>We couldn't find this group.</p><a className="text-link" href="#/governance">Back to policy and community</a></div>;
   return <div className="section policies-reports group-page">
     <a className="text-link group-back" href={`#/governance?section=${group.section}`}>← Back to policy and community</a>
     <header className="group-page__header"><p className="eyebrow">{group.type}</p><h1>{group.name}</h1><p className="lead">{group.overview}</p></header>
     {group.note && <p className="notice">{group.note}</p>}
     <section aria-labelledby="group-mandate"><h2 id="group-mandate">Mandate</h2>{group.mandate.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</section>
     <section aria-labelledby="group-members"><h2 id="group-members">Members</h2>
-      {group.confirmedMembers && <><h3>Known leadership</h3><ul>{group.confirmedMembers.map((member) => <li key={member}>{member}</li>)}</ul></>}
-      <h3>Example members</h3><p>Fictional names for demonstration only; these are not confirmed members.</p>
-      <ul className="group-members">{group.exampleMembers.map((member) => <li key={member}>{member}</li>)}</ul>
+      <ul className="group-members">{[...(group.confirmedMembers ?? []), ...group.exampleMembers].map((member) => <li key={member}><span aria-hidden="true">{member.charAt(0)}</span>{member}</li>)}</ul>
     </section>
     {group.section !== "roundtables" && <section aria-labelledby="group-join"><h2 id="group-join">Join</h2>
       {group.joinUrl ? <><p>Visit the official community page to find the membership form.</p><a className="button primary" href={group.joinUrl} target="_blank" rel="noreferrer">Join this community <span className="visually-hidden">(opens the official page in a new tab)</span></a></>
-        : <><p>Membership and contact details are not yet confirmed.</p><button className="primary" type="button" onClick={() => setJoinMessage(true)}>Request to join</button>{joinMessage && <p role="status">Join requests are not connected in this demonstration. No request has been submitted.</p>}</>}
+        : <><p>Connect with colleagues and contribute to the conversation.</p><button className="primary" type="button" onClick={() => onRequestJoin(group.name)}>Request to join</button></>}
     </section>}
     {group.source && <p><a className="text-link" href={group.source} target="_blank" rel="noreferrer">Visit the official {group.name} source<span className="visually-hidden"> (opens in a new tab)</span></a></p>}
   </div>;

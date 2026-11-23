@@ -7,10 +7,10 @@ const monthFormat = new Intl.DateTimeFormat("en-CA", { month: "long", year: "num
 const dateLabel = (value: string) => dateFormat.format(new Date(value + "T00:00:00Z"));
 
 const news = [
-  { date: "2026-11-17", source: "YFile", url: "https://www.yorku.ca/yfile/", title: "How AI literacy can fit into a course", summary: "An example campus story about asking students to test an AI answer, trace its claims and explain what they would change", activities: ["study", "teach"] },
-  { date: "2026-11-13", source: "Teaching Commons", url: "https://www.yorku.ca/teachingcommons/artificial-intelligence-ai-pedagogies/", title: "Designing assessment around student judgement", summary: "An example teaching update about assessing process, evidence and reflection when students have access to generative AI", activities: ["teach"] },
-  { date: "2026-11-10", source: "York University Libraries", url: "https://www.library.yorku.ca/web/research-learn/artificial-intelligence-workshops-guides-more/", title: "Checking citations suggested by AI", summary: "An example library update about finding the original source and confirming that it supports the claim before citing it", activities: ["study", "research"] },
-  { date: "2026-11-06", source: "University Information Technology", url: "https://www.yorku.ca/uit/faculty-and-staff-services/ai/", title: "Choosing the right Copilot for your work", summary: "An example service update about access, licensing and checking information permissions before adding material to a prompt", activities: ["work"] }
+  { date: "2026-09-09", source: "YFile", url: "https://www.yorku.ca/yfile/2026/09/09/york-professor-explores-how-ai-can-deepen-learning-in-the-classroom/", title: "Using AI to support deeper learning", summary: "A York instructor explores how AI-generated questions can encourage students to explain their reasoning and engage more deeply with course material.", activities: ["study", "teach"] },
+  { date: "2026-07-15", source: "YFile", url: "https://www.yorku.ca/yfile/2026/07/15/ai-innovation-at-york-u-starts-with-human-intelligence/", title: "A closer look at AI innovation across York", summary: "Discover research and innovation spanning health, climate and business, and the people shaping how AI is used.", activities: ["research", "work"] },
+  { date: "2026-07-15", source: "YFile", url: "https://www.yorku.ca/yfile/2026/07/15/how-york-researchers-are-using-ai-to-support-cancer-care/", title: "Supporting cancer care with AI research", summary: "York researchers are exploring ways AI can help specialists analyze medical images and make more informed decisions.", activities: ["research"] },
+  { date: "2026-07-15", source: "YFile", url: "https://www.yorku.ca/yfile/2026/07/15/can-ai-be-trusted-to-assess-climate-risks-a-york-study-investigates/", title: "Investigating AI and climate risk", summary: "Research at York examines the responsible use of AI in understanding environmental and climate-related risks.", activities: ["research"] }
 ] satisfies { date: string; source: string; url: string; title: string; summary: string; activities: Activity[] }[];
 
 function TopicSelect({ value, change }: { value: string; change: (value: string) => void }) {
@@ -35,10 +35,9 @@ export function News({ compact = false }: { compact?: boolean }) {
       <TopicSelect value={topic} change={setTopic} />
       <label>Source<select value={source} onChange={(event) => setSource(event.target.value)}>
         <option value="">All sources</option>
-        {news.map((item) => <option key={item.source}>{item.source}</option>)}
+        {[...new Set(news.map((item) => item.source))].map((name) => <option key={name}>{name}</option>)}
       </select></label>
     </div>}
-    <p className="quiet">Demo stories illustrate how updates from different York sources could appear here</p>
     <div className="news-cards">
       {(compact ? items.slice(0, 2) : items).map((item) => (
         <article className="update-item news-card" key={item.title}>
@@ -49,7 +48,7 @@ export function News({ compact = false }: { compact?: boolean }) {
           <Heading>{item.title}</Heading>
           <p>{item.summary}</p>
           <Tags activities={item.activities} />
-          <a className="text-link" href={item.url}>Visit {item.source}</a>
+          <a className="text-link" href={item.url}>Read the story <span aria-hidden="true">→</span></a>
         </article>
       ))}
     </div>
@@ -63,9 +62,9 @@ function EventRows({ events, compact }: { events: ContentItem[]; compact?: boole
     const { date, startTime, allDay, timezone, organizer, location, audience, summary, onlineLink, sourceUrl, activities, demo, type } = event.data;
     const link = onlineLink || sourceUrl;
     return <article className="update-item" key={event.id}>
-      <p className="update-meta"><time dateTime={date}>{dateLabel(date)}</time> · {type === "training" ? "Workshop" : "Event"}{demo && " · Demo event"}</p>
+      <p className="update-meta"><time dateTime={date}>{dateLabel(date)}</time> · {type === "training" ? "Workshop" : "Event"}</p>
       <Heading>{event.title}</Heading>
-      <p>{[allDay ? "All day" : startTime && `${startTime} (${timezone})`, location, organizer, audience].filter(Boolean).join(" · ")}</p>
+      <p>{[allDay ? "All day" : startTime && `${startTime} (${timezone})`, location, demo && organizer === "AI @ York demo" ? "AI @ York" : organizer, audience].filter(Boolean).join(" · ")}</p>
       {summary && <p>{summary}</p>}
       <Tags activities={activities} />
       {link && <a className="text-link" href={link}>Event details</a>}

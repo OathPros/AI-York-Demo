@@ -134,7 +134,7 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
   return <div className="section policies-reports governance-landing">
     <header className="documents-intro">
       <h1>Policy, governance and community</h1>
-      <p className="lead">Explore the demonstration policy, governance groups and communities.</p>
+      <p className="lead">Explore the policy, the people shaping AI at York and the communities bringing it to life.</p>
       <nav className="filters catalog-filters" aria-label="Governance sections">
         {[["roundtables", "Roundtable"], ["policy", "Policy"], ["working-groups", "Working groups"], ["community", "Communities"], ["reports", "Reports"]].map(([id, label]) =>
           <a key={id} href={`#/governance?section=${id}`}>{label}</a>)}
@@ -147,8 +147,8 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
       </section>
       <section id="governance-policy" aria-labelledby="policy-heading">
         <h2 id="policy-heading">Policy</h2>
-        <p className="policy-preview-notice">Demo discussion draft, not approved York policy. Studio edits appear in this browser only and are not shared.</p>
-        <iframe className="public-policy-frame" src={`${import.meta.env.BASE_URL}policy-studio.html?view=public&compact=1`} title="AI policy demonstration document" />
+        <p className="policy-preview-notice">Explore the policy and its related interpretations.</p>
+        <iframe className="public-policy-frame" src={`${import.meta.env.BASE_URL}policy-studio.html?view=public&compact=1`} title="AI policy document" />
         <div className="policy-preview-actions">
           <a className="text-link" href={`${import.meta.env.BASE_URL}policy-studio.html?view=public`} target="_blank" rel="noreferrer">Open full policy<span className="visually-hidden"> (opens in a new tab)</span></a>
           <a className="text-link" href="#/governance?section=policy-sources">Official policy sources</a>

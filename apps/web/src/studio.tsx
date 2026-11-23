@@ -27,7 +27,7 @@ export function StudioShell({ view, navigate, exit, content, pending, children }
       {contentCollections.map((name) => navigation(name, inventoryLabels[name]))}
     </nav>
     <div className="studio-main">
-      <div className="studio-top"><span>Demo workspace</span><button onClick={exit}>View site</button></div>
+      <div className="studio-top"><span>Content workspace</span><button onClick={exit}>View site</button></div>
       {view === "overview" ? <>
         <h1>Studio overview</h1>
         <p>Update page introductions, manage resources and review suggestions</p>
@@ -45,10 +45,10 @@ export function StudioShell({ view, navigate, exit, content, pending, children }
 
 export function PolicyStudio({ view }: { view: "policy" | "interpretation" }) {
   const url = `${import.meta.env.BASE_URL}policy-studio.html?view=${view}`;
-  return <section aria-label="Policy Studio demonstration">
+  return <section aria-label="Policy Studio">
     <h1>{view === "policy" ? "Policy Studio" : "Interpretation Studio"}</h1>
-    <p>This separate demonstration stores changes in this browser only. It does not update the site's published policies or guidance.</p>
-    <iframe className="policy-studio-frame" title="Policy and interpretation demonstration" src={url} />
+    <p>Manage the policy, its interpretations and their review history.</p>
+    <iframe className="policy-studio-frame" title="Policy and interpretation workspace" src={url} />
   </section>;
 }
 

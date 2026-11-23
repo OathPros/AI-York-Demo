@@ -12,11 +12,11 @@ describe("policy and community layout", () => {
       .map((section) => markup.indexOf(`id="governance-${section}"`));
     expect(positions.every((position) => position >= 0)).toBe(true);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
-    expect(markup).toContain('title="AI policy demonstration document"');
+    expect(markup).toContain('title="AI policy document"');
     expect(markup).toContain("policy-studio.html?view=public");
     expect(markup).toContain("compact=1");
     expect(markup).toContain("Open full policy");
-    expect(markup).toContain("not approved York policy");
+    expect(markup).not.toContain("not approved York policy");
     expect((markup.match(/class="document-card group-card"/g) ?? [])).toHaveLength(7);
   });
 });

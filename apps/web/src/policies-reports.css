@@ -28,11 +28,19 @@
   flex-direction: column;
   padding: clamp(1rem, 3vw, 1.65rem);
   border: 1px solid #ded6d8;
+  border-radius: .8rem;
   background: #fff;
+  box-shadow: 0 5px 22px rgb(50 24 33 / .045);
   overflow-wrap: anywhere;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 .policies-reports .document-card:hover,
-.policies-reports .document-card:focus-within { border-color: var(--red-dark) }
+.policies-reports .document-card:focus-within { border-color: var(--red-dark); box-shadow: 0 12px 30px rgb(50 24 33 / .09); transform: translateY(-2px) }
+.governance-top #governance-roundtables .document-card { background: linear-gradient(135deg, #261b25, #4a2633); border-color: #4a2633; color: #fff; box-shadow: 0 12px 28px rgb(55 22 35 / .16) }
+.governance-top #governance-roundtables .document-meta span { color: #ffbfcb }
+.governance-top #governance-roundtables .document-overview { color: #f4e9ed }
+.governance-top #governance-roundtables .document-actions button { background: #fff; color: #241a20; border-color: #fff }
+.governance-top #governance-roundtables .document-actions button:hover { background: #ffe4ea; border-color: #ffe4ea }
 .policies-reports .document-card h3 { margin: .65rem 0; font-size: clamp(1.35rem, 2.5vw, 1.75rem) }
 .policies-reports .document-meta { margin: 0; color: var(--muted); font-size: .875rem; font-weight: 600 }
 .policies-reports .document-meta span { color: var(--red-dark); margin-inline-end: .6rem }
@@ -104,13 +112,15 @@
 .group-dialog__body h3 { margin-top: 0 }
 .group-dialog__body .button { margin-top: .5rem }
 .group-page { max-width: 960px }
-.group-page__header { margin-block: 2rem }
+.group-page__header { margin-block: 2rem; padding: clamp(1.5rem, 4vw, 3rem); border-radius: 1rem; background: linear-gradient(130deg, #241b24, #593142); color: #fff }
+.group-page__header .eyebrow { color: #ffc2ce }
 .group-page__header h1 { margin: .4rem 0 1rem; font-size: clamp(2.4rem, 5vw, 4.5rem); line-height: 1.05; overflow-wrap: anywhere }
 .group-page__header .lead { max-width: 50rem }
 .group-page > section { margin-block: clamp(2rem, 5vw, 3.5rem); max-width: 50rem }
 .group-page > section h2 { margin-bottom: .75rem; font-size: clamp(1.7rem, 3vw, 2.4rem) }
 .group-members { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; list-style: none }
-.group-members li { padding: .5rem .8rem; background: var(--wash); border: 1px solid var(--line) }
+.group-members li { display: flex; align-items: center; gap: .65rem; padding: .5rem .85rem .5rem .5rem; background: var(--wash); border: 1px solid var(--line); border-radius: 2rem }
+.group-members li span { display: grid; place-items: center; width: 2rem; height: 2rem; flex-shrink: 0; border-radius: 50%; background: #ead9df; color: #7e1731; font-weight: 700 }
 
 @media (max-width: 760px) {
   .governance-top { grid-template-columns: minmax(0, 1fr) }

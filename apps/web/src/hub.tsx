@@ -3,7 +3,7 @@ import type { Activity, ContentBundle, ContentItem, PageCopy } from "@ai-york/co
 import { pageCopy } from "./page-copy";
 import { Calendar, News, Upcoming } from "./updates";
 import { migratedResourceHref } from "./learning";
-import { isProgram } from "./catalog";
+import { catalogDescription, isProgram } from "./catalog";
 
 export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide" | "guidance" | "training" | "programs" | "governance";
 export type Go = (page: Page) => void;
@@ -134,7 +134,7 @@ export function ToolsSection({ content, activity, showFilter = true, standalone 
       <Title id="tools-title">{standalone ? "Tools and how to get access" : "The right tools for you"}</Title>
       <p className="lead">
         {standalone && "Compare York-approved tools by who can use them and what they are for. "}
-        These tools respect and protect York data in ways commercially available tools do not. Access depends on your role and licence
+        Review each tool's access requirements and permitted uses before sharing information.
       </p>
       {showFilter && <div className="filters" role="group" aria-label="Filter by access">{([["all", "All tools"], ["students", "For students"], ["staff", "Faculty and staff"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)}>{label}</button>)}</div>}
       <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><ToolTitle>{tool.data.name}</ToolTitle><p>{tool.data.scope}</p><ResourceLink href={tool.data.url}>Access and requirements</ResourceLink></article>)}</div>
@@ -154,7 +154,7 @@ export function TrainingSection({ content, tags, title = "AI learning at York" }
       <p className="eyebrow">Go further</p><h2 id="training-title">{title}</h2>
       <p className="lead">Understand how AI works, learn to use York-approved tools, and develop practical skills for your role.</p>
       {!tags && <div className="filters" role="group" aria-label="Filter AI learning resources">{trainingFilters.map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>)}</div>}
-      <div className="grid">{items.map((item) => <article className="card" key={item.id}><span className="status">{item.data.format}</span><h3>{item.title}</h3>{item.data.summary && <p>{item.data.summary}</p>}<ResourceLink href={item.data.url}>Open resource</ResourceLink></article>)}</div>
+      <div className="grid">{items.map((item) => <article className="card" key={item.id}><span className="status">{item.data.format}</span><h3>{item.title}</h3>{catalogDescription(item) && <p>{catalogDescription(item)}</p>}<ResourceLink href={item.data.url}>Open resource</ResourceLink></article>)}</div>
       {items.length === 0 && <Empty>No training matches that focus yet. Choose another category.</Empty>}
     </section>
   );
@@ -208,7 +208,7 @@ export function IndexPage({ content, go }: { content: ContentBundle; go: Go }) {
 }
 
 export function GoverningPage() {
-  return <><PageHeader eyebrow="Governing bodies" title="Who governs AI at York" intro="York's AI Roundtable fosters cross-divisional communication and collaboration on AI implications, and advises on policies and strategies for responsible engagement with AI in teaching and learning, research and operations." /><section className="section"><p className="notice">Placeholder: the committees, offices and contacts that own each policy are not yet recorded in the CMS. Editors will add them once the inventory is confirmed.</p><ResourceLink href="https://www.yorku.ca/ai-at-york/">AI @ York official website</ResourceLink></section></>;
+  return <><PageHeader eyebrow="Governing bodies" title="Who governs AI at York" intro="York's AI Roundtable brings perspectives from across the university together to shape responsible AI." /><section className="section"><p>Explore the Roundtable, its working groups and the communities connecting people across York.</p><a className="button primary" href="#/governance?section=roundtables">Explore governance</a></section></>;
 }
 
 export function NewsPage() {
