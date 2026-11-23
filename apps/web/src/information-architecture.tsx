@@ -24,10 +24,11 @@ export function GuidancePage({ content, activity, copies }: { content: ContentBu
   </div>;
 }
 
-function CatalogCards({ items, showLevel = false }: { items: ContentItem[]; showLevel?: boolean }) {
+function CatalogCards({ items, showLevel = false, training = false }: { items: ContentItem[]; showLevel?: boolean; training?: boolean }) {
+  const Title = training ? "h2" : "h3";
   return <div className="grid">{items.map((item) => <article className="card" key={item.id}>
     <span className="status">{showLevel ? (programLevel(item) === "unspecified" ? "Level not specified" : programLevel(item)) : item.data.format}</span>
-    <h3>{item.title}</h3>{item.data.summary && <p>{item.data.summary}</p>}
+    <Title>{item.title}</Title>{item.data.summary && <p>{item.data.summary}</p>}
     <ResourceLink href={item.data.url}>Open resource</ResourceLink>
   </article>)}</div>;
 }
@@ -36,13 +37,12 @@ export function TrainingPage({ content, activity }: { content: ContentBundle; ac
   const items = content.training.filter((item) => !isProgram(item) && (!activity || trainingActivities(item).includes(activity)));
   return <div className="training-page">
     <LearningGuide />
-    <section className="section" aria-labelledby="training-catalog-title">
-      <h2 id="training-catalog-title">Courses, workshops and resources</h2>
+    <section className="section" aria-label="Training resources">
       <nav className="filters catalog-filters" aria-label="Filter training by activity">
         <a href="#/training" aria-current={!activity ? "page" : undefined}>All training</a>
         {activities.map(([value, label]) => <a key={value} href={`#/training?activity=${value}`} aria-current={activity === value ? "page" : undefined}>{label}</a>)}
       </nav>
-      <CatalogCards items={items} />
+      <CatalogCards items={items} training />
       {items.length === 0 && <p className="empty" role="status">No training is currently classified for this activity.</p>}
       <p>Looking for a degree or certificate? <a className="text-link" href="#/programs">Explore programs</a>.</p>
     </section>
