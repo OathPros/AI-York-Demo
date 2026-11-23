@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { ContentBundle } from "@ai-york/contracts";
+import { GroupCards, GroupOverview, type Group } from "./governance-groups";
 import "./policies-reports.css";
 
 type DocumentRecord = {
@@ -115,6 +116,7 @@ function DocumentReader({ record, close }: { record: DocumentRecord; close: () =
 
 export function GovernancePage({ content, section }: { content: ContentBundle; section?: string }) {
   const [openDocument, setOpenDocument] = useState<DocumentRecord | null>(null);
+  const [openGroup, setOpenGroup] = useState<Group | null>(null);
   const featuredUrls = new Set(policies.map(({ url }) => url));
   const related = content.policy.filter(({ data }) => data.url && !featuredUrls.has(data.url));
 
@@ -134,7 +136,7 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
       <h1>Policy, governance and community</h1>
       <p className="lead">Explore the demonstration policy, reports, governance and communities of practice.</p>
       <nav className="filters catalog-filters" aria-label="Governance sections">
-        {[["policy", "Policy"], ["reports", "Reports"], ["roundtables", "Roundtables"], ["working-groups", "Working groups"], ["community", "Communities of practice"]].map(([id, label]) =>
+        {[["policy", "Policy"], ["reports", "Reports"], ["roundtables", "Roundtables"], ["working-groups", "Working groups"], ["community", "Communities"]].map(([id, label]) =>
           <a key={id} href={`#/governance?section=${id}`}>{label}</a>)}
       </nav>
     </header>
@@ -161,21 +163,22 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
     </section>
     <section id="governance-roundtables" className="document-section" aria-labelledby="roundtables-heading">
       <h2 id="roundtables-heading">Roundtables</h2>
-      <p>York's AI Roundtable fosters cross-divisional communication and collaboration on AI implications, and advises on policies and strategies for responsible engagement with AI in teaching and learning, research and operations.</p>
-      <a className="text-link" href="https://www.yorku.ca/ai-at-york/">Visit the official AI @ York website</a>
+      <GroupCards section="roundtables" open={setOpenGroup} />
     </section>
     <section id="governance-working-groups" className="document-section" aria-labelledby="working-groups-heading">
       <h2 id="working-groups-heading">Working groups</h2>
-      <p>Working group details have not yet been added to this demonstration.</p>
+      <p>These groups emerged from the AI Roundtable to identify priorities in three areas.</p>
+      <GroupCards section="working-groups" open={setOpenGroup} />
     </section>
     <section id="governance-community" className="document-section" aria-labelledby="community-heading">
-      <h2 id="community-heading">Communities of practice</h2>
-      <div className="grid">{content.community.map((item) => <article className="card" key={item.id}>
+      <h2 id="community-heading">Communities</h2>
+      <GroupCards section="community" open={setOpenGroup} />
+      {content.community.length > 0 && <><h3>Additional community listings from Studio</h3><div className="grid">{content.community.map((item) => <article className="card" key={item.id}>
         <h3>{item.data.name}</h3><p>{item.data.summary}</p>{item.data.contact && <p>Contact: {item.data.contact}</p>}
         {item.data.url && <a className="text-link" href={item.data.url}>Join or learn more</a>}
-      </article>)}</div>
-      {content.community.length === 0 && <p>No communities are listed yet. Admins can add them in Studio, or you can suggest one.</p>}
+      </article>)}</div></>}
     </section>
     {openDocument && <DocumentReader record={openDocument} close={() => setOpenDocument(null)} />}
+    {openGroup && <GroupOverview group={openGroup} close={() => setOpenGroup(null)} />}
   </div>;
 }

@@ -75,3 +75,30 @@
 .policies-reports .document-reader-header > div { flex: 1 1 12rem; min-width: 0 }
 .policies-reports .document-reader-header h2 { margin: .3rem 0 0; font-size: clamp(1.25rem, 3vw, 2rem) }
 .policies-reports .document-reader iframe { width: 100%; height: 100%; min-height: 12rem; border: 0; background: #fff }
+
+.policies-reports .group-dialog {
+  box-sizing: border-box;
+  width: min(42rem, calc(100% - 2rem));
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+.policies-reports .group-dialog::backdrop { background: rgb(23 16 20 / .72) }
+.group-dialog header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.25rem; background: var(--wash) }
+.group-dialog header > div { min-width: 0 }
+.group-dialog header h2 { margin: .35rem 0 0; font-size: clamp(1.3rem, 3vw, 2rem); overflow-wrap: anywhere }
+.group-dialog header button { flex-shrink: 0; padding: .5rem .85rem; border: 1px solid var(--ink); background: var(--ink); color: #fff; font-weight: 700; cursor: pointer }
+.group-dialog__body { padding: clamp(1rem, 3vw, 1.75rem) }
+.group-dialog__body h3 { margin-top: 0 }
+.group-dialog__body .button { margin-top: .5rem }
+.group-page { max-width: 960px }
+.group-page__header { margin-block: 2rem }
+.group-page__header h1 { margin: .4rem 0 1rem; font-size: clamp(2.4rem, 5vw, 4.5rem); line-height: 1.05; overflow-wrap: anywhere }
+.group-page__header .lead { max-width: 50rem }
+.group-page > section { margin-block: clamp(2rem, 5vw, 3.5rem); max-width: 50rem }
+.group-page > section h2 { margin-bottom: .75rem; font-size: clamp(1.7rem, 3vw, 2.4rem) }
+.group-members { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; list-style: none }
+.group-members li { padding: .5rem .8rem; background: var(--wash); border: 1px solid var(--line) }

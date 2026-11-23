@@ -8,13 +8,14 @@ import type { PublishedPages } from "./page-copy";
 import "./styles.css";
 import { GuidancePage, ProgramsPage, TrainingPage } from "./information-architecture";
 import { GovernancePage } from "./policies-reports";
+import { GroupPage } from "./governance-groups";
 
 type Screen = "site" | "role" | "suggest" | "studio" | "receipt";
 
 type RequestRow = { id: string; kind: ChangeType; status: string; payload: SuggestionPayload & Record<string, string | boolean | undefined>; created_at: string };
 const pages: Page[] = ["home", "study", "teach", "research", "work", "partner", "policies", "tools", "learning", "events", "communities", "news", "governing", "index", "guide", "guidance", "training", "programs", "governance"];
 const emptyContent = (): ContentBundle => Object.fromEntries(contentCollections.map((name) => [name, []])) as unknown as ContentBundle;
-const pageFromHash = (): Page => { const key = window.location.hash.replace(/^#\/?/, "").split("?")[0] as Page; return String(key) === "initiative" ? "work" : pages.includes(key) ? key : "home"; };
+const pageFromHash = (): Page => { const key = window.location.hash.replace(/^#\/?/, "").split("?")[0]; return key.startsWith("governance/groups/") ? "governance" : key === "initiative" ? "work" : pages.includes(key as Page) ? key as Page : "home"; };
 
 function App() {
   const [screen, setScreen] = useState<Screen>("site");
@@ -136,6 +137,7 @@ function App() {
   const requestedLevel = params.get("level");
   const level = requestedLevel === "undergraduate" || requestedLevel === "graduate" || requestedLevel === "certificate" ? requestedLevel : undefined;
   const governanceSection = params.get("section") || (page === "communities" ? "community" : page === "governing" ? "roundtables" : undefined);
+  const groupId = hash.replace(/^#\/?/, "").split("?")[0].match(/^governance\/groups\/([^/]+)\/?$/)?.[1];
 
   const renderPage = () => {
     switch (page) {
@@ -145,7 +147,7 @@ function App() {
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
       case "guide": return <div><PageHeader eyebrow="Usage & Guidance" title="Check a specific use of AI" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder key={activity ?? "all"} content={content} initial={activity ? [activity] : []} /></div>;
       case "guidance": return <GuidancePage activity={activity} copies={publishedPages} />;
-      case "policies": case "governing": case "communities": case "governance": return <GovernancePage content={content} section={governanceSection} />;
+      case "policies": case "governing": case "communities": case "governance": return groupId ? <GroupPage id={groupId} /> : <GovernancePage content={content} section={governanceSection} />;
       case "tools": return <ToolsSection content={content} standalone />;
       case "learning": case "training": return <TrainingPage content={content} activity={activity} />;
       case "programs": return <ProgramsPage content={content} level={level} />;
