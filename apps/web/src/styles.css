@@ -395,15 +395,5 @@ footer { padding: 2rem max(24px, calc((100vw - 1180px) / 2)); display: flex; jus
 }
 
 #york-learning-guide h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5rem) }
+#york-learning-guide .section { padding-bottom: 0 }
 .training-page > .section { padding-top: 0 }
-#york-learning-guide .learning-routes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: 1rem 1.5rem;
-  padding: 1.2rem;
-  margin: 1.5rem 0 0;
-  list-style: none;
-  background: var(--wash);
-}
-#york-learning-guide .learning-routes a { display: inline-flex; align-items: center; min-height: 44px }
-#york-learning-guide .learning-routes p { margin: 0 }

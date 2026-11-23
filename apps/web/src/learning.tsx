@@ -28,12 +28,6 @@ export function LearningGuide() {
     <section className="section" aria-labelledby="learning-heading">
       <h1 id="learning-heading">AI training at York</h1>
       <p className="lead">Learn how generative AI works, then apply it to studying, teaching or a task in your role</p>
-      <ul className="learning-routes">
-        <li><a className="text-link" href="#/study">Study with AI</a><p>Check course rules and use AI for practice</p></li>
-        <li><a className="text-link" href="#/teach">Teach with AI</a><p>Set expectations and design assessments</p></li>
-        <li><a className="text-link" href="#/research">Research with AI</a><p>Evaluate tools and protect research data</p></li>
-        <li><a className="text-link" href="#/work">Use AI at work</a><p>Choose supported tools for administrative tasks</p></li>
-      </ul>
     </section>
   </div>;
 }
