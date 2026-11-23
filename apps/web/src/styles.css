@@ -310,6 +310,7 @@ select, input, textarea { width: 100%; min-height: 48px; padding: .7rem .8rem; b
 .studio-sidebar button { padding: .55rem .75rem; text-align: left; border: 0; border-radius: .4rem; background: transparent; color: inherit; cursor: pointer }
 .studio-sidebar button:hover, .studio-sidebar button[aria-current] { background: #503345 }
 .studio-main { min-width: 0; padding: clamp(1rem, 4vw, 3.5rem) }
+.policy-studio-frame { display: block; width: 100%; height: 85vh; min-height: 36rem; border: 1px solid #e1dce2; border-radius: .65rem; background: #fff }
 .studio-main h1 { margin: 1.25rem 0 .55rem; font-size: clamp(2rem, 4vw, 3.2rem) }
 .studio-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem }
 .studio-main button:not(.primary) { padding: .55rem .8rem; border: 1px solid #d5d2d8; border-radius: .4rem; background: #fff; cursor: pointer }

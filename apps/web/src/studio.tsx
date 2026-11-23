@@ -5,7 +5,7 @@ import { pageCopy } from "./page-copy";
 
 export type StudioView = "overview" | "pages" | "inbox" | ContentCollection;
 const inventoryLabels: Record<ContentCollection, string> = {
-  policy: "Policies", interpretation: "Guidance", tool: "Tools", event: "Events",
+  policy: "Policies", interpretation: "Interpretations", tool: "Tools", event: "Events",
   community: "Communities", training: "Training"
 };
 
@@ -40,6 +40,15 @@ export function StudioShell({ view, navigate, exit, content, pending, children }
       </> : children}
     </div>
   </div>;
+}
+
+export function PolicyStudio({ view }: { view: "policy" | "interpretation" }) {
+  const url = `${import.meta.env.BASE_URL}policy-studio.html?view=${view}`;
+  return <section aria-label="Policy Studio demonstration">
+    <h1>{view === "policy" ? "Policy Studio" : "Interpretation Studio"}</h1>
+    <p>This separate demonstration stores changes in this browser only. It does not update the site's published policies or guidance.</p>
+    <iframe className="policy-studio-frame" title="Policy and interpretation demonstration" src={url} />
+  </section>;
 }
 
 type PageVersions = { draft: PageCopy; published: PageCopy | null };

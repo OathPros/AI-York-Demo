@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2024-11-27"
 
 [vars]
-ALLOWED_ORIGINS = "http://localhost:5173,https://oathpros.github.io,https://ai-york-demo.pages.dev"
+ALLOWED_ORIGINS = "http://localhost:5173,https://oathpros.github.io,https://lukegagliardi.com,https://ai-york-demo.pages.dev"
 
 [[d1_databases]]
 binding = "DB"
