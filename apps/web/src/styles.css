@@ -38,6 +38,7 @@ main { flex: 1 }
 .app:not(.public-site) .demo-banner__message strong { flex-shrink: 0; color: #ffbec9; font-size: .67rem; letter-spacing: .1em; text-transform: uppercase }
 .app:not(.public-site) .demo-banner__actions { display: flex; flex-shrink: 0; flex-wrap: wrap; gap: .35rem 1rem }
 .app:not(.public-site) .demo-banner__actions button { min-height: 32px; padding: .15rem 0; border: 0; background: transparent; color: #fff; font-size: .75rem; font-weight: 700; text-decoration: underline; text-underline-offset: .2em; cursor: pointer }
+.app:not(.public-site) .demo-banner__actions a { display: inline-flex; align-items: center; min-height: 32px; color: #fff; font-weight: 700; text-underline-offset: .2em }
 .app:not(.public-site) .site-header { min-height: 78px; padding: 0 max(24px, calc((100vw - 1320px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 2rem; border-bottom: 1px solid #e5e4e1; background: #fff; box-shadow: 0 2px 12px rgb(34 22 28 / .035) }
 .app:not(.public-site) .brand { display: flex; align-items: baseline; gap: .85rem; color: var(--ink); text-decoration: none; white-space: nowrap }
 .app:not(.public-site) .brand > span { font-size: 1.55rem; font-weight: 700; letter-spacing: -.055em }

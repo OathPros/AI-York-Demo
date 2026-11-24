@@ -11,7 +11,7 @@ import partnerImage from "./assets/banners/partner.webp";
 import trainingImage from "./assets/banners/study.webp";
 import { Icon, PhotoHero } from "./public-ui";
 
-export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide" | "guidance" | "training" | "programs" | "governance";
+export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide" | "guidance" | "training" | "programs" | "governance" | "next-steps";
 export type Go = (page: Page) => void;
 type Audience = "all" | "students" | "staff";
 
