@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from "react";
 import type { Activity, ContentBundle, ContentItem, PageCopy } from "@ai-york/contracts";
 import { pageCopy } from "./page-copy";
-import { Calendar, News, Upcoming } from "./updates";
+import { Calendar, News, NewsStory, Upcoming } from "./updates";
 import { migratedResourceHref } from "./learning";
 import { catalogDescription, isProgram } from "./catalog";
+import { publicEvents } from "./demo-records";
+import homeImage from "./assets/banners/home.webp";
 
 export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide" | "guidance" | "training" | "programs" | "governance";
 export type Go = (page: Page) => void;
@@ -24,6 +26,12 @@ const dataOptions: { value: string; label: string; hint: string }[] = [
   { value: "unsure", label: "Unsure", hint: "Use this if a document combines different kinds of information, or you cannot tell whether it is public, internal or restricted" }
 ];
 const activityLabels: Record<Activity, string> = { work: "Work", study: "Study", teach: "Teach", research: "Research" };
+const sharedTaskLabels: Record<string, string> = {
+  draft: "Draft, edit or summarize content",
+  analyze: "Analyze information or data",
+  code: "Write or review code",
+  meet: "Summarize notes or meetings"
+};
 const collectionLabels: Record<string, string> = { policy: "Policy", interpretation: "Guidance", tool: "Tool", event: "Event", community: "Community", training: "Training" };
 
 export function ResourceLink({ href, children }: { href?: string; children: React.ReactNode }) {
@@ -44,17 +52,25 @@ function jumpToSection(event: React.MouseEvent<HTMLAnchorElement>) {
 }
 
 export function Principles() {
-  return <section className="section" aria-labelledby="principles-title"><p className="eyebrow">Our shared responsibilities</p><h2 id="principles-title">Use AI with care</h2><p className="lead">Everyone has a role in ensuring AI is used ethically, safely and in ways that uphold York's collective values.</p><div className="principles">{principles.map(([title, text], index) => <article key={title}><span className="num">0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>;
+  return <section className="section" aria-labelledby="principles-title"><p className="eyebrow">Our shared responsibilities</p><h2 id="principles-title">Use AI with care</h2><p className="lead">Everyone has a role in ensuring AI is used ethically, safely and in ways that uphold York's collective values.</p><div className="principles">{principles.map(([title, text]) => <article key={title}><h3>{title}</h3><p>{text}</p></article>)}</div></section>;
 }
 
-export function GuideFinder({ content, initial = [] }: { content: ContentBundle; initial?: Activity[] }) {
-  const [acts, setActs] = useState<Activity[]>(initial);
+export function GuideFinder({ content, initial = [], activities }: { content: ContentBundle; initial?: Activity[]; activities?: readonly Activity[] }) {
+  const [localActivities, setActs] = useState<Activity[]>(initial);
+  const acts = activities ?? localActivities;
   const [taskChoice, setTask] = useState("");
   const [data, setData] = useState("");
   const tasks = useMemo(() => {
-    const found = new Map<string, string>();
-    for (const item of content.interpretation) if (acts.includes(item.data.activity) && !found.has(item.data.task)) found.set(item.data.task, item.data.taskLabel || item.title);
-    return [...found];
+    const found = new Map<string, { label: string; activities: Set<Activity> }>();
+    for (const { data, title } of content.interpretation) {
+      if (!acts.includes(data.activity)) continue;
+      const entry = found.get(data.task) ?? { label: data.taskLabel || title, activities: new Set<Activity>() };
+      entry.activities.add(data.activity);
+      found.set(data.task, entry);
+    }
+    return [...found].map(([key, entry]) => [
+      key, entry.activities.size > 1 ? sharedTaskLabels[key] ?? entry.label : entry.label
+    ] as const);
   }, [acts, content.interpretation]);
   const task = tasks.some(([key]) => key === taskChoice) ? taskChoice : "";
   const toggle = (activity: Activity) => setActs((current) => (current.includes(activity) ? current.filter((a) => a !== activity) : [...current, activity]));
@@ -65,10 +81,10 @@ export function GuideFinder({ content, initial = [] }: { content: ContentBundle;
   return (
     <section className="section guide" aria-labelledby="guide-title">
       <p className="eyebrow">Find your answer</p>
-      <h2 id="guide-title">Can I use AI for this?</h2>
-      <p className="lead">Guidance tailored around your work. Find out which AI tools are appropriate, what rules apply and how to get started.</p>
+      <h2 id="guide-title">Can I use AI for this</h2>
+      <p className="lead">Choose a task and the kind of information it involves to see the reviewed guidance for each activity.</p>
       <div className="journey">
-        <fieldset aria-describedby="guide-activity-help">
+        {!activities && <fieldset aria-describedby="guide-activity-help">
           <legend>I'm using AI to</legend>
           <p className="journey-help" id="guide-activity-help">Choose one or more</p>
           <div className="activity-choices">
@@ -79,15 +95,18 @@ export function GuideFinder({ content, initial = [] }: { content: ContentBundle;
               </label>
             ))}
           </div>
-        </fieldset>
+        </fieldset>}
         <div>
           <label htmlFor="guide-task">AI will help me</label>
           <div className="journey-select">
             <select id="guide-task" value={task} disabled={tasks.length === 0} onChange={(e) => setTask(e.target.value)}>
-              <option value="">{tasks.length === 0 ? "Choose an activity first" : "Choose a task"}</option>
+              <option value="">{!acts.length ? "Choose an activity first" : tasks.length ? "Choose a task" : "No tasks available"}</option>
               {tasks.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
             </select>
           </div>
+          {activities && tasks.length > 0 && <div className="guide-task-shortcuts" role="group" aria-label="Suggested tasks">
+            {tasks.slice(0, 4).map(([key, label]) => <button key={key} type="button" aria-pressed={task === key} onClick={() => setTask(key)}>{label}</button>)}
+          </div>}
         </div>
         <fieldset disabled={!task}>
           <legend>I'll share the following information with AI</legend>
@@ -105,13 +124,14 @@ export function GuideFinder({ content, initial = [] }: { content: ContentBundle;
           </div>
         </fieldset>
       </div>
+      {ready && acts.length > 1 && <p className="guide-combined-note">Review every result that applies to your task. A result for one activity does not override a restriction in another. A missing result does not establish permission.</p>}
       <div className="status-line guide-status" role="status">{ready ? `Showing guidance for ${acts.map((a) => activityLabels[a]).join(", ")}` : "Choose an activity, a task and the information involved. Guidance appears automatically"}</div>
       {ready && <div className="results">{results.map(({ activity, item }) => item ? (
         <article className="result" key={activity}>
           <span className="status">{activityLabels[activity]}</span><h3>{item.title}</h3><p>{item.data.example_use}</p>
           <div className="traffic"><div className="ok"><h4>Generally acceptable</h4><p>{item.data.green}</p></div><div className="warn"><h4>Conditions before use</h4><p>{item.data.yellow}</p></div><div className="no"><h4>Not acceptable</h4><p>{item.data.red}</p></div></div>
           <p>{item.data.tool_advice}</p>
-          <div className="pills"><strong>Approved tools:</strong>{(item.data.tool_ids as string[]).map((id) => toolById(id)).filter(Boolean).map((tool) => <ResourceLink key={tool!.id} href={tool!.data.url}>{tool!.data.name}</ResourceLink>)}</div>
+          <div className="pills"><strong>Tools referenced for this activity</strong>{(item.data.tool_ids as string[]).map((id) => toolById(id)).filter(Boolean).map((tool) => <ResourceLink key={tool!.id} href={tool!.data.url}>{tool!.data.name}</ResourceLink>)}</div>
           <div className="pills"><strong>Policy and sources:</strong>{(item.data.sources as string[]).map((id) => policyById(id)).filter(Boolean).map((policy) => <ResourceLink key={policy!.id} href={policy!.data.url}>{policy!.data.title}</ResourceLink>)}</div>
           {item.data.approval_note && <p className="notice">{item.data.approval_note}</p>}
         </article>
@@ -123,9 +143,10 @@ export function GuideFinder({ content, initial = [] }: { content: ContentBundle;
 function toolVisible(tool: ContentItem, audience: Audience) { return audience === "all" || tool.data.audience === "all" || tool.data.audience === audience; }
 const audienceLabel: Record<string, string> = { all: "Students, faculty and staff", students: "Students", staff: "Faculty and staff" };
 
-export function ToolsSection({ content, activity, showFilter = true, standalone = false }: { content: ContentBundle; activity?: Activity; showFilter?: boolean; standalone?: boolean }) {
+export function ToolsSection({ content, activity, activities, showFilter = true, standalone = false }: { content: ContentBundle; activity?: Activity; activities?: Activity[]; showFilter?: boolean; standalone?: boolean }) {
   const [audience, setAudience] = useState<Audience>("all");
-  const tools = content.tool.filter((tool) => toolVisible(tool, audience) && (!activity || (tool.data.activities as string[]).includes(activity)));
+  const selected = activities?.length ? activities : activity ? [activity] : [];
+  const tools = content.tool.filter((tool) => toolVisible(tool, audience) && (!selected.length || selected.some((value) => tool.data.activities?.includes(value))));
   const Title = standalone ? "h1" : "h2";
   const ToolTitle = standalone ? "h2" : "h3";
   return (
@@ -137,7 +158,12 @@ export function ToolsSection({ content, activity, showFilter = true, standalone 
         Review each tool's access requirements and permitted uses before sharing information.
       </p>
       {showFilter && <div className="filters" role="group" aria-label="Filter by access">{([["all", "All tools"], ["students", "For students"], ["staff", "Faculty and staff"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)}>{label}</button>)}</div>}
-      <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><ToolTitle>{tool.data.name}</ToolTitle><p>{tool.data.scope}</p><ResourceLink href={tool.data.url}>Access and requirements</ResourceLink></article>)}</div>
+      {standalone && <div className="tool-catalog-note">
+        <p><strong>Before choosing a tool</strong> Check your account and the information your task involves. The Guide Finder shows tool references alongside the conditions for a specific task.</p>
+        <a className="text-link" href={selected.length ? `#/guide?activities=${selected.join(",")}` : "#/guide"}>Check a task</a>
+        {selected.length > 0 && <p>Showing tools for {selected.map((value) => activityLabels[value]).join(", ")} · <a className="text-link" href="#/tools">Show all tools</a></p>}
+      </div>}
+      <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><ToolTitle>{tool.data.name}</ToolTitle><p>{tool.data.scope}</p>{standalone && Array.isArray(tool.data.activities) && <p className="quiet">{tool.data.activities.map((value: Activity) => activityLabels[value]).filter(Boolean).join(" · ")}</p>}<ResourceLink href={tool.data.url}>Access and requirements</ResourceLink></article>)}</div>
       {tools.length === 0 && <Empty>No tools match this view yet.</Empty>}
     </section>
   );
@@ -164,7 +190,7 @@ export function EventList({ content }: { content: ContentBundle }) {
   return <section className="section updates-page">
     <h1>AI calendar</h1>
     <p className="lead">Browse AI workshops and events by month, topic or type</p>
-    <Calendar events={content.event} />
+    <Calendar events={publicEvents(content.event)} />
   </section>;
 }
 
@@ -211,7 +237,8 @@ export function GoverningPage() {
   return <><PageHeader eyebrow="Governing bodies" title="Who governs AI at York" intro="York's AI Roundtable brings perspectives from across the university together to shape responsible AI." /><section className="section"><p>Explore the Roundtable, its working groups and the communities connecting people across York.</p><a className="button primary" href="#/governance?section=roundtables">Explore governance</a></section></>;
 }
 
-export function NewsPage() {
+export function NewsPage({ story }: { story?: string }) {
+  if (story) return <NewsStory id={story} />;
   return <section className="section updates-page">
     <h1>AI news</h1>
     <p className="lead">Explore updates by topic and see where each story came from</p>
@@ -223,16 +250,24 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
   return (
     <div className="home-page">
       <section className="home-hero" aria-labelledby="home-title">
-        <div className="home-shell home-hero-copy">
-          <h1 id="home-title">{copy.title}</h1>
-          <p>{copy.intro}</p>
-          <div className="hero-actions">
-            <a className="button primary" href="#guide-title" onClick={jumpToSection}>Find guidance</a>
-            <button className="button inverse" onClick={() => go("tools")}>Explore AI tools</button>
+        <div className="home-shell home-hero-layout">
+          <div className="home-hero-copy">
+            <p className="eyebrow">York University</p>
+            <h1 id="home-title">{copy.title}</h1>
+            <p className="home-lede">{copy.intro}</p>
+            <div className="hero-actions">
+              <a className="button primary" href="#/guidance">Explore AI guidance <span aria-hidden="true">→</span></a>
+              <a className="text-link home-check-link" href="#guide-title" onClick={jumpToSection}>Check a specific task <span aria-hidden="true">↓</span></a>
+            </div>
           </div>
+          <img src={homeImage} alt="" fetchPriority="high" />
         </div>
       </section>
-      <section className="home-statement"><div className="home-shell"><p><strong>Start with what you are doing</strong> then check the information involved, the rules that apply and the tool you plan to use</p><button onClick={() => go("work")}>Explore AI at work</button></div></section>
+      <nav className="home-shortcuts home-shell" aria-label="Explore AI at York">
+        <a href="#/tools"><strong>Tools and access</strong><span>Find the right tool for your work</span><b aria-hidden="true">→</b></a>
+        <a href="#/training"><strong>Training and workshops</strong><span>Build skills you can put to use</span><b aria-hidden="true">→</b></a>
+        <a href="#/governance"><strong>Policy and community</strong><span>Find sources and connect with peers</span><b aria-hidden="true">→</b></a>
+      </nav>
       <Principles />
       <GuideFinder content={content} />
       <ToolsSection content={content} />
@@ -247,7 +282,7 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
             </div>
             <div>
               <h3>Upcoming events</h3>
-              <Upcoming events={content.event} />
+              <Upcoming events={publicEvents(content.event)} />
               <a className="text-link" href="#/events">Open the calendar</a>
             </div>
           </div>
@@ -255,7 +290,7 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
       </section>
       <section className="home-next">
         <div className="home-shell home-next-grid">
-          <div><h2>Find guidance for your role</h2><p>Get practical examples, policy links and tools for the work you do</p></div>
+          <div><h2>Explore guidance by activity</h2><p>Get practical examples, policy links and tools for the work you do</p></div>
           <div className="home-route-list">
             {(["study", "teach", "research", "work", "partner"] as const).map((key) => (
               <button key={key} onClick={() => go(key)}><strong>{pageCopy[key].title}</strong><b aria-hidden="true">→</b></button>

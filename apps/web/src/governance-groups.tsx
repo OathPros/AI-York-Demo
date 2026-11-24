@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
+import { groupRecords, groupRecordHref } from "./demo-records";
+
 type GroupSection = "roundtables" | "working-groups" | "community";
 export type Group = {
   id: string;
@@ -120,9 +122,50 @@ export function GroupOverview({ group, close }: { group: Group; close: () => voi
   </dialog>;
 }
 
-export function GroupPage({ id, onRequestJoin }: { id: string; onRequestJoin: (name: string) => void }) {
+const formatDate = (date: string) => new Intl.DateTimeFormat("en-CA", { dateStyle: "long", timeZone: "UTC" }).format(new Date(date + "T00:00:00Z"));
+
+function GroupRecords({ group, selected }: { group: Group; selected?: string }) {
+  const record = groupRecords[group.id];
+  if (!record) return null;
+  const community = group.section === "community";
+  return <div className="group-records">
+    <section aria-labelledby="group-records-title">
+      <h2 id="group-records-title">{community ? "Sessions and discussions" : "Meetings and decisions"}</h2>
+      <details id="group-record-upcoming" open={selected === "upcoming" || undefined}>
+        <summary><span>Upcoming · <time dateTime={record.upcoming.date}>{formatDate(record.upcoming.date)}</time></span><strong>{record.upcoming.title}</strong></summary>
+        <p>{record.venue} · 12:00 p.m. Toronto time</p>
+        <h3>Agenda</h3><ol>{record.upcoming.agenda.map((item) => <li key={item}>{item}</li>)}</ol>
+        <a className="text-link" href="#/events">Browse the calendar</a>
+      </details>
+      <details id="group-record-archive" open={selected === "archive" || undefined}>
+        <summary><span>Archive · <time dateTime={record.previous.date}>{formatDate(record.previous.date)}</time></span><strong>{record.previous.title}</strong></summary>
+        <h3>{community ? "Discussion notes" : "Minutes"}</h3><p>{record.previous.discussion}</p>
+        <h3>{community ? "Follow up" : "Decision register"}</h3><p>{record.previous.decision}</p>
+        <a className="text-link" href={groupRecordHref(group.id, "deliverable")}>View the associated action</a>
+      </details>
+    </section>
+    <section aria-labelledby="group-deliverables">
+      <h2 id="group-deliverables">{community ? "Shared resources" : "Deliverables and actions"}</h2>
+      <details id="group-record-deliverable" open={selected === "deliverable" || undefined}>
+        <summary><span>{record.deliverable.status}</span><strong>{record.deliverable.title}</strong></summary>
+        <p>{record.deliverable.description}</p>
+        <dl><div><dt>Action owner</dt><dd>{record.owner}</dd></div><div><dt>Due</dt><dd><time dateTime={record.deliverable.due}>{formatDate(record.deliverable.due)}</time></dd></div></dl>
+        <a className="text-link" href={groupRecordHref(group.id, "archive")}>Read the source discussion</a>
+      </details>
+      <p><a className="text-link" href={record.resource.href}>{record.resource.title}</a></p>
+    </section>
+  </div>;
+}
+
+export function GroupPage({ id, record, onRequestJoin }: { id: string; record?: string; onRequestJoin: (name: string) => void }) {
   const group = groupById(id);
-  useEffect(() => { window.scrollTo(0, 0); }, [id]);
+  useEffect(() => {
+    const target = record && document.getElementById(`group-record-${record}`);
+    if (target) {
+      target.querySelector("summary")?.focus({ preventScroll: true });
+      target.scrollIntoView();
+    } else window.scrollTo(0, 0);
+  }, [id, record]);
 
   if (!group) return <div className="section policies-reports"><h1>Group not found</h1><p>We couldn't find this group.</p><a className="text-link" href="#/governance">Back to policy and community</a></div>;
   return <div className="section policies-reports group-page">
@@ -133,6 +176,7 @@ export function GroupPage({ id, onRequestJoin }: { id: string; onRequestJoin: (n
     <section aria-labelledby="group-members"><h2 id="group-members">Members</h2>
       <ul className="group-members">{[...(group.confirmedMembers ?? []), ...group.exampleMembers].map((member) => <li key={member}><span aria-hidden="true">{member.charAt(0)}</span>{member}</li>)}</ul>
     </section>
+    <GroupRecords key={id} group={group} selected={record} />
     {group.section !== "roundtables" && <section aria-labelledby="group-join"><h2 id="group-join">Join</h2>
       {group.joinUrl ? <><p>Visit the official community page to find the membership form.</p><a className="button primary" href={group.joinUrl} target="_blank" rel="noreferrer">Join this community <span className="visually-hidden">(opens the official page in a new tab)</span></a></>
         : <><p>Connect with colleagues and contribute to the conversation.</p><button className="primary" type="button" onClick={() => onRequestJoin(group.name)}>Request to join</button></>}

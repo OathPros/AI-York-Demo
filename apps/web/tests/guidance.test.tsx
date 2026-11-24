@@ -2,11 +2,12 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { GuidancePage } from "../src/information-architecture";
+import { guidanceSelection } from "../src/audience-guides";
 
 describe("contextual guidance", () => {
   it("shows study guidance by default with a selected, shareable context", () => {
     const page = renderToStaticMarkup(<GuidancePage copies={{}} />);
-    expect(page).toContain('href="#/guidance?activity=study" aria-current="page"');
+    expect(page).toContain('aria-pressed="true"><span aria-hidden="true">✓</span>Study');
     expect(page).toContain("Course rules and citation");
     expect(page).not.toContain("Ethics and data approvals");
     expect(page).toContain('href="#/guide?activity=study"');
@@ -19,10 +20,22 @@ describe("contextual guidance", () => {
     ["work", "Handle York information", "Course expectations and assessment"]
   ] as const)("shows only the %s context's guidance", (activity, included, excluded) => {
     const page = renderToStaticMarkup(<GuidancePage activity={activity} copies={{}} />);
-    expect(page).toContain(`href="#/guidance?activity=${activity}" aria-current="page"`);
+    expect(page.match(/aria-pressed="true"/g)).toHaveLength(1);
     expect(page).toContain(included);
     expect(page).not.toContain(excluded);
     expect(page).toContain(`href="#/guide?activity=${activity}"`);
+  });
+
+  it.each([
+    ["teach,research", ["Course expectations and assessment", "Ethics and data approvals"]],
+    ["research,work", ["Ethics and data approvals", "Handle York information"]],
+    ["study,teach,research", ["Course rules and citation", "Course expectations and assessment", "Ethics and data approvals"]]
+  ])("composes guidance for %s and preserves the selection in the Finder link", (value, topics) => {
+    const activities = guidanceSelection(new URLSearchParams(`activities=${value},invalid`));
+    const page = renderToStaticMarkup(<GuidancePage copies={{}} activities={activities} />);
+    for (const topic of topics) expect(page).toContain(topic);
+    expect(page.match(/Start with the task and the information/g)).toHaveLength(1);
+    expect(page).toContain(`href="#/guide?activities=${value}"`);
   });
 
   it("uses the Studio-published title and introduction for the selected context", () => {

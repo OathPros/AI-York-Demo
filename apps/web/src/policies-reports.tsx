@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import type { ContentBundle } from "@ai-york/contracts";
 import { GroupCards, GroupOverview, type Group } from "./governance-groups";
 import "./policies-reports.css";
+import { groupRecords, groupRecordHref } from "./demo-records";
 
 type DocumentRecord = {
   title: string;
@@ -182,6 +183,13 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
     <section id="governance-reports" className="document-section" aria-labelledby="reports-heading">
       <h2 id="reports-heading">Reports</h2>
       <DocumentCards records={reports} open={setOpenDocument} />
+      <div className="report-records">
+        <h3>Working group deliverables</h3>
+        <ul>{["ai-roundtable", "student-administrative-services", "teaching-learning", "research"].map((id) => {
+          const { title, description, status } = groupRecords[id].deliverable;
+          return <li key={id}><a className="text-link" href={groupRecordHref(id, "deliverable")}>{title}</a><span className="status">{status}</span><p>{description}</p></li>;
+        })}</ul>
+      </div>
     </section>
     {openDocument && <DocumentReader record={openDocument} close={() => setOpenDocument(null)} />}
     {openGroup && <GroupOverview group={openGroup} close={() => setOpenGroup(null)} />}

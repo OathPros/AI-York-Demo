@@ -1,17 +1,38 @@
 import React, { useState } from "react";
 import type { Activity, ContentItem } from "@ai-york/contracts";
+import { exampleStories } from "./demo-records";
 
 const topics: Record<Activity, string> = { study: "Study", teach: "Teaching", research: "Research", work: "Work" };
 const dateFormat = new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 const monthFormat = new Intl.DateTimeFormat("en-CA", { month: "long", year: "numeric", timeZone: "UTC" });
 const dateLabel = (value: string) => dateFormat.format(new Date(value + "T00:00:00Z"));
 
-const news = [
+const yorkNews = [
   { date: "2026-09-09", source: "YFile", url: "https://www.yorku.ca/yfile/2026/09/09/york-professor-explores-how-ai-can-deepen-learning-in-the-classroom/", title: "Using AI to support deeper learning", summary: "A York instructor explores how AI-generated questions can encourage students to explain their reasoning and engage more deeply with course material.", activities: ["study", "teach"] },
   { date: "2026-07-15", source: "YFile", url: "https://www.yorku.ca/yfile/2026/07/15/ai-innovation-at-york-u-starts-with-human-intelligence/", title: "A closer look at AI innovation across York", summary: "Discover research and innovation spanning health, climate and business, and the people shaping how AI is used.", activities: ["research", "work"] },
   { date: "2026-07-15", source: "YFile", url: "https://www.yorku.ca/yfile/2026/07/15/how-york-researchers-are-using-ai-to-support-cancer-care/", title: "Supporting cancer care with AI research", summary: "York researchers are exploring ways AI can help specialists analyze medical images and make more informed decisions.", activities: ["research"] },
   { date: "2026-07-15", source: "YFile", url: "https://www.yorku.ca/yfile/2026/07/15/can-ai-be-trusted-to-assess-climate-risks-a-york-study-investigates/", title: "Investigating AI and climate risk", summary: "Research at York examines the responsible use of AI in understanding environmental and climate-related risks.", activities: ["research"] }
 ] satisfies { date: string; source: string; url: string; title: string; summary: string; activities: Activity[] }[];
+
+const news = [
+  ...yorkNews,
+  ...exampleStories.map((story) => ({ ...story, source: "AI @ York", url: `#/news?story=${story.id}` }))
+].sort((a, b) => b.date.localeCompare(a.date));
+
+export function NewsStory({ id }: { id: string }) {
+  const story = exampleStories.find((item) => item.id === id);
+  return <article className="section updates-page story-page">
+    <a className="text-link" href="#/news">← All AI news</a>
+    {story ? <>
+      <p className="update-meta"><time dateTime={story.date}>{dateLabel(story.date)}</time> · AI @ York</p>
+      <h1>{story.title}</h1><p className="lead">{story.summary}</p>
+      <Tags activities={story.activities} />
+      {story.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+      <h2>Related records</h2>
+      <ul>{story.related.map(({ title, href }) => <li key={href}><a className="text-link" href={href}>{title}</a></li>)}</ul>
+    </> : <h1>Story not found</h1>}
+  </article>;
+}
 
 function TopicSelect({ value, change }: { value: string; change: (value: string) => void }) {
   return <label>Topic<select value={value} onChange={(event) => change(event.target.value)}>

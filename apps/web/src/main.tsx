@@ -7,6 +7,8 @@ import { CmsManager, PageEditor, PolicyStudio, StudioShell, type StudioView } fr
 import type { PublishedPages } from "./page-copy";
 import "./styles.css";
 import { GuidancePage, ProgramsPage, TrainingPage } from "./information-architecture";
+import { guidanceSelection } from "./audience-guides";
+import "./public-site.css";
 import { GovernancePage } from "./policies-reports";
 import { GroupPage } from "./governance-groups";
 import { DemoBanner } from "./demo-banner";
@@ -19,6 +21,7 @@ const emptyContent = (): ContentBundle => Object.fromEntries(contentCollections.
 const pageFromHash = (): Page => { const key = window.location.hash.replace(/^#\/?/, "").split("?")[0]; return key.startsWith("governance/groups/") ? "governance" : key === "initiative" ? "work" : pages.includes(key as Page) ? key as Page : "home"; };
 
 function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("site");
   const [page, setPage] = useState<Page>(pageFromHash());
   const [hash, setHash] = useState(window.location.hash);
@@ -47,6 +50,7 @@ function App() {
   const isCalendarType = changeType === "event" || changeType === "training";
 
   const go = useCallback((next: Page) => { const nextHash = `#/${next}`; setPage(next); setHash(nextHash); setScreen("site"); window.history.pushState({}, "", nextHash); window.scrollTo(0, 0); }, []);
+  useEffect(() => setMenuOpen(false), [hash]);
   const navigateLink = (event: React.MouseEvent<HTMLAnchorElement>, next: Page) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
@@ -140,6 +144,7 @@ function App() {
   const params = new URLSearchParams(hash.split("?")[1] || "");
   const selectedActivity = activitySchema.safeParse(params.get("activity"));
   const activity = selectedActivity.success ? selectedActivity.data : undefined;
+  const selectedContexts = guidanceSelection(params);
   const requestedLevel = params.get("level");
   const level = requestedLevel === "undergraduate" || requestedLevel === "graduate" || requestedLevel === "certificate" ? requestedLevel : undefined;
   const governanceSection = params.get("section") || (page === "communities" ? "community" : page === "governing" ? "roundtables" : undefined);
@@ -149,24 +154,24 @@ function App() {
     switch (page) {
       case "home": return <Home content={content} go={go} copy={publishedPages.home} />;
       case "study": case "teach": case "research": case "work":
-        return <GuidancePage activity={page} copies={publishedPages} />;
+        return <GuidancePage activity={page} copies={publishedPages} content={content} />;
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
-      case "guide": return <div><PageHeader eyebrow="Usage & Guidance" title="Check a specific use of AI" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder key={activity ?? "all"} content={content} initial={activity ? [activity] : []} /></div>;
-      case "guidance": return <GuidancePage activity={activity} copies={publishedPages} />;
-      case "policies": case "governing": case "communities": case "governance": return groupId ? <GroupPage id={groupId} onRequestJoin={requestGroupJoin} /> : <GovernancePage content={content} section={governanceSection} />;
-      case "tools": return <ToolsSection content={content} standalone />;
-      case "learning": case "training": return <TrainingPage content={content} activity={activity} />;
+      case "guide": return <div><PageHeader eyebrow="Usage & Guidance" title="Check a specific use of AI" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder key={selectedContexts.join(",")} content={content} initial={selectedContexts} /></div>;
+      case "guidance": return <GuidancePage activities={selectedContexts.length || params.get("activities") === "" ? selectedContexts : undefined} copies={publishedPages} content={content} />;
+      case "policies": case "governing": case "communities": case "governance": return groupId ? <GroupPage id={groupId} record={params.get("record") ?? undefined} onRequestJoin={requestGroupJoin} /> : <GovernancePage content={content} section={governanceSection} />;
+      case "tools": return <ToolsSection content={content} activities={selectedContexts} standalone />;
+      case "learning": case "training": return <TrainingPage content={content} activity={activity} activities={selectedContexts} />;
       case "programs": return <ProgramsPage content={content} level={level} />;
       case "events": return <EventList content={content} />;
-      case "news": return <NewsPage />;
+      case "news": return <NewsPage story={params.get("story") ?? undefined} />;
       case "index": return <IndexPage content={content} go={go} />;
     }
   };
 
   const navItems: [Page, string][] = [["guidance", "Guidance"], ["training", "Training"], ["programs", "Programs"], ["tools", "Tools"], ["governance", "Policy & community"], ["events", "Calendar"], ["news", "News"]];
   const currentNav: Page = ["study", "teach", "research", "work", "guide"].includes(page) ? "guidance" : page === "learning" ? "training" : ["policies", "governing", "communities"].includes(page) ? "governance" : page;
-  return <div className="app"><DemoBanner onSuggest={screen !== "studio" ? suggest : undefined} onOpenStudio={screen !== "studio" ? openStudio : undefined} />{screen !== "studio" && <>
-    <header className="site-header"><a className="brand" href="#/home" aria-label="AI @ York home" onClick={(e) => navigateLink(e, "home")}><span>AI <b>@</b> York</span><small>Guidance tools support</small></a><nav aria-label="Primary">{navItems.map(([key, label]) => <a key={key} href={`#/${key}`} aria-current={screen === "site" && currentNav === key ? "page" : undefined} onClick={(e) => navigateLink(e, key)}>{label}</a>)}<a className="nav-primary" href="#/guide" onClick={(e) => navigateLink(e, "guide")}>Can I use AI for this</a></nav></header></>}
+  return <div className={screen === "site" ? "app public-site" : "app"}><DemoBanner publicNotice={screen !== "studio"} onSuggest={screen !== "studio" ? suggest : undefined} onOpenStudio={screen !== "studio" ? openStudio : undefined} />{screen !== "studio" && <>
+    <header className="site-header"><a className="brand" href="#/home" aria-label="AI @ York home" onClick={(e) => navigateLink(e, "home")}><span>AI <b>@</b> York</span>{screen !== "site" && <small>Guidance tools support</small>}</a>{screen === "site" && <button type="button" className="site-menu-toggle" aria-expanded={menuOpen} aria-controls="primary-nav" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "Close menu" : "Menu"}</button>}<nav id="primary-nav" data-open={menuOpen} aria-label="Primary">{navItems.map(([key, label]) => <a key={key} href={`#/${key}`} aria-current={screen === "site" && currentNav === key ? "page" : undefined} onClick={(e) => navigateLink(e, key)}>{label}</a>)}<a className="nav-primary" href="#/guide" onClick={(e) => navigateLink(e, "guide")}>Can I use AI for this</a></nav></header></>}
     <main>
       {screen === "site" && <>{error && <p className="error" role="alert">{error}</p>}{renderPage()}</>}
       {screen === "role" && <section className="panel narrow"><p className="eyebrow">Workspace access</p><h1>Choose how to continue</h1><p>Select a role to suggest an update or manage content.</p>{error && <p className="error" role="alert">{error}</p>}<div className="role-grid"><button className="role" onClick={() => chooseRole("external")}><strong>External User</strong><span>Suggest an event, training, fix a broken link or tell us what is missing.</span></button><button className="role" onClick={() => chooseRole("admin")}><strong>AI @ York Admin</strong><span>Manage the policy, interpretation, tool, event, community and training inventories, and review suggested changes.</span></button></div><button className="text-button" onClick={() => go("home")}>Return to AI @ York</button></section>}

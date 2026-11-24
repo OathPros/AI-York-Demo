@@ -8,9 +8,7 @@ describe("demo presentation", () => {
   it("keeps the disclosure visible when workspace actions are absent", () => {
     const markup = renderToStaticMarkup(<DemoBanner />);
     expect(markup).toContain('role="note"');
-    expect(markup).toContain("not official York guidance");
-    expect(markup).toContain("requests stay in this workspace");
-    expect(markup).toContain("policy edits stay in this browser");
+    expect(markup).toContain("Demonstration website. Some content, activities and records are illustrative and do not represent official York University guidance.");
     expect(markup).not.toContain("Open Studio");
   });
 

@@ -1,198 +1,125 @@
-import React, { useRef } from "react";
-import type { Activity, PageCopy } from "@ai-york/contracts";
-import { pageCopy } from "./page-copy";
-import studyImage from "./assets/banners/study.webp";
-import teachImage from "./assets/banners/teach.webp";
-import researchImage from "./assets/banners/research.webp";
-import workImage from "./assets/banners/work.webp";
+import React from "react";
+import type { Activity, ContentBundle } from "@ai-york/contracts";
+import { guides, guidanceTopics } from "./guidance-content";
+import { GuideFinder } from "./hub";
+import { pageCopy, type PublishedPages } from "./page-copy";
 import "./audience-guides.css";
 
-type Guide = Activity;
-type Link = [label: string, href: string];
-type Topic = { activity: Guide; id: string; title: string; items: [heading: string, copy: string][]; links?: Link[]; example?: [heading: string, copy: string] };
+const labels: Record<Activity, string> = { study: "Study", teach: "Teach", research: "Research", work: "Work" };
+const contexts = Object.keys(labels) as Activity[];
 
-const guides: Record<Guide, { audience: string; image: string }> = {
-  study: { audience: "Undergraduate and graduate students", image: studyImage },
-  teach: { audience: "Instructors and graduate supervisors", image: teachImage },
-  research: { audience: "Researchers and research teams", image: researchImage },
-  work: { audience: "Staff and people managers", image: workImage }
-};
-
-const guidanceTopics: Topic[] = [
-      { activity: "study", id: "coursework", title: "Course rules and citation", items: [
-        ["Check this assignment", "York’s Academic Conduct Policy treats undocumented or unreferenced use of AI in assessed work as a breach. Documented use is generally permitted unless your instructor restricts it for the course or assessment. Read the course outline and assignment instructions, and ask about unclear uses before you begin"],
-        ["Keep a record as you work", "Follow the instructor’s directions for acknowledgement and citation. Keep the tool name, how you used it and what you changed. Save prompts or outputs if required. Open and read the original sources before citing them"]
-      ], links: [
-        ["Read the Academic Conduct Policy", "https://www.yorku.ca/secretariat/policies/policies/academic-conduct-policy-and-procedures/"],
-        ["Get citation help from York Libraries", "https://www.library.yorku.ca/web/research-learn/artificial-intelligence-citing-academic-integrity/"]
-      ] },
-      { activity: "study", id: "practice", title: "Study and practise", items: [
-        ["Build independence", "Ask for hints, practice questions or a second explanation using material you can share. Try each task yourself and compare the feedback with your course notes. If an answer seems convincing but misses context or reinforces a stereotype, investigate what it left out"],
-        ["Make university easier to navigate", "Use text to speech or a plain language explanation to access material you have permission to share. Ask for an example of a respectful email to an instructor or a study schedule built around your own deadlines"],
-        ["Find scholarly sources", "Use AI to suggest keywords and alternate terms. Search the library databases yourself and read any article before relying on it. Get permission before uploading course materials, classmates’ work or class recordings"]
-      ], example: ["Try a practice prompt", "Give me three practice questions on this topic. Wait for my answer to each question, then give me a hint I can use to improve it"], links: [
-        ["Find library workshops and guides", "https://www.library.yorku.ca/web/research-learn/artificial-intelligence-workshops-guides-more/"],
-        ["Explore AI fundamentals", "#/learning"],
-        ["Get Copilot with your student account", "https://www.yorku.ca/uit/student-services/ai/"],
-        ["Explore LinkedIn Learning at York", "https://www.yorku.ca/services/lil/"]
-      ] },
-      { activity: "study", id: "graduate", title: "Theses and graduate milestones", items: [
-        ["Agree on boundaries with your supervisor", "Before using AI to research, create, write or edit a thesis or dissertation, discuss the proposed use with your supervisor or supervisory committee. Clarify expectations for graduate coursework and comprehensive exams separately. Consult your graduate program director if the expectations remain unclear"],
-        ["Prepare to explain your contribution", "Keep a record of where AI affected your methods, writing or revisions. Be ready to explain at your defence what you did, what the tool contributed and how the work represents your original contribution"]
-      ], links: [
-        ["Read the Ontario graduate research considerations", "https://cou.ca/wp-content/uploads/2024/10/OCGS-AI-graduate-research-considerations-FN-Oct-1-2024.pdf"],
-        ["Plan an AI research workflow", "#/research"]
-      ] },
-      { activity: "teach", id: "assessment", title: "Course expectations and assessment", items: [
-        ["Make the rules visible", "State where AI is prohibited, optional or expected for each assessment. Name permitted tasks such as brainstorming, translation or code debugging, and specify how students should document or cite use. Give students who opt out an equivalent way to demonstrate the same learning"],
-        ["Design for evidence of learning", "Identify what students need to do independently. Use staged drafts, in-class explanations, simulations or a task grounded in a class discussion. When AI is part of the assessment, give explicit criteria for evaluating its output"],
-        ["Handle suspected misuse", "York does not recommend AI detection tools. Their results can be inaccurate and can disproportionately flag multilingual writers. Keep student submissions out of external detectors and use York’s academic integrity support for suspected breaches"]
-      ], example: ["Example assignment wording", "You may use AI to brainstorm research questions. Develop your argument from course readings and your own analysis. In a short note, identify the tool and explain how you used it to shape your question"], links: [
-        ["Get academic integrity support for instructors", "https://www.yorku.ca/unit/vpacad/academic-integrity/ai-technology-and-academic-integrity/"],
-        ["Use the AI Assessment Scale", "https://open-publishing.org/journals/index.php/jutlp/article/view/810/769"]
-      ] },
-      { activity: "teach", id: "classroom", title: "AI literacy in class", items: [
-        ["Make AI visible in familiar tools", "Show where features such as suggested rewrites or summaries use AI. Discuss where the feature fits disciplinary practice, which perspectives it misses and when students might choose to work without it"],
-        ["Give everyone the same output to critique", "Bring one generated response into class. Ask groups to compare it with a course reading, trace an unsupported claim and explain a revision. The class can practise evaluating AI without each student needing an account"],
-        ["Use AI for practice and feedback", "Try tailored scenarios, role-play or feedback on a fictional sample. Ask students to explain which suggestions they would accept and why"]
-      ], links: [
-        ["Download the editable York slide deck", "https://www.yorku.ca/teachingcommons/wp-content/uploads/sites/38/2024/11/GenAI-and-Academic-Integrity-slide-deck.pptx"],
-        ["Explore King’s College London teaching guidance", "https://www.kcl.ac.uk/about/strategy/learning-and-teaching/ai-guidance"],
-        ["Find Teaching Commons support", "https://www.yorku.ca/teachingcommons/artificial-intelligence-ai-pedagogies/"]
-      ] },
-      { activity: "teach", id: "preparation", title: "Course preparation and feedback", items: [
-        ["Draft materials you can review", "Generate an initial outline, rubric or bank of comments using fictional examples and material you may share. Check disciplinary accuracy, accessibility and alignment with learning outcomes. Personalize feedback and keep grades, accommodation details and identifiable submissions out of unauthorized tools"],
-        ["Explain your own use", "Tell students where AI shaped the materials or activity, why you used it and how you checked the result. Ask for student feedback if the design creates an unexpected access barrier"]
-      ], links: [["Explore inclusive course design ideas", "https://learningdesignviews.educ.ubc.ca/inclusive-content-and-ai/"]] },
-      { activity: "teach", id: "supervision", title: "Graduate supervision", items: [
-        ["Set expectations at the start", "Discuss where AI fits your discipline and which uses are appropriate at each milestone. Talk through data sovereignty, rights, privacy and bias using the student’s proposed workflow. Consult the graduate program or scholarly body when norms are unclear"],
-        ["Revisit the agreement", "Ask for a record of material AI use and discuss how it will be explained in writing and at the defence. Revisit the agreement when the student changes tools, data or methods"]
-      ], links: [["Read about AI and academic supervision", "https://universityaffairs.ca/career-advice/career-advice-article/ai-higher-education-and-the-future-of-academic-supervision/"]] },
-      { activity: "research", id: "approvals", title: "Ethics and data approvals", items: [
-        ["Review the proposed workflow before collecting data", "Identify what will enter the tool, where it will be processed and stored, who can access it and how long it will be retained. For human participant research, check the approved protocol and consent. Consult Research Ethics about any required amendment before changing the workflow"],
-        ["Protect restricted material", "Keep identifiable participant material, confidential partner information and embargoed drafts out of unauthorized services. Check data use agreements, licences, Indigenous data governance and data sovereignty requirements. Removing names alone may leave people identifiable"]
-      ], links: [
-        ["Contact York Research Ethics", "https://www.yorku.ca/research/research-ethics/human-participants-in-research/"],
-        ["Find cybersecurity guidance for academia", "https://www.cyber.gc.ca/en/academia"]
-      ] },
-      { activity: "research", id: "methods", title: "Research methods and reporting", items: [
-        ["Pilot before using research data", "Test a search, analysis or data cleaning method on synthetic inputs or material you are authorized to share. For literature screening, check the search against original publications and have a researcher confirm inclusion decisions"],
-        ["Make the method reproducible", "Record the tool and version, purpose, inputs, material outputs and independent checks. Verify references, calculations and code. Describe material AI use when reporting your methods and check the destination journal’s disclosure and authorship rules"]
-      ], links: [
-        ["Open the York Libraries guide to using generative AI in research", "https://researchguides.library.yorku.ca/genairesearch"],
-        ["Explore the York Libraries AI research guide", "https://researchguides.library.yorku.ca/AI"]
-      ] },
-      { activity: "research", id: "funding", title: "Grant applications and peer review", items: [
-        ["Check the funding opportunity before using AI", "Read the funding opportunity’s instructions. The federal agencies hold applicants responsible for the accuracy and completeness of the application and for verifying and acknowledging every source. Keep confidential proposal material out of tools that cannot protect it"],
-        ["Protect confidential review", "Federal research funding agencies prohibit using public, online or institutionally deployed generative AI tools to review funding applications. CIHR also prohibits automated transcription and summaries during peer review meetings and related discussions. Disability accommodations require CIHR approval in advance"]
-      ], links: [
-        ["Read federal granting agency guidance", "https://science.ised-isde.canada.ca/site/science/en/interagency-research-funding/policies-and-guidelines/guidance-use-artificial-intelligence-development-and-review-research-grant-proposals"],
-        ["Read the CIHR peer review meeting policy", "https://cihr-irsc.gc.ca/e/54129.html"]
-      ] },
-      { activity: "research", id: "community", title: "AI research at York", items: [
-        ["Find research groups", "York teams study how to design trustworthy AI systems, how people learn and create with digital tools, and how emerging technologies shape society. Explore the research groups below to identify potential collaborators"],
-        ["Take research into practice", "Contact Innovation York for commercialization support, Osgoode’s IP Innovation Clinic for intellectual property resources or Lassonde’s BEST program for entrepreneurship"]
-      ], links: [
-        ["Centre for Artificial Intelligence and Society", "https://www.yorku.ca/research/cais/"],
-        ["Centre for Innovation in Computing at Lassonde", "https://lassonde.yorku.ca/research/research-facilities-and-centres#h-centre-for-innovation-in-computing-lassonde"],
-        ["Institute for Research on Digital Literacies", "https://irdl.info.yorku.ca/"],
-        ["Institute for Technoscience and Society", "https://www.yorku.ca/research/its/"],
-        ["Connected Minds", "https://www.yorku.ca/research/connected-minds/"],
-        ["Lassonde computing research labs", "https://lassonde.yorku.ca/eecs/research/research-labs/"],
-        ["Lassonde research facilities and centres", "https://lassonde.yorku.ca/research/research-facilities-and-centres"],
-        ["Innovation York", "https://www.yorku.ca/research/innovation-partnerships/"],
-        ["IP Innovation Clinic", "https://www.yorku.ca/osgoode/ip-innovation-clinic/"],
-        ["Lassonde BEST entrepreneurship program", "https://lassonde.yorku.ca/best/"],
-        ["Explore AI degrees and certificates", "#/partner"]
-      ] },
-      { activity: "work", id: "decide", title: "Decide when AI fits", items: [
-        ["Start with low risk work", "Discuss your use with your supervisor and obtain management approval. Start with a template that uses fictional details and no York data. Have a person who knows the work check the output for errors, bias and suitability"],
-        ["Get oversight before higher impact work", "Discuss public communications, strategic decisions, meeting transcription and code that touches York systems or data with your supervisor before using AI. Identify AI-generated content in outward-facing communications and have an accountable person approve it. Involve Information Security for new integrations"],
-        ["Keep people responsible for decisions", "York’s guidelines prohibit AI impersonation and expert or critical decisions without human oversight. Keep decisions about students or employees with the people and processes authorized to make them"]
-      ], links: [
-        ["Read York’s administrative AI guidelines", "https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2025/07/Generative-AI-Guidelines_r2.1_July_2_2025.pdf"],
-        ["Check a workplace scenario", "#/guide"]
-      ] },
-      { activity: "work", id: "data", title: "Handle York information", items: [
-        ["Classify the input before sharing it", "Public information is intended for public access. Internal information includes non-public procedures and work drafts. Confidential information includes unpublished proposals, contracts and internal financial reports. Regulated information includes health, payment and student records"],
-        ["Keep York data out of public AI platforms", "UIT directs staff not to enter York University data into public AI platforms. Use York-sanctioned tools approved for secure use and check any additional authorization required for the information involved"],
-        ["Check the exact tool and configuration", "A personal or unsigned-in account lacks York’s enterprise protections. Use only approved tools with non-public York information. The administrative guidelines require explicit authorization through York’s assessment process before you enter personal, confidential or regulated information. Request a risk assessment before using a new chatbot or meeting assistant with York data"]
-      ], links: [
-        ["Read UIT’s AI services guidance", "https://www.yorku.ca/uit/faculty-and-staff-services/ai/"],
-        ["Read York’s information classification standard", "https://www.yorku.ca/secretariat/policies/policies/information-security-classification-standard/"],
-        ["Check York’s Microsoft 365 data handling rules", "https://www.yorku.ca/uit/faculty-and-staff-services/microsoft-365-for-faculty-and-staff/handling-university-data-in-microsoft-365/"],
-        ["Start a cyber threat and risk assessment", "https://www.yorku.ca/uit/infosec/ctra/"]
-      ] },
-      { activity: "work", id: "access", title: "Get workplace tools", items: [
-        ["Copilot in a browser or Microsoft 365", "For browser chat, sign in with Passport York and confirm the Enterprise Data Protection shield. For Copilot inside Word, Excel, Outlook or Teams, ask UIT Administration for a paid Microsoft 365 Copilot licence and confirm the charge with your cost centre"],
-        ["York managed assistants and coding tools", "For a YU AURA assistant, ask UIT about access, approved data sources and permissions for your use case. For York coding work, check eligibility for the university’s GitHub Copilot licence and keep institutional code out of personal accounts"],
-        ["Meeting summaries in Zoom", "Enable Zoom AI Companion only for a suitable meeting. Notify participants, get consent and leave it off if anyone objects. Review the summary for accuracy, share it outside the meeting only on a need-to-know basis and delete it when it is no longer needed"]
-      ], links: [
-        ["Open Microsoft Copilot", "https://copilot.cloud.microsoft.com/"],
-        ["Email UIT Administration about a licence", "mailto:uitadmin@yorku.ca"],
-        ["Ask UIT about YU AURA or get technical help", "https://askus.yorku.ca/portal"],
-        ["Get York GitHub access", "https://www.yorku.ca/uit/faculty-and-staff-services/github/"],
-        ["Set up Zoom AI Companion", "https://lthelp.yorku.ca/ai-companion/introduction-to-zoom-ai-companion"],
-        ["Read York’s meeting assistant guidelines", "https://www.yorku.ca/uit/cio/wp-content/uploads/sites/936/2026/02/Guidelines-AI-Chatbots-Assistants.pdf"]
-      ] },
-      { activity: "work", id: "training", title: "Workplace training", items: [
-        ["Start with a real task and safe inputs", "The York learning package covers Copilot, YU AURA and AURA Chat with how-to guides and recorded sessions. People managers can use the workplace recording to prepare conversations about when a team needs oversight"]
-      ], links: [
-        ["Open the YU Learn workplace AI package with Passport York", "https://yulearn.yorku.ca/local/yulearn/learning_opportunity.php?id=1651"],
-        ["Watch the people managers session with Passport York", "https://yulearn.yorku.ca/local/yulearn/learning_opportunity.php?id=1620"],
-        ["Browse UIT’s AI prompt library", "https://www.yorku.ca/uit/faculty-and-staff-services/ai/prompt-library/"]
-      ] }
-];
-
-function topicsForActivity(activity: Guide): Topic[] {
-  return guidanceTopics.filter((topic) => topic.activity === activity);
+export function guidanceSelection(params: URLSearchParams): Activity[] {
+  const requested = [...params.getAll("activity"), ...params.getAll("activities")].flatMap((value) => value.split(","));
+  return contexts.filter((context) => requested.includes(context));
 }
 
-export function AudienceGuide({ kind, copy = pageCopy[kind], embedded = false }: { kind: Guide; copy?: PageCopy; embedded?: boolean }) {
-  const { audience, image } = guides[kind];
-  const topics = topicsForActivity(kind);
-  const Title = embedded ? "h2" : "h1";
-  const root = useRef<HTMLDivElement>(null);
-  const headingId = (id: string) => `${kind}-${id}`;
+function contextHref(page: "guidance" | "guide" | "training" | "tools", selection: readonly Activity[]) {
+  const value = contexts.filter((context) => selection.includes(context));
+  if (value.length === 0) return `#/${page}`;
+  return `#/${page}?${value.length === 1 ? "activity" : "activities"}=${value.join(",")}`;
+}
 
-  function jumpTo(id: string) {
-    const heading = root.current?.querySelector<HTMLElement>(`#${headingId(id)}`);
-    heading?.focus({ preventScroll: true });
-    heading?.scrollIntoView();
+const stages = [
+  { title: "Check what applies", intro: "Find the expectations and approvals that govern the work and the information involved.", topics: ["coursework", "assessment", "approvals", "decide", "data", "graduate", "supervision", "funding"] },
+  { title: "Plan the task", intro: "Explore concrete ways to work, and what to review before using the output.", topics: ["practice", "classroom", "preparation", "methods"] },
+  { title: "Find tools and support", intro: "Check access requirements and find support for the activity you are working on.", topics: ["access", "training", "community"] }
+];
+
+const overlappingTasks: { activities: Activity[]; title: string; example: string }[] = [
+  { activities: ["research", "work"], title: "Summarize a meeting or analyze data", example: "A project meeting may include research participant information and internal York updates. Check the approved research workflow and data agreements for the research material, then check York information handling and meeting assistant requirements for the administrative work." },
+  { activities: ["teach", "research"], title: "Turn a research example into teaching material", example: "Before bringing research material into a class, check the research permissions and the information involved. For the teaching activity, check accessibility, course expectations and how you will explain any use of AI." },
+  { activities: ["study", "teach", "research"], title: "Work across a course, a thesis and a teaching assignment", example: "Keep the expectations for your own assessed work, your thesis workflow and the materials you prepare for students distinct. Check the course instructions, discuss thesis use with your supervisor and review the teaching and research requirements that apply to the material." }
+];
+
+export function GuidancePage({ activity, activities, copies, content }: {
+  activity?: Activity; activities?: Activity[]; copies: PublishedPages; content?: ContentBundle;
+}) {
+  const selected = activities ?? [activity ?? "study"];
+  const single = selected.length === 1 ? selected[0] : undefined;
+  const copy = single ? copies[single] ?? pageCopy[single] : undefined;
+  const examples = overlappingTasks.filter((example) => example.activities.every((activity) => selected.includes(activity)));
+  const topics = guidanceTopics.filter((topic) => selected.includes(topic.activity));
+  const sources = new Map<string, string>();
+  for (const topic of topics) {
+    for (const [label, href] of topic.links ?? []) if (!sources.has(href)) sources.set(href, label);
   }
 
-  return <div ref={root} className={`audience-guide audience-guide--${kind}`}>
-    <header className="audience-guide__hero">
-      <div className="shell audience-guide__hero-inner">
-        <div className="audience-guide__intro">
-          <p className="audience-guide__audience">{audience}</p>
-          <Title>{copy.title}</Title>
-          <p className="audience-guide__lede">{copy.intro}</p>
-        </div>
-        <img src={image} alt="" />
+  function jumpToFinder() {
+    const target = document.getElementById("guide-title");
+    target?.setAttribute("tabindex", "-1");
+    target?.focus();
+    target?.scrollIntoView({ block: "start" });
+  }
+
+  return <div className="guidance-page">
+    <header className="guidance-hero shell">
+      <div>
+        <p className="eyebrow">AI @ York / Guidance</p>
+        <h1>{copy?.title ?? "AI guidance for your activities"}</h1>
+        <p className="lead">{copy?.intro ?? "Find the requirements, examples and tools that apply across the work you do at York."}</p>
+        {content ? <button type="button" className="primary" onClick={jumpToFinder}>Check a task <span aria-hidden="true">↓</span></button> :
+          <a className="button primary" href={contextHref("guide", selected)}>Check a task</a>}
       </div>
+      <img src={guides[single ?? "research"].image} alt="" />
     </header>
-    <div className="shell audience-guide__body">
-      <nav className="audience-guide__index" aria-label="On this page">
-        <h2>On this page</h2>
-        <ul>{topics.map((topic) => <li key={topic.id}>
-          <button type="button" onClick={() => jumpTo(topic.id)}>{topic.title}<span aria-hidden="true">↓</span></button>
-        </li>)}</ul>
-      </nav>
-      <div className="audience-guide__topics">
-        {topics.map(({ id, title, items, links, example }) => <section key={id} aria-labelledby={headingId(id)}>
-          <h2 id={headingId(id)} tabIndex={-1}>{title}</h2>
-          <div className="audience-guide__items">
-            {items.map(([heading, text]) => <div key={heading}><h3>{heading}</h3><p>{text}</p></div>)}
-          </div>
-          {example && <aside className="audience-guide__example"><h3>{example[0]}</h3><p>{example[1]}</p></aside>}
-          {links && <ul className="audience-guide__links">
-            {links.map(([label, href]) => <li key={href}>
-              <a href={href}>{label}<span aria-hidden="true">→</span></a>
-            </li>)}
-          </ul>}
-        </section>)}
+
+    <div className="guidance-context">
+      <div className="shell">
+        <div><h2 id="activity-picker">What are you doing with AI?</h2><p>Choose the activities you want guidance for. You can combine them.</p></div>
+        <div className="context-controls" role="group" aria-labelledby="activity-picker">
+          {contexts.map((context) => {
+            const active = selected.includes(context);
+            const next = active ? selected.filter((value) => value !== context) : [...selected, context];
+            const href = next.length ? contextHref("guidance", next) : "#/guidance?activities=";
+            return <button key={context} type="button" aria-pressed={active} onClick={() => { window.location.hash = href; }}>
+              <span aria-hidden="true">{active ? "✓" : "+"}</span>{labels[context]}
+            </button>;
+          })}
+        </div>
       </div>
     </div>
+    <div className="shell guidance-reading">
+      <div className="guidance-main">
+        {selected.length ? <>
+          <section className="guidance-overview">
+            <h2>Start with the task and the information</h2>
+            <p>Check what you can share, which rules apply to this task and how you will review the output. When activities overlap, check the requirements for each one.</p>
+            {!single && selected.map((activity) => <p key={activity}><strong>{(copies[activity] ?? pageCopy[activity]).title}</strong> · {(copies[activity] ?? pageCopy[activity]).intro}</p>)}
+          </section>
+          {examples.length > 0 && <section className="guidance-examples" aria-labelledby="guidance-examples-title">
+            <h2 id="guidance-examples-title">When activities overlap</h2>
+            {examples.map(({ title, example }) => <div key={title}><h3>{title}</h3><p>{example}</p></div>)}
+            {content && <button className="text-button" type="button" onClick={jumpToFinder}>Check the task and information type ↓</button>}
+          </section>}
+          {stages.map((stage) => {
+            const sections = stage.topics.flatMap((id) => topics.filter((topic) => topic.id === id));
+            return sections.length > 0 && <section className="guidance-stage" key={stage.title}>
+              <h2>{stage.title}</h2><p>{stage.intro}</p>
+              {sections.map((topic) => <details key={topic.id}>
+                <summary><span className="guidance-context-label">{labels[topic.activity]}</span><strong>{topic.title}</strong></summary>
+                <div className="guidance-detail">
+                  {topic.items.map(([heading, text]) => <div key={heading}><h3>{heading}</h3><p>{text}</p></div>)}
+                  {topic.example && <aside><h3>{topic.example[0]}</h3><p>{topic.example[1]}</p></aside>}
+                  {topic.links && <ul>{topic.links.map(([label, href]) => <li key={href}><a href={href}>{label}</a></li>)}</ul>}
+                </div>
+              </details>)}
+            </section>;
+          })}
+        </> : <p role="status">Select an activity to see relevant guidance and tasks.</p>}
+      </div>
+      <aside className="guidance-resources" aria-labelledby="guidance-resources-title">
+        <h2 id="guidance-resources-title">Tools and references</h2>
+        <ul>
+          <li><a href={contextHref("tools", selected)}>Compare York tools and access</a></li>
+          <li><a href={contextHref("training", selected)}>Find training</a></li>
+          <li><a href="#/governance">Explore policy and community</a></li>
+        </ul>
+        {sources.size > 0 && <details><summary>All sources and related resources</summary>
+          <ul>{[...sources].map(([href, label]) => <li key={href}><a href={href}>{label}</a></li>)}</ul>
+        </details>}
+        <a className="text-link" href={contextHref("guide", selected)}>Open Guide Finder with these activities →</a>
+      </aside>
+    </div>
+    {content && <div className="guidance-task"><GuideFinder content={content} activities={selected} /></div>}
   </div>;
 }
