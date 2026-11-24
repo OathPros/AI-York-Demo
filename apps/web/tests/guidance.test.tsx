@@ -5,12 +5,13 @@ import { GuidancePage } from "../src/information-architecture";
 import { guidanceSelection } from "../src/audience-guides";
 
 describe("contextual guidance", () => {
-  it("shows study guidance by default with a selected, shareable context", () => {
+  it("shows an unselected starting view with useful, shareable paths to each activity", () => {
     const page = renderToStaticMarkup(<GuidancePage copies={{}} />);
-    expect(page).toContain('aria-pressed="true">Study');
+    expect(page).not.toContain('aria-pressed="true"');
+    expect(page).toContain("Start with your work");
     expect(page).toContain("Course rules and citation");
-    expect(page).not.toContain("Ethics and data approvals");
-    expect(page).toContain('href="#/guide?activity=study"');
+    expect(page).toContain("Ethics and data approvals");
+    expect(page).toContain('href="#/guidance?activity=study"');
   });
 
   it.each([
@@ -48,7 +49,7 @@ describe("contextual guidance", () => {
 
   it("uses the Studio-published title and introduction for the selected context", () => {
     const page = renderToStaticMarkup(<GuidancePage activity="research" copies={{ research: { title: "Published title", intro: "Published introduction" } }} />);
-    expect(page).toContain("<h1>Published title</h1>");
+    expect(page).toMatch(/<h1[^>]*>Published title<\/h1>/);
     expect(page).toContain("Published introduction");
     expect(page).toContain("https://researchguides.library.yorku.ca/genairesearch");
   });

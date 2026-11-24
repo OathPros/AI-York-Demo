@@ -75,6 +75,7 @@ const demoEvents: ContentItem[] = Object.entries(groupRecords).map(([id, record]
     date: record.upcoming.date, startTime: "12:00", timezone: "America/Toronto", organizer: record.group,
     location: record.venue, audience: "York community", summary: record.upcoming.agenda[0],
     sourceUrl: groupRecordHref(id, "upcoming"), activities: record.activities,
+    category: id === "ai-roundtable" ? "Roundtable" : ["data-analytics", "student-services-genai", "administrative-ai"].includes(id) ? "Community session" : undefined,
     type: ["data-analytics", "teaching-learning", "administrative-ai"].includes(id) ? "training" : "event"
   }
 }));

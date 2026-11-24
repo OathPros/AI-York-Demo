@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import type { Activity, ContentItem } from "@ai-york/contracts";
 import { exampleStories } from "./demo-records";
+import { Icon } from "./public-ui";
+import eventImage from "./assets/banners/teach.webp";
+import researchImage from "./assets/banners/research.webp";
+import studyImage from "./assets/banners/study.webp";
+import workImage from "./assets/banners/work.webp";
 
 const topics: Record<Activity, string> = { study: "Study", teach: "Teaching", research: "Research", work: "Work" };
 const dateFormat = new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -60,8 +65,10 @@ export function News({ compact = false }: { compact?: boolean }) {
       </select></label>
     </div>}
     <div className="news-cards">
-      {(compact ? items.slice(0, 2) : items).map((item) => (
-        <article className="update-item news-card" key={item.title}>
+      {(compact ? items.slice(0, 2) : items).map((item, index) => (
+        <article className={`update-item news-card${!compact && index === 0 ? " news-spotlight" : ""}`} key={item.title}>
+          {!compact && index === 0 && <img src={item.activities.some((activity) => activity === "study") ? studyImage : item.activities.some((activity) => activity === "research") ? researchImage : workImage} alt="" />}
+          <div className="news-copy">
           <p className="update-meta">
             <span>{item.source}</span>
             <time dateTime={item.date}>{dateLabel(item.date)}</time>
@@ -70,6 +77,7 @@ export function News({ compact = false }: { compact?: boolean }) {
           <p>{item.summary}</p>
           <Tags activities={item.activities} />
           <a className="text-link" href={item.url}>Read the story</a>
+          </div>
         </article>
       ))}
     </div>
@@ -77,27 +85,68 @@ export function News({ compact = false }: { compact?: boolean }) {
   </div>;
 }
 
-function EventRows({ events, compact }: { events: ContentItem[]; compact?: boolean }) {
-  const Heading = compact ? "h4" : "h2";
-  return <div className="event-agenda">{events.map((event) => {
-    const { date, startTime, allDay, timezone, organizer, location, audience, summary, onlineLink, sourceUrl, activities, demo, type } = event.data;
-    const link = onlineLink || sourceUrl;
-    return <article className="update-item" key={event.id}>
-      <p className="update-meta"><time dateTime={date}>{dateLabel(date)}</time> · {type === "training" ? "Workshop" : "Event"}</p>
-      <Heading>{event.title}</Heading>
-      <p>{[allDay ? "All day" : startTime && `${startTime} (${timezone})`, location, demo && organizer === "AI @ York demo" ? "AI @ York" : organizer, audience].filter(Boolean).join(" · ")}</p>
-      {summary && <p>{summary}</p>}
-      <Tags activities={activities} />
-      {link && <a className="text-link" href={link}>Event details</a>}
-    </article>;
-  })}</div>;
+const eventType = (event: ContentItem) => event.data.category ??
+  (/\broundtable\b/i.test(event.title) ? "Roundtable" : event.data.type === "training" ? "Workshop" : "Event");
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+const todayAtYork = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Toronto", dateStyle: "short" }).format(new Date());
+const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const dayMonth = new Intl.DateTimeFormat("en-CA", { month: "short", timeZone: "UTC" });
+
+function EventDate({ date }: { date: string }) {
+  return <time className="event-date" dateTime={date} aria-label={dateLabel(date)}>
+    <span>{dayMonth.format(new Date(date + "T00:00:00Z"))}</span><strong>{Number(date.slice(8))}</strong>
+  </time>;
 }
 
-const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+function eventTime(startTime?: string, timezone?: string) {
+  if (!startTime) return "";
+  const clock = new Date(`2000-01-01T${startTime}Z`);
+  const time = Number.isNaN(clock.getTime()) ? startTime
+    : new Intl.DateTimeFormat("en-CA", { hour: "numeric", minute: "numeric", timeZone: "UTC" }).format(clock);
+  return [time, timezone === "America/Toronto" ? "ET" : timezone].filter(Boolean).join(" ");
+}
+
+function EventDetails({ event, heading: Heading }: { event: ContentItem; heading: "h2" | "h3" | "h4" }) {
+  const { startTime, allDay, timezone, organizer, location, audience, summary, onlineLink, sourceUrl, activities, demo } = event.data;
+  const link = onlineLink || sourceUrl;
+  const host = demo && organizer === "AI @ York demo" ? "AI @ York" : organizer;
+  return <div className="event-details">
+    <p className="status">{eventType(event)}</p>
+    <Heading>{event.title}</Heading>
+    {summary && <p>{summary}</p>}
+    <p className="event-logistics">{[allDay ? "All day" : eventTime(startTime, timezone), location, host, audience].filter(Boolean).join(" · ")}</p>
+    <Tags activities={activities} />
+    {link && <a className="text-link" href={link}>Event details<span className="visually-hidden"> for {event.title}</span></a>}
+  </div>;
+}
+
+function EventRows({ events, compact }: { events: ContentItem[]; compact?: boolean }) {
+  return <div className="event-agenda">{events.map((event) => <article className="event-entry" key={event.id}>
+    <EventDate date={event.data.date} />
+    <EventDetails event={event} heading={compact ? "h4" : "h3"} />
+  </article>)}</div>;
+}
+
+function UpcomingAgenda({ events }: { events: ContentItem[] }) {
+  const byMonth = new Map<string, ContentItem[]>();
+  for (const event of events) {
+    const month = event.data.date.slice(0, 7);
+    const group = byMonth.get(month) ?? [];
+    group.push(event);
+    byMonth.set(month, group);
+  }
+  return <>{[...byMonth].map(([month, items]) =>
+    <section className="agenda-month" key={month} aria-labelledby={`agenda-month-${month}`}>
+      <h3 id={`agenda-month-${month}`}>{monthFormat.format(new Date(month + "-01T00:00:00Z"))}</h3>
+      <EventRows events={items} compact />
+    </section>
+  )}</>;
+}
 
 export function Calendar({ events }: { events: ContentItem[] }) {
-  const [month, setMonth] = useState(() => isoDate(new Date()).slice(0, 7));
+  const today = todayAtYork();
+  const [mode, setMode] = useState<"agenda" | "month">("agenda");
+  const [month, setMonth] = useState(() => today.slice(0, 7));
   const [selectedDay, setSelectedDay] = useState("");
   const [topic, setTopic] = useState("");
   const [kind, setKind] = useState("");
@@ -107,42 +156,80 @@ export function Calendar({ events }: { events: ContentItem[] }) {
     setSelectedDay("");
   };
   const dates = Array.from({ length: new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate() }, (_, index) => `${month}-${String(index + 1).padStart(2, "0")}`);
-  const filtered = events.filter(({ data }) => (!topic || data.activities?.includes(topic)) && (!kind || data.type === kind));
+  const filtered = events.filter((event) => (!topic || event.data.activities?.includes(topic)) &&
+    (!kind || (["event", "training"].includes(kind) ? event.data.type === kind : eventType(event) === kind)));
+  const upcoming = filtered.filter(({ data }) => data.date >= today);
+  const featured = upcoming[0];
   const monthEvents = filtered.filter(({ data }) => data.date.startsWith(month));
+  const eventsByDay = new Map<string, number>();
+  for (const { data } of monthEvents) eventsByDay.set(data.date, (eventsByDay.get(data.date) ?? 0) + 1);
   const visible = selectedDay ? monthEvents.filter(({ data }) => data.date === selectedDay) : monthEvents;
   const next = filtered.find(({ data }) => data.date.slice(0, 7) > month);
+  const categories = [...new Set(events.map(eventType))].filter((label) => label !== "Event" && label !== "Workshop");
 
-  return <div className="calendar-layout">
-    <div className="updates-filters">
-      <TopicSelect value={topic} change={(value) => { setTopic(value); setSelectedDay(""); }} />
-      <label>Event type<select value={kind} onChange={(event) => { setKind(event.target.value); setSelectedDay(""); }}>
-        <option value="">All types</option><option value="event">Event</option><option value="training">Workshop</option>
-      </select></label>
-    </div>
-    <div className="calendar-toolbar">
-      <button type="button" onClick={() => move(-1)} aria-label="Previous month">‹</button>
-      <h2 aria-live="polite">{monthFormat.format(start)}</h2>
-      <button type="button" onClick={() => move(1)} aria-label="Next month">›</button>
-    </div>
-    <div className="calendar-grid" role="group" aria-label={monthFormat.format(start)}>
-      {weekdays.map((day) => <span key={day} className="calendar-weekday">{day}</span>)}
-      {Array.from({ length: start.getUTCDay() }, (_, index) => <span key={index} aria-hidden="true" />)}
-      {dates.map((date, index) => {
-        const count = monthEvents.filter(({ data }) => data.date === date).length;
-        return count ? <button key={date} aria-pressed={selectedDay === date} aria-label={`${dateLabel(date)}, ${count} ${count === 1 ? "event" : "events"}`}
-          onClick={() => setSelectedDay(selectedDay === date ? "" : date)}>{index + 1}<span aria-hidden="true" className="calendar-dot" /></button> :
-          <span key={date} className="calendar-day">{index + 1}</span>;
-      })}
-    </div>
-    {selectedDay && <button className="text-button" onClick={() => setSelectedDay("")}>Show all events this month</button>}
-    <div aria-live="polite">
-      {visible.length ? <EventRows events={visible} /> : <p>No events match this view</p>}
-    </div>
-    {next && <button className="button" onClick={() => { setMonth(next.data.date.slice(0, 7)); setSelectedDay(""); }}>Next month with events</button>}
+  return <div className="calendar-page">
+    <header className="calendar-cover"><div className="shell">
+      <div className="listing-head"><h1>AI calendar</h1><p className="lead">Workshops, roundtables and community sessions across York</p></div>
+      {featured && <article className="event-feature">
+        <div className="event-feature-copy" key={featured.id}>
+          <div className="event-feature-meta"><p className="eyebrow">Next up</p><EventDate date={featured.data.date} /></div>
+          <EventDetails event={featured} heading="h2" />
+        </div>
+        <div className="event-feature-media">
+          <img src={featured.data.activities?.includes("research") ? researchImage : featured.data.activities?.includes("teach") ? eventImage : workImage} alt="" />
+        </div>
+      </article>}
+    </div></header>
+    <section className="shell calendar-layout" aria-label="Browse events">
+      <div className="calendar-controls">
+        <div className="view-selector" role="group" aria-label="Event view">
+          <button type="button" aria-pressed={mode === "agenda"} onClick={() => setMode("agenda")}><Icon name="agenda" />Agenda</button>
+          <button type="button" aria-pressed={mode === "month"} onClick={() => setMode("month")}><Icon name="calendar" />Month</button>
+        </div>
+        <div className="updates-filters">
+          <TopicSelect value={topic} change={(value) => { setTopic(value); setSelectedDay(""); }} />
+          <label>Event type<select value={kind} onChange={(event) => { setKind(event.target.value); setSelectedDay(""); }}>
+            <option value="">All types</option><option value="event">Event</option><option value="training">Workshop</option>
+            {categories.map((category) => <option key={category}>{category}</option>)}
+          </select></label>
+        </div>
+      </div>
+      {mode === "agenda" ? <div className="calendar-agenda">
+        {upcoming.length > 1 && <><h2>Upcoming events</h2><UpcomingAgenda events={upcoming.slice(1)} /></>}
+        {!upcoming.length && <p role="status">No upcoming events match these filters.</p>}
+      </div> : <div className="calendar-month">
+        <div className="calendar-board">
+          <div className="calendar-toolbar">
+            <h2 aria-live="polite">{monthFormat.format(start)}</h2>
+            <div className="month-actions">
+              <button type="button" className="icon-button" onClick={() => move(-1)} aria-label="Previous month"><Icon name="previous" /></button>
+              <button type="button" className="icon-button" onClick={() => move(1)} aria-label="Next month"><Icon name="next" /></button>
+            </div>
+          </div>
+          <div className="calendar-grid" role="group" aria-label={monthFormat.format(start)}>
+            {weekdays.map((day) => <span key={day} className="calendar-weekday">{day}</span>)}
+            {Array.from({ length: start.getUTCDay() }, (_, index) => <span key={index} aria-hidden="true" />)}
+            {dates.map((date, index) => {
+              const count = eventsByDay.get(date);
+              const current = date === today ? "date" : undefined;
+              return count ? <button key={date} aria-current={current} aria-pressed={selectedDay === date} aria-label={`${dateLabel(date)}, ${count} ${count === 1 ? "event" : "events"}`}
+                onClick={() => setSelectedDay(selectedDay === date ? "" : date)}>{index + 1}<span aria-hidden="true" className="calendar-dot" /></button> :
+                <span key={date} className="calendar-day" aria-current={current}>{index + 1}</span>;
+            })}
+          </div>
+          {next && <button className="text-button" onClick={() => { setMonth(next.data.date.slice(0, 7)); setSelectedDay(""); }}>Next month with events</button>}
+        </div>
+        <div className="calendar-month-events">
+          <h2>{selectedDay ? dateLabel(selectedDay) : "This month"}</h2>
+          {selectedDay && <button className="text-button" onClick={() => setSelectedDay("")}>Show all events this month</button>}
+          <div aria-live="polite">{visible.length ? <EventRows events={visible} /> : <p>No events match this view.</p>}</div>
+        </div>
+      </div>}
+    </section>
   </div>;
 }
 
 export function Upcoming({ events }: { events: ContentItem[] }) {
-  const upcoming = events.filter(({ data }) => data.date >= isoDate(new Date())).slice(0, 2);
+  const upcoming = events.filter(({ data }) => data.date >= todayAtYork()).slice(0, 2);
   return upcoming.length ? <EventRows events={upcoming} compact /> : <p>No upcoming events are listed</p>;
 }

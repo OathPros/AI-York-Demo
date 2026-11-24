@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { ContentBundle } from "@ai-york/contracts";
 import { GroupCards, GroupOverview, formatDate, groupById, type Group } from "./governance-groups";
-import "./policies-reports.css";
+import { PhotoHero } from "./public-ui";
+import communityMobile from "./assets/banners/mobile/teach.webp";
 import communityImage from "./assets/banners/teach.webp";
 import { groupRecords, groupRecordHref } from "./demo-records";
 
@@ -198,13 +199,10 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
       </div>
     </section>
     <section id="governance-community" className="community-band" aria-labelledby="community-heading">
-      <header className="immersive-hero community-hero">
-        <img src={communityImage} alt="" loading="lazy" />
-        <div className="shell immersive-copy">
-          <h2 id="community-heading">Communities</h2>
-          <p className="lead">Connect with colleagues, share practical examples and take part in a session.</p>
-        </div>
-      </header>
+      <PhotoHero className="community-hero" image={communityImage} mobile={communityMobile} id="community-heading" lazy>
+        <h2 id="community-heading">Communities</h2>
+        <p className="lead">Connect with colleagues, share practical examples and take part in a session.</p>
+      </PhotoHero>
       <div className="shell governance-band">
         <GroupCards section="community" open={setOpenGroup} />
         {content.community.length > 0 && <section className="community-listings"><h3>More communities</h3><div className="governance-directory">{content.community.map((item) => <article className="governance-directory-row" key={item.id}>

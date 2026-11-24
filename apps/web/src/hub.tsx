@@ -6,6 +6,10 @@ import { migratedResourceHref } from "./learning";
 import { catalogDescription, isProgram } from "./catalog";
 import { publicEvents } from "./demo-records";
 import homeImage from "./assets/banners/home.webp";
+import homeMobile from "./assets/banners/mobile/home.webp";
+import partnerImage from "./assets/banners/partner.webp";
+import trainingImage from "./assets/banners/study.webp";
+import { Icon, PhotoHero } from "./public-ui";
 
 export type Page = "home" | "study" | "teach" | "research" | "work" | "partner" | "policies" | "tools" | "learning" | "events" | "communities" | "news" | "governing" | "index" | "guide" | "guidance" | "training" | "programs" | "governance";
 export type Go = (page: Page) => void;
@@ -52,7 +56,7 @@ function jumpToSection(event: React.MouseEvent<HTMLAnchorElement>) {
 }
 
 export function Principles() {
-  return <section className="section" aria-labelledby="principles-title"><p className="eyebrow">Our shared responsibilities</p><h2 id="principles-title">Use AI with care</h2><p className="lead">Everyone has a role in ensuring AI is used ethically, safely and in ways that uphold York's collective values.</p><div className="principles">{principles.map(([title, text]) => <article key={title}><h3>{title}</h3><p>{text}</p></article>)}</div></section>;
+  return <section className="section principles-section" aria-labelledby="principles-title"><p className="eyebrow">Our shared responsibilities</p><h2 id="principles-title">Use AI with care</h2><p className="lead">Everyone has a role in ensuring AI is used ethically, safely and in ways that uphold York's collective values.</p><div className="principles">{principles.map(([title, text]) => <article key={title}><h3>{title}</h3><p>{text}</p></article>)}</div></section>;
 }
 
 export function GuideFinder({ content, initial = [], activities, standalone = false }: { content: ContentBundle; initial?: Activity[]; activities?: readonly Activity[]; standalone?: boolean }) {
@@ -81,8 +85,7 @@ export function GuideFinder({ content, initial = [], activities, standalone = fa
   const policyById = (id: string) => content.policy.find((policy) => policy.id === id);
   return (
     <section className="section guide" aria-labelledby="guide-title">
-      <p className="eyebrow">Find your answer</p>
-      <Title id="guide-title">{standalone ? "Check a specific use of AI" : "Can I use AI for this"}</Title>
+      <header className="guide-heading"><Title id="guide-title">{standalone ? "Check a specific use of AI" : "Can I use AI for this"}</Title></header>
       <div className="journey">
         {!activities && <fieldset>
           <legend>I'm using AI to</legend>
@@ -102,12 +105,10 @@ export function GuideFinder({ content, initial = [], activities, standalone = fa
               {tasks.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
             </select>
           </div>
-          {activities && tasks.length > 0 && <div className="guide-task-shortcuts" role="group" aria-label="Suggested tasks">
-            {tasks.slice(0, 4).map(([key, label]) => <button key={key} type="button" aria-pressed={task === key} onClick={() => setTask(key)}>{label}</button>)}
-          </div>}
+
         </div>
-        <fieldset disabled={!task}>
-          <legend>I'll share the following information with AI</legend>
+        <fieldset disabled={!task} hidden={!task}>
+          <legend>Information involved</legend>
           <div className="data-choices">
             {dataOptions.map((option) => (
               <label key={option.value} className="data-choice">
@@ -147,24 +148,29 @@ export function ToolsSection({ content, activity, activities, showFilter = true,
   const tools = content.tool.filter((tool) => toolVisible(tool, audience) && (!selected.length || selected.some((value) => tool.data.activities?.includes(value))));
   const Title = standalone ? "h1" : "h2";
   const ToolTitle = standalone ? "h2" : "h3";
-  return (
-    <section className={standalone ? "section tools-page" : "section"} aria-labelledby="tools-title">
-      <p className="eyebrow">York-approved tools</p>
-      <Title id="tools-title">{standalone ? "Tools and how to get access" : "The right tools for you"}</Title>
-      <p className="lead">
-        {standalone && "Compare York-approved tools by who can use them and what they are for. "}
-        Review each tool's access requirements and permitted uses before sharing information.
-      </p>
-      {showFilter && <div className="filters" role="group" aria-label="Filter by access">{([["all", "All tools"], ["students", "For students"], ["staff", "Faculty and staff"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)}>{label}</button>)}</div>}
-      {standalone && <div className="tool-catalog-note">
-        <p><strong>Before choosing a tool</strong> Check your account and the information your task involves. The Guide Finder shows tool references alongside the conditions for a specific task.</p>
-        <a className="text-link" href={selected.length ? `#/guide?activities=${selected.join(",")}` : "#/guide"}>Check a task</a>
-        {selected.length > 0 && <p>Showing tools for {selected.map((value) => activityLabels[value]).join(", ")} · <a className="text-link" href="#/tools">Show all tools</a></p>}
-      </div>}
-      <div className="grid">{tools.map((tool) => <article className="card" key={tool.id}><span className="status">{audienceLabel[tool.data.audience] ?? ""}</span><ToolTitle>{tool.data.name}</ToolTitle><p>{tool.data.scope}</p>{standalone && Array.isArray(tool.data.activities) && <p className="quiet">{tool.data.activities.map((value: Activity) => activityLabels[value]).filter(Boolean).join(" · ")}</p>}<ResourceLink href={tool.data.url}>Access and requirements</ResourceLink></article>)}</div>
-      {tools.length === 0 && <Empty>No tools match this view yet.</Empty>}
+  return <div className={standalone ? "tools-page" : "tools-listing"}>
+    <header className={standalone ? "tools-cover" : "section"}>
+      <div className={standalone ? "shell tools-cover-inner" : undefined}>
+        <div><Title id="tools-title">{standalone ? "Tools and how to get access" : "The right tools for you"}</Title>
+        <p className="lead">Compare access and permitted uses for York-approved AI tools.</p></div>
+        {standalone && <aside className="tools-cover-note"><Icon name="tools" /><p>Check the information your task involves before sharing it with a tool.</p>
+          <a className="text-link" href={selected.length ? `#/guide?activities=${selected.join(",")}` : "#/guide"}>Check a task</a></aside>}
+      </div>
+    </header>
+    <section className="section tools-catalog" aria-labelledby="tools-title">
+      {showFilter && <div className="filters" role="group" aria-label="Filter by access">{([["all", "All tools"], ["students", "For students"], ["staff", "Faculty and staff"]] as const).map(([value, label]) =>
+        <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)}>{label}</button>)}</div>}
+      {selected.length > 0 && <div className="listing-head"><p className="status">{selected.map((value) => activityLabels[value]).join(" · ")}</p><a className="text-link" href="#/tools">Show all activities</a></div>}
+      <div className="tools-register">{tools.map((tool) => <article className="tool-entry" key={tool.id}>
+        <p className="status">{audienceLabel[tool.data.audience] ?? ""}</p>
+        <div><ToolTitle>{tool.data.name}</ToolTitle><p>{tool.data.scope}</p>
+          {Array.isArray(tool.data.activities) && <p className="quiet">{tool.data.activities.map((value: Activity) => activityLabels[value]).filter(Boolean).join(" · ")}</p>}
+        </div>
+        <ResourceLink href={tool.data.url}>Access and requirements<span className="visually-hidden"> for {tool.data.name}</span></ResourceLink>
+      </article>)}</div>
+      {tools.length === 0 && <Empty>No tools match this view.</Empty>}
     </section>
-  );
+  </div>;
 }
 
 const trainingFilters = [["all", "All resources"], ["basics", "Getting started"], ["work", "Administrative"], ["teach", "Teaching"], ["study", "Study & research"], ["tools", "Tool how-tos"]] as const;
@@ -185,11 +191,7 @@ export function TrainingSection({ content, tags, title = "AI learning at York" }
 }
 
 export function EventList({ content }: { content: ContentBundle }) {
-  return <section className="section updates-page">
-    <h1>AI calendar</h1>
-    <p className="lead">Browse AI workshops and events by month, topic or type</p>
-    <Calendar events={publicEvents(content.event)} />
-  </section>;
+  return <Calendar events={publicEvents(content.event)} />;
 }
 
 export function CommunityList({ content, activity }: { content: ContentBundle; activity?: Activity }) {
@@ -203,9 +205,9 @@ export function PageHeader({ eyebrow, title, intro, children }: { eyebrow: strin
 
 export function PartnerPage({ content, go, copy = pageCopy.partner }: { content: ContentBundle; go: Go; copy?: PageCopy }) {
   return <>
-    <section className="experience-hero partner-hero"><div className="shell">
-      <h1>{copy.title}</h1><p className="experience-lede">{copy.intro}</p>
-    </div></section>
+    <PhotoHero className="partner-hero" image={partnerImage}>
+      <h1>{copy.title}</h1><p className="lead">{copy.intro}</p>
+    </PhotoHero>
     <section className="shell workplace-examples"><h2>Find the right route</h2>
       <div className="task-notes">
         <article><h3>Find a degree or certificate</h3><p>Use the program links below to compare admissions requirements and delivery options</p></article>
@@ -239,62 +241,46 @@ export function NewsPage({ story }: { story?: string }) {
   if (story) return <NewsStory id={story} />;
   return <section className="section updates-page">
     <h1>AI news</h1>
-    <p className="lead">Explore updates by topic and see where each story came from</p>
+    <p className="lead">Research, teaching and developments across York</p>
     <News />
   </section>;
 }
 
-export function Home({ content, go, copy = pageCopy.home }: { content: ContentBundle; go: Go; copy?: PageCopy }) {
-  return (
-    <div className="home-page">
-      <section className="home-hero immersive-hero" aria-labelledby="home-title">
-        <img src={homeImage} alt="" />
-        <div className="home-shell immersive-copy home-hero-copy">
-            <p className="eyebrow">York University</p>
-            <h1 id="home-title">{copy.title}</h1>
-            <p className="home-lede">{copy.intro}</p>
-            <div className="hero-actions">
-              <a className="button primary" href="#/guidance">Explore AI guidance</a>
-              <a className="text-link home-check-link" href="#guide-title" onClick={jumpToSection}>Check a specific task</a>
-            </div>
+export function Home({ content, copy = pageCopy.home }: { content: ContentBundle; copy?: PageCopy }) {
+  return <div className="home-page">
+    <PhotoHero className="home-hero" image={homeImage} mobile={homeMobile} id="home-title">
+      <h1 id="home-title">{copy.title}</h1>
+      <p className="home-lede">{copy.intro}</p>
+      <div className="inline-actions">
+        <a className="button primary" href="#/guidance">Explore AI guidance</a>
+        <a className="button secondary" href="#guide-title" onClick={jumpToSection}>Check a task</a>
+      </div>
+    </PhotoHero>
+    <nav className="shell home-directory" aria-label="Explore AI at York">
+      <a href="#/tools"><Icon name="tools" /><strong>Tools and access</strong><span>York-approved AI tools</span></a>
+      <a href="#/training"><Icon name="book" /><strong>Training and workshops</strong><span>Practice exercises and resources</span></a>
+      <a href="#/governance"><Icon name="people" /><strong>Policy and community</strong><span>Policy, groups and participation</span></a>
+    </nav>
+    <div className="home-finder"><GuideFinder content={content} /></div>
+    <Principles />
+    <section className="learning-feature" aria-labelledby="learning-feature-title">
+      <img src={trainingImage} alt="" loading="lazy" />
+      <div><h2 id="learning-feature-title">Learn by doing</h2>
+        <p>Try an exercise in the practice lab, find training for your work or explore York’s AI degrees and certificates.</p>
+        <div className="inline-actions"><a className="button primary" href="#/training">Explore training</a><a className="text-link" href="#/programs">Browse programs</a></div>
+      </div>
+    </section>
+    <section className="home-updates" aria-labelledby="home-updates-title">
+      <div className="section">
+        <h2 id="home-updates-title">Around York</h2>
+        <div className="home-updates-grid">
+          <div><div className="listing-head"><h3>Latest news</h3><a className="text-link" href="#/news">All news</a></div><News compact /></div>
+          <div><div className="listing-head"><h3>Upcoming events</h3><a className="text-link" href="#/events">Full calendar</a></div><Upcoming events={publicEvents(content.event)} /></div>
         </div>
-      </section>
-      <nav className="home-shortcuts home-shell" aria-label="Explore AI at York">
-        <a href="#/tools"><strong>Tools and access</strong><span>Find the right tool for your work</span></a>
-        <a href="#/training"><strong>Training and workshops</strong><span>Build skills you can put to use</span></a>
-        <a href="#/governance"><strong>Policy and community</strong><span>Find sources and connect with peers</span></a>
-      </nav>
-      <div className="home-finder"><GuideFinder content={content} /></div>
-      <Principles />
-      <ToolsSection content={content} />
-      <section className="home-updates" aria-labelledby="home-updates-title">
-        <div className="section">
-          <h2 id="home-updates-title">News and events</h2>
-          <div className="home-updates-grid">
-            <div>
-              <h3>Latest news</h3>
-              <News compact />
-              <a className="text-link" href="#/news">See all news</a>
-            </div>
-            <div>
-              <h3>Upcoming events</h3>
-              <Upcoming events={publicEvents(content.event)} />
-              <a className="text-link" href="#/events">Open the calendar</a>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section className="home-next">
-        <div className="home-shell home-next-grid">
-          <div><h2>Explore guidance by activity</h2><p>Get practical examples, policy links and tools for the work you do</p></div>
-          <div className="home-route-list">
-            {(["study", "teach", "research", "work", "partner"] as const).map((key) => (
-              <button key={key} onClick={() => go(key)}><strong>{pageCopy[key].title}</strong></button>
-            ))}
-          </div>
-        </div>
-      </section>
-      <TrainingSection content={content} />
-    </div>
-  );
+      </div>
+    </section>
+    <nav className="section home-activities" aria-label="Guidance by activity">
+      {(["study", "teach", "research", "work", "partner"] as const).map((key) => <a key={key} href={`#/${key}`}>{pageCopy[key].title}</a>)}
+    </nav>
+  </div>;
 }

@@ -96,7 +96,7 @@ export function groupById(id: string): Group | undefined {
 }
 
 export function GroupCards({ section, open }: { section: GroupSection; open: (group: Group) => void }) {
-  return <div className="governance-directory">
+  return <div className={`governance-directory directory-${section}`}>
     {groups.filter((group) => group.section === section).map((group) => {
       const href = `#/governance/groups/${group.id}`;
       const records = groupRecords[group.id];
@@ -182,10 +182,11 @@ export function GroupPage({ id, record, onRequestJoin }: { id: string; record?: 
     <a className="text-link group-back" href={`#/governance?section=${group.section}`}>Back to policy and community</a>
     <header className="group-page__header"><p className="eyebrow">{group.type}</p><h1>{group.name}</h1><p className="lead">{group.overview}</p></header>
     {group.note && <p className="notice">{group.note}</p>}
-    <section aria-labelledby="group-mandate"><h2 id="group-mandate">Mandate</h2>{group.mandate.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</section>
+    <div className="group-profile"><section aria-labelledby="group-mandate"><h2 id="group-mandate">Mandate</h2>{group.mandate.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</section>
     <section aria-labelledby="group-members"><h2 id="group-members">Members</h2>
       <ul className="group-members">{[...(group.confirmedMembers ?? []), ...group.exampleMembers].map((member) => <li key={member}><span aria-hidden="true">{member.charAt(0)}</span>{member}</li>)}</ul>
     </section>
+    </div>
     <GroupRecords key={id} group={group} selected={record} />
     {group.section !== "roundtables" && <section aria-labelledby="group-join"><h2 id="group-join">Join</h2>
       {group.joinUrl ? <><p>Visit the official community page to find the membership form.</p><a className="button primary" href={group.joinUrl} target="_blank" rel="noreferrer">Join this community <span className="visually-hidden">(opens the official page in a new tab)</span></a></>

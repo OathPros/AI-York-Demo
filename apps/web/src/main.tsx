@@ -9,6 +9,9 @@ import "./styles.css";
 import { GuidancePage, ProgramsPage, TrainingPage } from "./information-architecture";
 import { guidanceSelection } from "./audience-guides";
 import "./public-site.css";
+import "./public-experiences.css";
+import "./policies-reports.css";
+import { Icon } from "./public-ui";
 import { GovernancePage } from "./policies-reports";
 import { GroupPage } from "./governance-groups";
 import { DemoBanner } from "./demo-banner";
@@ -152,12 +155,12 @@ function App() {
 
   const renderPage = () => {
     switch (page) {
-      case "home": return <Home content={content} go={go} copy={publishedPages.home} />;
+      case "home": return <Home content={content} copy={publishedPages.home} />;
       case "study": case "teach": case "research": case "work":
         return <GuidancePage activity={page} copies={publishedPages} content={content} />;
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
       case "guide": return <GuideFinder key={selectedContexts.join(",")} content={content} initial={selectedContexts} standalone />;
-      case "guidance": return <GuidancePage activities={selectedContexts.length || params.get("activities") === "" ? selectedContexts : undefined} copies={publishedPages} content={content} />;
+      case "guidance": return <GuidancePage activities={selectedContexts} copies={publishedPages} content={content} taskView={selectedContexts.length > 0 && params.get("view") === "task"} />;
       case "policies": case "governing": case "communities": case "governance": return groupId ? <GroupPage id={groupId} record={params.get("record") ?? undefined} onRequestJoin={requestGroupJoin} /> : <GovernancePage content={content} section={governanceSection} />;
       case "tools": return <ToolsSection content={content} activities={selectedContexts} standalone />;
       case "learning": case "training": return <TrainingPage content={content} activity={activity} activities={selectedContexts} />;
@@ -171,7 +174,7 @@ function App() {
   const navItems: [Page, string][] = [["guidance", "Guidance"], ["training", "Training"], ["programs", "Programs"], ["tools", "Tools"], ["governance", "Policy & community"], ["events", "Calendar"], ["news", "News"]];
   const currentNav: Page = ["study", "teach", "research", "work", "guide"].includes(page) ? "guidance" : page === "learning" ? "training" : ["policies", "governing", "communities"].includes(page) ? "governance" : page;
   return <div className={screen === "site" ? "app public-site" : "app"}><DemoBanner publicNotice={screen !== "studio"} onSuggest={screen !== "studio" ? suggest : undefined} onOpenStudio={screen !== "studio" ? openStudio : undefined} />{screen !== "studio" && <>
-    <header className="site-header"><a className="brand" href="#/home" aria-label="AI @ York home" onClick={(e) => navigateLink(e, "home")}><span>AI <b>@</b> York</span>{screen !== "site" && <small>Guidance tools support</small>}</a>{screen === "site" && <button type="button" className="site-menu-toggle" aria-expanded={menuOpen} aria-controls="primary-nav" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "Close menu" : "Menu"}</button>}<nav id="primary-nav" data-open={menuOpen} aria-label="Primary">{navItems.map(([key, label]) => <a key={key} href={`#/${key}`} aria-current={screen === "site" && currentNav === key ? "page" : undefined} onClick={(e) => navigateLink(e, key)}>{label}</a>)}<a className="nav-primary" href="#/guide" onClick={(e) => navigateLink(e, "guide")}>Can I use AI for this</a></nav></header></>}
+    <header className="site-header"><a className="brand" href="#/home" aria-label="AI @ York home" onClick={(e) => navigateLink(e, "home")}><span>AI <b>@</b> York</span>{screen !== "site" && <small>Guidance tools support</small>}</a>{screen === "site" && <button type="button" className="site-menu-toggle" aria-expanded={menuOpen} aria-controls="primary-nav" onClick={() => setMenuOpen(!menuOpen)}><Icon name={menuOpen ? "close" : "menu"} />{menuOpen ? "Close menu" : "Menu"}</button>}<nav id="primary-nav" data-open={menuOpen} aria-label="Primary">{navItems.map(([key, label]) => <a key={key} href={`#/${key}`} aria-current={screen === "site" && currentNav === key ? "page" : undefined} onClick={(e) => navigateLink(e, key)}>{label}</a>)}<a className="nav-primary" href="#/guide" onClick={(e) => navigateLink(e, "guide")}>Can I use AI for this</a></nav></header></>}
     <main>
       {screen === "site" && <>{error && <p className="error" role="alert">{error}</p>}{renderPage()}</>}
       {screen === "role" && <section className="panel narrow"><p className="eyebrow">Workspace access</p><h1>Choose how to continue</h1><p>Select a role to suggest an update or manage content.</p>{error && <p className="error" role="alert">{error}</p>}<div className="role-grid"><button className="role" onClick={() => chooseRole("external")}><strong>External User</strong><span>Suggest an event, training, fix a broken link or tell us what is missing.</span></button><button className="role" onClick={() => chooseRole("admin")}><strong>AI @ York Admin</strong><span>Manage the policy, interpretation, tool, event, community and training inventories, and review suggested changes.</span></button></div><button className="text-button" onClick={() => go("home")}>Return to AI @ York</button></section>}
