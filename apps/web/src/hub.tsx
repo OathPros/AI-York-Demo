@@ -85,15 +85,13 @@ export function GuideFinder({ content, initial = [], activities, standalone = fa
       <Title id="guide-title">{standalone ? "Check a specific use of AI" : "Can I use AI for this"}</Title>
       <p className="lead">Choose a task and the kind of information it involves to see the reviewed guidance for each activity.</p>
       <div className="journey">
-        {!activities && <fieldset aria-describedby="guide-activity-help">
+        {!activities && <fieldset>
           <legend>I'm using AI to</legend>
-          <p className="journey-help" id="guide-activity-help">Choose one or more</p>
           <div className="activity-choices">
             {(Object.keys(activityLabels) as Activity[]).map((activity) => (
-              <label key={activity} className="activity-choice">
-                <input type="checkbox" checked={acts.includes(activity)} onChange={() => toggle(activity)} />
+              <button type="button" key={activity} className="activity-choice" aria-pressed={acts.includes(activity)} onClick={() => toggle(activity)}>
                 {activityLabels[activity]}
-              </label>
+              </button>
             ))}
           </div>
         </fieldset>}
@@ -126,7 +124,7 @@ export function GuideFinder({ content, initial = [], activities, standalone = fa
         </fieldset>
       </div>
       {ready && acts.length > 1 && <p className="guide-combined-note">Review every result that applies to your task. A result for one activity does not override a restriction in another. A missing result does not establish permission.</p>}
-      <div className="status-line guide-status" role="status">{ready ? `Showing guidance for ${acts.map((a) => activityLabels[a]).join(", ")}` : "Choose an activity, a task and the information involved. Guidance appears automatically"}</div>
+      <div className="visually-hidden" role="status">{ready ? `Showing guidance for ${acts.map((a) => activityLabels[a]).join(", ")}` : ""}</div>
       {ready && <div className="results">{results.map(({ activity, item }) => item ? (
         <article className="result" key={activity}>
           <span className="status">{activityLabels[activity]}</span><h3>{item.title}</h3><p>{item.data.example_use}</p>

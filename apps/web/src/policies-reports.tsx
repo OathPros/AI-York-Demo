@@ -140,7 +140,7 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
     <header className="governance-intro">
       <div className="shell">
         <p className="eyebrow">AI @ York</p>
-        <h1>Policy, governance<br className="governance-title-break" /> and community</h1>
+        <h1>Policy, governance and community</h1>
         <p className="lead">Explore the policy, the people shaping AI at York and the communities bringing it to life.</p>
         <nav className="governance-nav" aria-label="Governance sections">
           {[["roundtables", "Roundtable"], ["policy", "Policy"], ["working-groups", "Working groups"], ["community", "Communities"], ["reports", "Reports"]].map(([id, label]) =>

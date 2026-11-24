@@ -1,21 +1,22 @@
-.public-site { --red: #bd1635; --red-dark: #99112b; --wash: #f3efe8; --line: #d9d1c7; }
-.public-site .site-header { min-height: 70px; padding-inline: max(24px, calc((100vw - 1180px) / 2)); box-shadow: none; }
+.public-site { --red: #bd1635; --red-dark: #99112b; --wash: #f2f4f7; --line: #cfd4dc; --dark-field: #20242b; }
+.public-site .demo-banner__message { max-width: none; }
+.public-site .notice { border-color: #556279; background: var(--wash); }
+.public-site .site-header { min-height: 70px; padding-inline: max(24px, calc((100vw - 1180px) / 2)); box-shadow: none; border-color: var(--line); }
 .public-site .site-header nav a { font-size: .875rem; }
 .public-site .site-header nav .nav-primary { border-radius: 2rem; }
-.public-site .demo-banner { background: #24211f; }
+.public-site .demo-banner, .public-site footer { background: var(--dark-field); }
 .public-site .site-menu-toggle { display: none; }
 /* Image fills the section; reading width is handled by the copy, independently. */
-.immersive-hero { display: grid; align-items: end; position: relative; isolation: isolate; overflow: hidden; background: #26201c; color: #fffaf2; min-height: var(--hero-height, 29rem); }
+.immersive-hero { display: grid; align-items: end; position: relative; isolation: isolate; overflow: hidden; background: var(--dark-field); color: #fff; min-height: var(--hero-height, 29rem); }
 .immersive-hero > img { width: 100%; height: 100%; position: absolute; inset: 0; z-index: -2; object-fit: cover; object-position: var(--image-position, center); }
-.immersive-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(17 13 12 / .87), rgb(17 13 12 / .65) 38%, rgb(17 13 12 / .1) 78%); }
+.immersive-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(13 17 25 / .87), rgb(13 17 25 / .65) 38%, rgb(13 17 25 / .1) 78%); }
 .immersive-copy { padding-block: clamp(2.75rem, 8vw, 7rem); }
 .immersive-copy > .eyebrow { color: #ffd0d5; }
-.immersive-copy > .lead, .home-lede { max-width: 36rem; color: #fffaf2; font-size: clamp(1.04rem, 1.6vw, 1.35rem); }
+.immersive-copy > .lead, .home-lede { color: #fff; font-size: clamp(1.04rem, 1.6vw, 1.35rem); }
 .home-hero { --hero-height: clamp(29rem, 47vw, 47rem); --image-position: 64% center; }
 .home-hero h1 { font-size: clamp(4rem, 11vw, 10rem); margin: .3rem 0 .8rem; line-height: .96; letter-spacing: -.075em; }
 .home-hero .home-check-link { color: #fff; }
-.home-finder { background: #f6f0e7; margin-top: clamp(1.5rem, 4vw, 3rem); }
-.home-finder .guide .journey { background: #fffaf3; }
+.home-finder { background: var(--wash); margin-top: clamp(1.5rem, 4vw, 3rem); }
 .community-hero { --hero-height: clamp(20rem, 36vw, 32rem); --image-position: center 53%; }
 .home-check-link { display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; }
 .home-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-block: 1.5rem 0; border-bottom: 1px solid var(--line); }
@@ -25,15 +26,14 @@
 .home-shortcuts span { grid-row: 2; color: var(--muted); }
 .home-shortcuts b { grid-column: 2; grid-row: 1; color: var(--red-dark); }
 .public-site .home-page .principles { background: transparent; gap: .75rem; padding: 0; }
-.public-site .home-page .home-updates { background: #292522; }
-.public-site .home-next { background: #eae2d5; color: #201c1b; }
-.public-site .home-next .home-route-list { background: #302827; }
+.public-site .home-page .home-updates { background: var(--dark-field); }
+.public-site .home-next { background: var(--wash); color: var(--ink); }
+.public-site .home-next .home-route-list { background: var(--dark-field); }
 .public-site .guide > h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5.25rem); }
-.public-site .guide .journey { background: #f1ebe3; border-radius: .6rem; }
 .guide-task-shortcuts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
 .guide-task-shortcuts button { border-radius: 2rem; }
-.guide-task-shortcuts button[aria-pressed="true"] { background: #292522; color: white; }
-.guide-combined-note { padding: .8rem 1rem; background: #f1ebe3; }
+.guide-task-shortcuts button[aria-pressed="true"] { background: var(--dark-field); color: white; }
+.guide-combined-note { padding: .8rem 1rem; background: var(--wash); }
 .public-site summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 @media (max-width: 1020px) {
   .public-site .site-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; padding-block: .65rem; }
@@ -44,7 +44,7 @@
 @media (max-width: 700px) {
   .public-site .site-header { padding-inline: 16px; }
   .home-shortcuts { grid-template-columns: minmax(0, 1fr); }
-  .immersive-hero::before { background: linear-gradient(0deg, rgb(17 13 12 / .93), rgb(17 13 12 / .73) 49%, rgb(17 13 12 / .14) 100%); }
+  .immersive-hero::before { background: linear-gradient(0deg, rgb(13 17 25 / .93), rgb(13 17 25 / .73) 49%, rgb(13 17 25 / .14) 100%); }
   .immersive-copy { padding-block: 4.5rem 2.5rem; }
   .home-shortcuts { margin-top: .5rem; }
   .home-shortcuts a { padding-inline: 0; }
@@ -64,7 +64,6 @@
 .public-site .report-records li { padding-block: .9rem; border-top: 1px solid var(--line); }
 .public-site .report-records li .status { margin-left: 1rem; }
 .public-site .report-records li p { margin: .4rem 0 0; }
-.public-site .story-page { max-width: 54rem; }
 .public-site .story-page .update-meta { margin-top: 1.4rem; }
 @media (max-width: 760px) { .public-site .group-records { grid-template-columns: minmax(0, 1fr); } }
 .public-site .tool-catalog-note { margin-block: 1.25rem; padding: .9rem 1.3rem; background: var(--wash); }
@@ -76,7 +75,7 @@
 .public-site .site-menu-toggle { border: 1px solid var(--line); border-radius: 2rem; padding: .4rem 1rem; background: #fff; font-weight: 700; }
 
 
-.academic-intro { background: #ede6d9; padding-block: clamp(2.75rem, 8vw, 7rem); }
+.academic-intro { background: var(--wash); padding-block: clamp(2.75rem, 8vw, 7rem); }
 .academic-intro h1 { font-size: clamp(3.75rem, 9vw, 8.25rem); margin: 0; letter-spacing: -.065em; }
 .academic-intro p { margin-bottom: 0; }
 .programs-page .section { padding-top: clamp(1.25rem, 4vw, 3.5rem); }
