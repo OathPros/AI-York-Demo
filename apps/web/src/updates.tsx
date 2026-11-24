@@ -22,7 +22,7 @@ const news = [
 export function NewsStory({ id }: { id: string }) {
   const story = exampleStories.find((item) => item.id === id);
   return <article className="section updates-page story-page">
-    <a className="text-link" href="#/news">← All AI news</a>
+    <a className="text-link" href="#/news">All AI news</a>
     {story ? <>
       <p className="update-meta"><time dateTime={story.date}>{dateLabel(story.date)}</time> · AI @ York</p>
       <h1>{story.title}</h1><p className="lead">{story.summary}</p>
@@ -69,7 +69,7 @@ export function News({ compact = false }: { compact?: boolean }) {
           <Heading>{item.title}</Heading>
           <p>{item.summary}</p>
           <Tags activities={item.activities} />
-          <a className="text-link" href={item.url}>Read the story <span aria-hidden="true">→</span></a>
+          <a className="text-link" href={item.url}>Read the story</a>
         </article>
       ))}
     </div>

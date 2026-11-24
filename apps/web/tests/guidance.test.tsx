@@ -7,7 +7,7 @@ import { guidanceSelection } from "../src/audience-guides";
 describe("contextual guidance", () => {
   it("shows study guidance by default with a selected, shareable context", () => {
     const page = renderToStaticMarkup(<GuidancePage copies={{}} />);
-    expect(page).toContain('aria-pressed="true"><span aria-hidden="true">✓</span>Study');
+    expect(page).toContain('aria-pressed="true">Study');
     expect(page).toContain("Course rules and citation");
     expect(page).not.toContain("Ethics and data approvals");
     expect(page).toContain('href="#/guide?activity=study"');
@@ -34,8 +34,16 @@ describe("contextual guidance", () => {
     const activities = guidanceSelection(new URLSearchParams(`activities=${value},invalid`));
     const page = renderToStaticMarkup(<GuidancePage copies={{}} activities={activities} />);
     for (const topic of topics) expect(page).toContain(topic);
-    expect(page.match(/Start with the task and the information/g)).toHaveLength(1);
+    expect(page.match(/Selected activities/g)).toHaveLength(1);
     expect(page).toContain(`href="#/guide?activities=${value}"`);
+  });
+
+  it("puts activity controls in the hero and omits the empty selection prompt", () => {
+    const page = renderToStaticMarkup(<GuidancePage copies={{}} activities={[]} />);
+    const hero = page.split("</header>")[0];
+    expect(hero).toContain("context-controls");
+    expect(hero).not.toContain("Check a task");
+    expect(page).not.toContain("Select an activity to see relevant guidance");
   });
 
   it("uses the Studio-published title and introduction for the selected context", () => {

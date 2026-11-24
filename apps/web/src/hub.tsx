@@ -83,7 +83,6 @@ export function GuideFinder({ content, initial = [], activities, standalone = fa
     <section className="section guide" aria-labelledby="guide-title">
       <p className="eyebrow">Find your answer</p>
       <Title id="guide-title">{standalone ? "Check a specific use of AI" : "Can I use AI for this"}</Title>
-      <p className="lead">Choose a task and the kind of information it involves to see the reviewed guidance for each activity.</p>
       <div className="journey">
         {!activities && <fieldset>
           <legend>I'm using AI to</legend>
@@ -99,7 +98,7 @@ export function GuideFinder({ content, initial = [], activities, standalone = fa
           <label htmlFor="guide-task">AI will help me</label>
           <div className="journey-select">
             <select id="guide-task" value={task} disabled={tasks.length === 0} onChange={(e) => setTask(e.target.value)}>
-              <option value="">{!acts.length ? "Choose an activity first" : tasks.length ? "Choose a task" : "No tasks available"}</option>
+              <option value="">{!acts.length || tasks.length ? "Select a task" : "No tasks available"}</option>
               {tasks.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
             </select>
           </div>
@@ -180,7 +179,7 @@ export function TrainingSection({ content, tags, title = "AI learning at York" }
       <p className="lead">Understand how AI works, learn to use York-approved tools, and develop practical skills for your role.</p>
       {!tags && <div className="filters" role="group" aria-label="Filter AI learning resources">{trainingFilters.map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>)}</div>}
       <div className="grid">{items.map((item) => <article className="card" key={item.id}><span className="status">{item.data.format}</span><h3>{item.title}</h3>{catalogDescription(item) && <p>{catalogDescription(item)}</p>}<ResourceLink href={item.data.url}>Open resource</ResourceLink></article>)}</div>
-      {items.length === 0 && <Empty>No training matches that focus yet. Choose another category.</Empty>}
+      {items.length === 0 && <Empty>No training matches this category.</Empty>}
     </section>
   );
 }
@@ -215,7 +214,7 @@ export function PartnerPage({ content, go, copy = pageCopy.partner }: { content:
       <div className="field-example"><h3>Prepare a partnership brief</h3><p>Describe the problem, the people it affects, the expertise you need and a possible first project. Flag data access, ownership and funding questions before anyone shares private material</p></div>
     </section>
     <TrainingSection content={content} tags={["partner"]} title="Training for external audiences" />
-    <section className="section"><button onClick={() => go("events")}>See upcoming events <span aria-hidden="true">→</span></button></section>
+    <section className="section"><button onClick={() => go("events")}>See upcoming events</button></section>
   </>;
 }
 
@@ -255,15 +254,15 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
             <h1 id="home-title">{copy.title}</h1>
             <p className="home-lede">{copy.intro}</p>
             <div className="hero-actions">
-              <a className="button primary" href="#/guidance">Explore AI guidance <span aria-hidden="true">→</span></a>
-              <a className="text-link home-check-link" href="#guide-title" onClick={jumpToSection}>Check a specific task <span aria-hidden="true">↓</span></a>
+              <a className="button primary" href="#/guidance">Explore AI guidance</a>
+              <a className="text-link home-check-link" href="#guide-title" onClick={jumpToSection}>Check a specific task</a>
             </div>
         </div>
       </section>
       <nav className="home-shortcuts home-shell" aria-label="Explore AI at York">
-        <a href="#/tools"><strong>Tools and access</strong><span>Find the right tool for your work</span><b aria-hidden="true">→</b></a>
-        <a href="#/training"><strong>Training and workshops</strong><span>Build skills you can put to use</span><b aria-hidden="true">→</b></a>
-        <a href="#/governance"><strong>Policy and community</strong><span>Find sources and connect with peers</span><b aria-hidden="true">→</b></a>
+        <a href="#/tools"><strong>Tools and access</strong><span>Find the right tool for your work</span></a>
+        <a href="#/training"><strong>Training and workshops</strong><span>Build skills you can put to use</span></a>
+        <a href="#/governance"><strong>Policy and community</strong><span>Find sources and connect with peers</span></a>
       </nav>
       <div className="home-finder"><GuideFinder content={content} /></div>
       <Principles />
@@ -290,7 +289,7 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
           <div><h2>Explore guidance by activity</h2><p>Get practical examples, policy links and tools for the work you do</p></div>
           <div className="home-route-list">
             {(["study", "teach", "research", "work", "partner"] as const).map((key) => (
-              <button key={key} onClick={() => go(key)}><strong>{pageCopy[key].title}</strong><b aria-hidden="true">→</b></button>
+              <button key={key} onClick={() => go(key)}><strong>{pageCopy[key].title}</strong></button>
             ))}
           </div>
         </div>

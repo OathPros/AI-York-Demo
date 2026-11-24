@@ -179,7 +179,7 @@ export function GroupPage({ id, record, onRequestJoin }: { id: string; record?: 
 
   if (!group) return <div className="section policies-reports"><h1>Group not found</h1><p>We couldn't find this group.</p><a className="text-link" href="#/governance">Back to policy and community</a></div>;
   return <div className="section policies-reports group-page">
-    <a className="text-link group-back" href={`#/governance?section=${group.section}`}>← Back to policy and community</a>
+    <a className="text-link group-back" href={`#/governance?section=${group.section}`}>Back to policy and community</a>
     <header className="group-page__header"><p className="eyebrow">{group.type}</p><h1>{group.name}</h1><p className="lead">{group.overview}</p></header>
     {group.note && <p className="notice">{group.note}</p>}
     <section aria-labelledby="group-mandate"><h2 id="group-mandate">Mandate</h2>{group.mandate.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</section>

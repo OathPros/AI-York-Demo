@@ -20,9 +20,9 @@ function contextHref(page: "guidance" | "guide" | "training" | "tools", selectio
 }
 
 const stages = [
-  { title: "Check what applies", intro: "Find the expectations and approvals that govern the work and the information involved.", topics: ["coursework", "assessment", "approvals", "decide", "data", "graduate", "supervision", "funding"] },
-  { title: "Plan the task", intro: "Explore concrete ways to work, and what to review before using the output.", topics: ["practice", "classroom", "preparation", "methods"] },
-  { title: "Find tools and support", intro: "Check access requirements and find support for the activity you are working on.", topics: ["access", "training", "community"] }
+  { title: "Check what applies", topics: ["coursework", "assessment", "approvals", "decide", "data", "graduate", "supervision", "funding"] },
+  { title: "Plan the task", topics: ["practice", "classroom", "preparation", "methods"] },
+  { title: "Find tools and support", topics: ["access", "training", "community"] }
 ];
 
 const overlappingTasks: { activities: Activity[]; title: string; example: string }[] = [
@@ -44,13 +44,6 @@ export function GuidancePage({ activity, activities, copies, content }: {
     for (const [label, href] of topic.links ?? []) if (!sources.has(href)) sources.set(href, label);
   }
 
-  function jumpToFinder() {
-    const target = document.getElementById("guide-title");
-    target?.setAttribute("tabindex", "-1");
-    target?.focus();
-    target?.scrollIntoView({ block: "start" });
-  }
-
   return <div className="guidance-page">
     <header className={`guidance-hero immersive-hero guidance-hero--${single ?? "combined"}`}>
       <img key={single ?? "combined"} src={guides[single ?? "research"].image} alt="" />
@@ -58,43 +51,33 @@ export function GuidancePage({ activity, activities, copies, content }: {
         <p className="eyebrow">AI @ York / Guidance</p>
         <h1>{copy?.title ?? "AI guidance for your activities"}</h1>
         <p className="lead">{copy?.intro ?? "Find the requirements, examples and tools that apply across the work you do at York."}</p>
-        {content ? <button type="button" className="primary" onClick={jumpToFinder}>Check a task <span aria-hidden="true">↓</span></button> :
-          <a className="button primary" href={contextHref("guide", selected)}>Check a task</a>}
-      </div>
-    </header>
-
-    <div className="guidance-context">
-      <div className="shell">
-        <div><h2 id="activity-picker">What are you doing with AI?</h2><p>Choose the activities you want guidance for. You can combine them.</p></div>
-        <div className="context-controls" role="group" aria-labelledby="activity-picker">
+        <div className="context-controls" role="group" aria-label="Guidance activities, choose any combination">
           {contexts.map((context) => {
             const active = selected.includes(context);
             const next = active ? selected.filter((value) => value !== context) : [...selected, context];
             const href = next.length ? contextHref("guidance", next) : "#/guidance?activities=";
             return <button key={context} type="button" aria-pressed={active} onClick={() => { window.location.hash = href; }}>
-              <span aria-hidden="true">{active ? "✓" : "+"}</span>{labels[context]}
+              {labels[context]}
             </button>;
           })}
         </div>
       </div>
-    </div>
-    {selected.length ? <>
-      <section className="shell guidance-overview">
-        <h2>Start with the task and the information</h2>
+    </header>
+    {selected.length > 0 && <>
+      {!single && <section className="shell guidance-overview">
+        <h2>Selected activities</h2>
         <div>
-          <p>Check what you can share, which rules apply to this task and how you will review the output. When activities overlap, check the requirements for each one.</p>
-          {!single && selected.map((activity) => {
+          {selected.map((activity) => {
             const { title, intro } = copies[activity] ?? pageCopy[activity];
             return <p key={activity}><strong>{title}</strong> · {intro}</p>;
           })}
         </div>
-      </section>
+      </section>}
       {examples.length > 0 && <section className="guidance-examples" aria-labelledby="guidance-examples-title">
         <div className="shell guidance-example-layout">
           <h2 id="guidance-examples-title">When activities overlap</h2>
           <div>
             {examples.map(({ title, example }) => <div key={title}><h3>{title}</h3><p>{example}</p></div>)}
-            {content && <button className="text-button" type="button" onClick={jumpToFinder}>Check the task and information type ↓</button>}
           </div>
         </div>
       </section>}
@@ -103,7 +86,7 @@ export function GuidancePage({ activity, activities, copies, content }: {
           const sections = stage.topics.flatMap((id) => topics.filter((topic) => topic.id === id));
           if (!sections.length) return null;
           return <section className="guidance-stage" key={stage.title}>
-            <div><h2>{stage.title}</h2><p>{stage.intro}</p></div>
+            <h2>{stage.title}</h2>
             <div className="guidance-topics">
               {sections.map((topic) => <details key={topic.id}>
                 <summary><span className="guidance-context-label">{labels[topic.activity]}</span><strong>{topic.title}</strong></summary>
@@ -117,7 +100,7 @@ export function GuidancePage({ activity, activities, copies, content }: {
           </section>;
         })}
       </div>
-    </> : <p className="shell guidance-empty" role="status">Select an activity to see relevant guidance and tasks.</p>}
+    </>}
     <aside className="shell guidance-resources" aria-labelledby="guidance-resources-title">
       <h2 id="guidance-resources-title">Tools and references</h2>
       <ul>
@@ -128,8 +111,8 @@ export function GuidancePage({ activity, activities, copies, content }: {
       {sources.size > 0 && <details><summary>All sources and related resources</summary>
         <ul>{[...sources].map(([href, label]) => <li key={href}><a href={href}>{label}</a></li>)}</ul>
       </details>}
-      <a className="text-link" href={contextHref("guide", selected)}>Open Guide Finder with these activities →</a>
+      <a className="text-link" href={contextHref("guide", selected)}>Open Guide Finder</a>
     </aside>
-    {content && <div className="guidance-task"><GuideFinder content={content} activities={selected} /></div>}
+    {content && <div className="guidance-task" hidden={!selected.length}><GuideFinder content={content} activities={selected} /></div>}
   </div>;
 }

@@ -20,16 +20,16 @@
 .community-hero { --hero-height: clamp(20rem, 36vw, 32rem); --image-position: center 53%; }
 .home-check-link { display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; }
 .home-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-block: 1.5rem 0; border-bottom: 1px solid var(--line); }
-.home-shortcuts a { display: grid; grid-template-columns: 1fr auto; gap: .25rem 1rem; padding: 1rem; color: inherit; text-decoration: none; }
+.home-shortcuts a { display: grid; gap: .25rem; padding: 1rem; color: inherit; text-decoration: none; }
 .home-shortcuts a:hover { background: var(--wash); }
 .home-shortcuts strong { font-size: 1.15rem; }
-.home-shortcuts span { grid-row: 2; color: var(--muted); }
-.home-shortcuts b { grid-column: 2; grid-row: 1; color: var(--red-dark); }
+.home-shortcuts span { color: var(--muted); }
 .public-site .home-page .principles { background: transparent; gap: .75rem; padding: 0; }
 .public-site .home-page .home-updates { background: var(--dark-field); }
 .public-site .home-next { background: var(--wash); color: var(--ink); }
 .public-site .home-next .home-route-list { background: var(--dark-field); }
 .public-site .guide > h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5.25rem); }
+.public-site .guide > .journey { margin-top: clamp(1.25rem, 3vw, 2.5rem); }
 .guide-task-shortcuts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
 .guide-task-shortcuts button { border-radius: 2rem; }
 .guide-task-shortcuts button[aria-pressed="true"] { background: var(--dark-field); color: white; }
