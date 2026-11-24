@@ -52,15 +52,15 @@ export function GuidancePage({ activity, activities, copies, content }: {
   }
 
   return <div className="guidance-page">
-    <header className="guidance-hero shell">
-      <div>
+    <header className={`guidance-hero immersive-hero guidance-hero--${single ?? "combined"}`}>
+      <img key={single ?? "combined"} src={guides[single ?? "research"].image} alt="" />
+      <div className="shell immersive-copy">
         <p className="eyebrow">AI @ York / Guidance</p>
         <h1>{copy?.title ?? "AI guidance for your activities"}</h1>
         <p className="lead">{copy?.intro ?? "Find the requirements, examples and tools that apply across the work you do at York."}</p>
         {content ? <button type="button" className="primary" onClick={jumpToFinder}>Check a task <span aria-hidden="true">↓</span></button> :
           <a className="button primary" href={contextHref("guide", selected)}>Check a task</a>}
       </div>
-      <img src={guides[single ?? "research"].image} alt="" />
     </header>
 
     <div className="guidance-context">
@@ -78,23 +78,33 @@ export function GuidancePage({ activity, activities, copies, content }: {
         </div>
       </div>
     </div>
-    <div className="shell guidance-reading">
-      <div className="guidance-main">
-        {selected.length ? <>
-          <section className="guidance-overview">
-            <h2>Start with the task and the information</h2>
-            <p>Check what you can share, which rules apply to this task and how you will review the output. When activities overlap, check the requirements for each one.</p>
-            {!single && selected.map((activity) => <p key={activity}><strong>{(copies[activity] ?? pageCopy[activity]).title}</strong> · {(copies[activity] ?? pageCopy[activity]).intro}</p>)}
-          </section>
-          {examples.length > 0 && <section className="guidance-examples" aria-labelledby="guidance-examples-title">
-            <h2 id="guidance-examples-title">When activities overlap</h2>
+    {selected.length ? <>
+      <section className="shell guidance-overview">
+        <h2>Start with the task and the information</h2>
+        <div>
+          <p>Check what you can share, which rules apply to this task and how you will review the output. When activities overlap, check the requirements for each one.</p>
+          {!single && selected.map((activity) => {
+            const { title, intro } = copies[activity] ?? pageCopy[activity];
+            return <p key={activity}><strong>{title}</strong> · {intro}</p>;
+          })}
+        </div>
+      </section>
+      {examples.length > 0 && <section className="guidance-examples" aria-labelledby="guidance-examples-title">
+        <div className="shell guidance-example-layout">
+          <h2 id="guidance-examples-title">When activities overlap</h2>
+          <div>
             {examples.map(({ title, example }) => <div key={title}><h3>{title}</h3><p>{example}</p></div>)}
             {content && <button className="text-button" type="button" onClick={jumpToFinder}>Check the task and information type ↓</button>}
-          </section>}
-          {stages.map((stage) => {
-            const sections = stage.topics.flatMap((id) => topics.filter((topic) => topic.id === id));
-            return sections.length > 0 && <section className="guidance-stage" key={stage.title}>
-              <h2>{stage.title}</h2><p>{stage.intro}</p>
+          </div>
+        </div>
+      </section>}
+      <div className="shell guidance-reading">
+        {stages.map((stage) => {
+          const sections = stage.topics.flatMap((id) => topics.filter((topic) => topic.id === id));
+          if (!sections.length) return null;
+          return <section className="guidance-stage" key={stage.title}>
+            <div><h2>{stage.title}</h2><p>{stage.intro}</p></div>
+            <div className="guidance-topics">
               {sections.map((topic) => <details key={topic.id}>
                 <summary><span className="guidance-context-label">{labels[topic.activity]}</span><strong>{topic.title}</strong></summary>
                 <div className="guidance-detail">
@@ -103,23 +113,23 @@ export function GuidancePage({ activity, activities, copies, content }: {
                   {topic.links && <ul>{topic.links.map(([label, href]) => <li key={href}><a href={href}>{label}</a></li>)}</ul>}
                 </div>
               </details>)}
-            </section>;
-          })}
-        </> : <p role="status">Select an activity to see relevant guidance and tasks.</p>}
+            </div>
+          </section>;
+        })}
       </div>
-      <aside className="guidance-resources" aria-labelledby="guidance-resources-title">
-        <h2 id="guidance-resources-title">Tools and references</h2>
-        <ul>
-          <li><a href={contextHref("tools", selected)}>Compare York tools and access</a></li>
-          <li><a href={contextHref("training", selected)}>Find training</a></li>
-          <li><a href="#/governance">Explore policy and community</a></li>
-        </ul>
-        {sources.size > 0 && <details><summary>All sources and related resources</summary>
-          <ul>{[...sources].map(([href, label]) => <li key={href}><a href={href}>{label}</a></li>)}</ul>
-        </details>}
-        <a className="text-link" href={contextHref("guide", selected)}>Open Guide Finder with these activities →</a>
-      </aside>
-    </div>
+    </> : <p className="shell guidance-empty" role="status">Select an activity to see relevant guidance and tasks.</p>}
+    <aside className="shell guidance-resources" aria-labelledby="guidance-resources-title">
+      <h2 id="guidance-resources-title">Tools and references</h2>
+      <ul>
+        <li><a href={contextHref("tools", selected)}>Compare York tools and access</a></li>
+        <li><a href={contextHref("training", selected)}>Find training</a></li>
+        <li><a href="#/governance">Explore policy and community</a></li>
+      </ul>
+      {sources.size > 0 && <details><summary>All sources and related resources</summary>
+        <ul>{[...sources].map(([href, label]) => <li key={href}><a href={href}>{label}</a></li>)}</ul>
+      </details>}
+      <a className="text-link" href={contextHref("guide", selected)}>Open Guide Finder with these activities →</a>
+    </aside>
     {content && <div className="guidance-task"><GuideFinder content={content} activities={selected} /></div>}
   </div>;
 }

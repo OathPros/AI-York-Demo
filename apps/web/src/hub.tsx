@@ -55,7 +55,8 @@ export function Principles() {
   return <section className="section" aria-labelledby="principles-title"><p className="eyebrow">Our shared responsibilities</p><h2 id="principles-title">Use AI with care</h2><p className="lead">Everyone has a role in ensuring AI is used ethically, safely and in ways that uphold York's collective values.</p><div className="principles">{principles.map(([title, text]) => <article key={title}><h3>{title}</h3><p>{text}</p></article>)}</div></section>;
 }
 
-export function GuideFinder({ content, initial = [], activities }: { content: ContentBundle; initial?: Activity[]; activities?: readonly Activity[] }) {
+export function GuideFinder({ content, initial = [], activities, standalone = false }: { content: ContentBundle; initial?: Activity[]; activities?: readonly Activity[]; standalone?: boolean }) {
+  const Title = standalone ? "h1" : "h2";
   const [localActivities, setActs] = useState<Activity[]>(initial);
   const acts = activities ?? localActivities;
   const [taskChoice, setTask] = useState("");
@@ -81,7 +82,7 @@ export function GuideFinder({ content, initial = [], activities }: { content: Co
   return (
     <section className="section guide" aria-labelledby="guide-title">
       <p className="eyebrow">Find your answer</p>
-      <h2 id="guide-title">Can I use AI for this</h2>
+      <Title id="guide-title">{standalone ? "Check a specific use of AI" : "Can I use AI for this"}</Title>
       <p className="lead">Choose a task and the kind of information it involves to see the reviewed guidance for each activity.</p>
       <div className="journey">
         {!activities && <fieldset aria-describedby="guide-activity-help">
@@ -249,9 +250,9 @@ export function NewsPage({ story }: { story?: string }) {
 export function Home({ content, go, copy = pageCopy.home }: { content: ContentBundle; go: Go; copy?: PageCopy }) {
   return (
     <div className="home-page">
-      <section className="home-hero" aria-labelledby="home-title">
-        <div className="home-shell home-hero-layout">
-          <div className="home-hero-copy">
+      <section className="home-hero immersive-hero" aria-labelledby="home-title">
+        <img src={homeImage} alt="" />
+        <div className="home-shell immersive-copy home-hero-copy">
             <p className="eyebrow">York University</p>
             <h1 id="home-title">{copy.title}</h1>
             <p className="home-lede">{copy.intro}</p>
@@ -259,8 +260,6 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
               <a className="button primary" href="#/guidance">Explore AI guidance <span aria-hidden="true">→</span></a>
               <a className="text-link home-check-link" href="#guide-title" onClick={jumpToSection}>Check a specific task <span aria-hidden="true">↓</span></a>
             </div>
-          </div>
-          <img src={homeImage} alt="" fetchPriority="high" />
         </div>
       </section>
       <nav className="home-shortcuts home-shell" aria-label="Explore AI at York">
@@ -268,8 +267,8 @@ export function Home({ content, go, copy = pageCopy.home }: { content: ContentBu
         <a href="#/training"><strong>Training and workshops</strong><span>Build skills you can put to use</span><b aria-hidden="true">→</b></a>
         <a href="#/governance"><strong>Policy and community</strong><span>Find sources and connect with peers</span><b aria-hidden="true">→</b></a>
       </nav>
+      <div className="home-finder"><GuideFinder content={content} /></div>
       <Principles />
-      <GuideFinder content={content} />
       <ToolsSection content={content} />
       <section className="home-updates" aria-labelledby="home-updates-title">
         <div className="section">

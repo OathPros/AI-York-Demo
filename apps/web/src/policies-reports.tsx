@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { ContentBundle } from "@ai-york/contracts";
-import { GroupCards, GroupOverview, type Group } from "./governance-groups";
+import { GroupCards, GroupOverview, formatDate, groupById, type Group } from "./governance-groups";
 import "./policies-reports.css";
+import communityImage from "./assets/banners/teach.webp";
 import { groupRecords, groupRecordHref } from "./demo-records";
 
 type DocumentRecord = {
@@ -77,13 +78,12 @@ function OfficialLink({ record }: { record: DocumentRecord }) {
   </a>;
 }
 
-function DocumentCards({ records, open }: { records: DocumentRecord[]; open: (record: DocumentRecord) => void }) {
-  return <div className="document-cards">
+function ReportList({ records, open }: { records: DocumentRecord[]; open: (record: DocumentRecord) => void }) {
+  return <div className="publication-list">
     {records.map((record) => (
-      <article className="document-card" key={record.url}>
+      <article className="publication-row" key={record.url}>
         <p className="document-meta"><span>{record.kind}</span> {record.publisher}</p>
-        <h3>{record.title}</h3>
-        <p className="document-overview">{record.overview}</p>
+        <div><h3>{record.title}</h3><p className="document-overview">{record.overview}</p></div>
         <div className="document-actions">
           <button type="button" aria-haspopup="dialog" onClick={() => open(record)}>
             Read {record.kind.toLowerCase()}<span className="visually-hidden"> {record.title}</span>
@@ -125,6 +125,7 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
     if (section) {
       const target = document.getElementById(`governance-${section}`);
       if (target) {
+        if (target instanceof HTMLDetailsElement) target.open = true;
         target.tabIndex = -1;
         target.focus({ preventScroll: true });
         target.scrollIntoView();
@@ -132,63 +133,97 @@ export function GovernancePage({ content, section }: { content: ContentBundle; s
     }
   }, [section]);
 
-  return <div className="section policies-reports governance-landing">
-    <header className="documents-intro">
-      <h1>Policy, governance and community</h1>
-      <p className="lead">Explore the policy, the people shaping AI at York and the communities bringing it to life.</p>
-      <nav className="filters catalog-filters" aria-label="Governance sections">
-        {[["roundtables", "Roundtable"], ["policy", "Policy"], ["working-groups", "Working groups"], ["community", "Communities"], ["reports", "Reports"]].map(([id, label]) =>
-          <a key={id} href={`#/governance?section=${id}`}>{label}</a>)}
-      </nav>
+  const roundtable = groupById("ai-roundtable")!;
+  const records = groupRecords[roundtable.id];
+
+  return <div className="policies-reports governance-landing">
+    <header className="governance-intro">
+      <div className="shell">
+        <p className="eyebrow">AI @ York</p>
+        <h1>Policy, governance<br className="governance-title-break" /> and community</h1>
+        <p className="lead">Explore the policy, the people shaping AI at York and the communities bringing it to life.</p>
+        <nav className="governance-nav" aria-label="Governance sections">
+          {[["roundtables", "Roundtable"], ["policy", "Policy"], ["working-groups", "Working groups"], ["community", "Communities"], ["reports", "Reports"]].map(([id, label]) =>
+            <a key={id} href={`#/governance?section=${id}`}>{label}</a>)}
+        </nav>
+      </div>
     </header>
-    <div className="governance-top">
-      <section id="governance-roundtables" aria-labelledby="roundtables-heading">
-        <h2 id="roundtables-heading">Roundtable</h2>
-        <GroupCards section="roundtables" open={setOpenGroup} />
-      </section>
-      <section id="governance-policy" aria-labelledby="policy-heading">
-        <h2 id="policy-heading">Policy</h2>
-        <p className="policy-preview-notice">Explore the policy and its related interpretations.</p>
+    <section id="governance-roundtables" className="governance-band roundtable-band" aria-labelledby="roundtables-heading">
+      <div className="shell governance-split">
+        <div>
+          <h2 id="roundtables-heading">{roundtable.name}</h2>
+          <p className="lead">{roundtable.overview}</p>
+          <ul className="roundtable-mandate">{roundtable.mandate.map((item) => <li key={item}>{item}</li>)}</ul>
+          <div className="roundtable-actions">
+            <a className="button primary" href={`#/governance/groups/${roundtable.id}`}>Explore the Roundtable</a>
+            <button className="text-button" type="button" aria-haspopup="dialog" onClick={() => setOpenGroup(roundtable)}>View overview<span className="visually-hidden"> of AI Roundtable</span></button>
+          </div>
+        </div>
+        <div className="roundtable-records">
+          {([{ key: "upcoming", label: "Next meeting", record: records.upcoming }, { key: "archive", label: "Recent activity", record: records.previous }] as const).map(({ key, label, record }) => <article key={key}>
+            <p className="eyebrow">{label}</p>
+            <time dateTime={record.date}>{formatDate(record.date)}</time>
+            <h3><a href={groupRecordHref(roundtable.id, key)}>{record.title}</a></h3>
+          </article>)}
+        </div>
+      </div>
+    </section>
+    <section id="governance-policy" className="governance-band policy-band" aria-labelledby="policy-heading">
+      <div className="shell">
+        <div className="governance-policy-heading"><h2 id="policy-heading">Policy</h2><p>Explore the policy and its related interpretations.</p></div>
         <iframe className="public-policy-frame" src={`${import.meta.env.BASE_URL}policy-studio.html?view=public&compact=1`} title="AI policy document" />
         <div className="policy-preview-actions">
           <a className="text-link" href={`${import.meta.env.BASE_URL}policy-studio.html?view=public`} target="_blank" rel="noreferrer">Open full policy<span className="visually-hidden"> (opens in a new tab)</span></a>
           <a className="text-link" href="#/governance?section=policy-sources">Official policy sources</a>
         </div>
-      </section>
-    </div>
-    <section id="governance-working-groups" className="document-section" aria-labelledby="working-groups-heading">
-      <h2 id="working-groups-heading">Working groups</h2>
-      <GroupCards section="working-groups" open={setOpenGroup} />
+        <details id="governance-policy-sources" className="document-related">
+          <summary>Related official policy documents</summary>
+          <ul>
+            {policies.map(({ url, title }) => <li key={url}><a className="text-link" href={url}>{title}</a></li>)}
+            {related.map(({ id, title, data }) => (
+              <li key={id}>
+                <a className="text-link" href={data.url}>{data.title || title}</a>
+                {data.summary && <p>{data.summary.replace(/\.$/, "")}</p>}
+              </li>
+            ))}
+          </ul>
+        </details>
+      </div>
     </section>
-    <section id="governance-community" className="document-section" aria-labelledby="community-heading">
-      <h2 id="community-heading">Communities</h2>
-      <GroupCards section="community" open={setOpenGroup} />
-      {content.community.length > 0 && <><h3>Additional community listings from Studio</h3><div className="grid">{content.community.map((item) => <article className="card" key={item.id}>
-        <h3>{item.data.name}</h3><p>{item.data.summary}</p>{item.data.contact && <p>Contact: {item.data.contact}</p>}
-        {item.data.url && <a className="text-link" href={item.data.url}>Join or learn more</a>}
-      </article>)}</div></>}
+    <section id="governance-working-groups" className="governance-band" aria-labelledby="working-groups-heading">
+      <div className="shell">
+        <h2 id="working-groups-heading">Working groups</h2>
+        <p className="lead">Follow the groups that bring research, teaching and service priorities to the AI Roundtable.</p>
+        <GroupCards section="working-groups" open={setOpenGroup} />
+      </div>
     </section>
-    <details id="governance-policy-sources" className="document-related">
-      <summary>Related official policy documents</summary>
-      <ul>
-        {policies.map(({ url, title }) => <li key={url}><a className="text-link" href={url}>{title}</a></li>)}
-        {related.map(({ id, title, data }) => (
-          <li key={id}>
-            <a className="text-link" href={data.url}>{data.title || title}</a>
-            {data.summary && <p>{data.summary.replace(/\.$/, "")}</p>}
-          </li>
-        ))}
-      </ul>
-    </details>
-    <section id="governance-reports" className="document-section" aria-labelledby="reports-heading">
-      <h2 id="reports-heading">Reports</h2>
-      <DocumentCards records={reports} open={setOpenDocument} />
-      <div className="report-records">
-        <h3>Working group deliverables</h3>
-        <ul>{["ai-roundtable", "student-administrative-services", "teaching-learning", "research"].map((id) => {
-          const { title, description, status } = groupRecords[id].deliverable;
-          return <li key={id}><a className="text-link" href={groupRecordHref(id, "deliverable")}>{title}</a><span className="status">{status}</span><p>{description}</p></li>;
-        })}</ul>
+    <section id="governance-community" className="community-band" aria-labelledby="community-heading">
+      <header className="immersive-hero community-hero">
+        <img src={communityImage} alt="" loading="lazy" />
+        <div className="shell immersive-copy">
+          <h2 id="community-heading">Communities</h2>
+          <p className="lead">Connect with colleagues, share practical examples and take part in a session.</p>
+        </div>
+      </header>
+      <div className="shell governance-band">
+        <GroupCards section="community" open={setOpenGroup} />
+        {content.community.length > 0 && <section className="community-listings"><h3>More communities</h3><div className="governance-directory">{content.community.map((item) => <article className="governance-directory-row" key={item.id}>
+          <div><h4>{item.data.name}</h4><p>{item.data.summary}</p>{item.data.contact && <p>Contact: {item.data.contact}</p>}</div>
+          {item.data.url && <a className="text-link" href={item.data.url}>Join or learn more</a>}
+        </article>)}</div></section>}
+      </div>
+    </section>
+    <section id="governance-reports" className="governance-band reports-band" aria-labelledby="reports-heading">
+      <div className="shell">
+        <h2 id="reports-heading">Reports and deliverables</h2>
+        <ReportList records={reports} open={setOpenDocument} />
+        <div className="report-records">
+          <h3>Roundtable and working group deliverables</h3>
+          <ul>{["ai-roundtable", "student-administrative-services", "teaching-learning", "research"].map((id) => {
+            const { title, description, status } = groupRecords[id].deliverable;
+            return <li key={id}><a className="text-link" href={groupRecordHref(id, "deliverable")}>{title}</a><span className="status">{status}</span><p>{description}</p></li>;
+          })}</ul>
+        </div>
       </div>
     </section>
     {openDocument && <DocumentReader record={openDocument} close={() => setOpenDocument(null)} />}

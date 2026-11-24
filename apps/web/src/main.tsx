@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { activitySchema, changeTypeLabels, changeTypes, contentCollections, type ChangeType, type ContentBundle, type DemoRole, type SuggestionPayload } from "@ai-york/contracts";
 import { api } from "./api";
-import { EventList, GuideFinder, Home, IndexPage, NewsPage, PageHeader, PartnerPage, ToolsSection, type Page } from "./hub";
+import { EventList, GuideFinder, Home, IndexPage, NewsPage, PartnerPage, ToolsSection, type Page } from "./hub";
 import { CmsManager, PageEditor, PolicyStudio, StudioShell, type StudioView } from "./studio";
 import type { PublishedPages } from "./page-copy";
 import "./styles.css";
@@ -156,7 +156,7 @@ function App() {
       case "study": case "teach": case "research": case "work":
         return <GuidancePage activity={page} copies={publishedPages} content={content} />;
       case "partner": return <PartnerPage content={content} go={go} copy={publishedPages.partner} />;
-      case "guide": return <div><PageHeader eyebrow="Usage & Guidance" title="Check a specific use of AI" intro="Start with what you are trying to do, the information involved and the conditions that apply." /><GuideFinder key={selectedContexts.join(",")} content={content} initial={selectedContexts} /></div>;
+      case "guide": return <GuideFinder key={selectedContexts.join(",")} content={content} initial={selectedContexts} standalone />;
       case "guidance": return <GuidancePage activities={selectedContexts.length || params.get("activities") === "" ? selectedContexts : undefined} copies={publishedPages} content={content} />;
       case "policies": case "governing": case "communities": case "governance": return groupId ? <GroupPage id={groupId} record={params.get("record") ?? undefined} onRequestJoin={requestGroupJoin} /> : <GovernancePage content={content} section={governanceSection} />;
       case "tools": return <ToolsSection content={content} activities={selectedContexts} standalone />;

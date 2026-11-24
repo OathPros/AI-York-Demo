@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { GovernancePage } from "../src/policies-reports";
 
 describe("policy and community layout", () => {
-  it("places the roundtable and policy before group cards and reports", () => {
+  it("places the roundtable and policy before group directories and reports", () => {
     const content = Object.fromEntries(contentCollections.map((name) => [name, []])) as unknown as ContentBundle;
     const markup = renderToStaticMarkup(<GovernancePage content={content} />);
     const positions = ["roundtables", "policy", "working-groups", "community", "reports"]
@@ -17,6 +17,8 @@ describe("policy and community layout", () => {
     expect(markup).toContain("compact=1");
     expect(markup).toContain("Open full policy");
     expect(markup).not.toContain("not approved York policy");
-    expect((markup.match(/class="document-card group-card"/g) ?? [])).toHaveLength(7);
+    expect((markup.match(/class="governance-directory-row"/g) ?? [])).toHaveLength(6);
+    expect(markup).toContain("#/governance/groups/ai-roundtable?record=upcoming");
+    expect(markup).toContain("Reports and deliverables");
   });
 });

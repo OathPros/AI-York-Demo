@@ -2,18 +2,21 @@ import React from "react";
 import type { Activity, ContentBundle, ContentItem } from "@ai-york/contracts";
 export { GuidancePage } from "./audience-guides";
 import { catalogDescription, isProgram, programLevel, programsForPage, trainingActivities, type ProgramLevel } from "./catalog";
-import { PageHeader, ResourceLink } from "./hub";
+import { ResourceLink } from "./hub";
 import { LearningGuide } from "./learning";
 
 const activities: [Activity, string][] = [["study", "Study"], ["work", "Work"], ["research", "Research"], ["teach", "Teaching"]];
 
-function CatalogCards({ items, showLevel = false, training = false }: { items: ContentItem[]; showLevel?: boolean; training?: boolean }) {
-  const Title = training ? "h2" : "h3";
-  return <div className="grid">{items.map((item) => <article className="card" key={item.id}>
-    <span className="status">{showLevel ? (programLevel(item) === "unspecified" ? (item.data.format || "Program resource") : programLevel(item)) : item.data.format}</span>
-    <Title>{item.title}</Title>{catalogDescription(item) && <p>{catalogDescription(item)}</p>}
-    <ResourceLink href={item.data.url}>Open resource</ResourceLink>
-  </article>)}</div>;
+function CatalogList({ items, programs = false }: { items: ContentItem[]; programs?: boolean }) {
+  const Title = programs ? "h2" : "h3";
+  return <div className="academic-list">{items.map((item) => {
+    const credential = levels.find(([key]) => key === programLevel(item))?.[1];
+    return <article className="academic-entry" key={item.id}>
+      <p className="status">{item.data.format || (programs ? credential ?? "Program resource" : "Training resource")}</p>
+      <div><Title>{item.title}</Title>{catalogDescription(item) && <p>{catalogDescription(item)}</p>}</div>
+      <ResourceLink href={item.data.url}>{programs ? "Official program page" : "Open resource"}<span className="visually-hidden"> for {item.title}</span></ResourceLink>
+    </article>;
+  })}</div>;
 }
 
 const practicePaths: { activity: Activity; title: string; exercise: string }[] = [
@@ -44,7 +47,7 @@ export function TrainingPage({ content, activity, activities: selection }: { con
         {activities.map(([value, label]) => <a key={value} href={`#/training?activity=${value}`} aria-current={selected.length === 1 && selected[0] === value ? "page" : undefined}>{label}</a>)}
       </nav>
       {selected.length > 1 && <p>Showing resources for {activities.filter(([value]) => selected.includes(value)).map(([, label]) => label).join(", ")}</p>}
-      <CatalogCards items={items} training />
+      <CatalogList items={items} />
       {items.length === 0 && <p className="empty" role="status">No training is currently classified for this activity.</p>}
       <p>Looking for a degree or certificate? <a className="text-link" href="#/programs">Explore programs</a>.</p>
     </section>
@@ -56,14 +59,16 @@ const levels: [Exclude<ProgramLevel, "unspecified">, string][] = [["undergraduat
 export function ProgramsPage({ content, level }: { content: ContentBundle; level?: Exclude<ProgramLevel, "unspecified"> }) {
   const items = programsForPage(content.training).filter((item) => !level || programLevel(item) === level);
   return <div className="programs-page">
-    <PageHeader eyebrow="Formal study" title="AI programs" intro="Explore degrees and certificates. Check each program's official page for admission and current details." />
-    <section className="section" aria-labelledby="programs-title">
-      <h2 id="programs-title">Degrees and certificates</h2>
+    <header className="academic-intro"><div className="shell">
+      <h1>AI programs</h1>
+      <p className="lead">Explore York degrees and certificates and find official admissions information.</p>
+    </div></header>
+    <section className="section" aria-label="Program listings">
       <nav className="filters catalog-filters" aria-label="Filter programs by level">
         <a href="#/programs" aria-current={!level ? "page" : undefined}>All programs</a>
         {levels.map(([value, label]) => <a key={value} href={`#/programs?level=${value}`} aria-current={level === value ? "page" : undefined}>{label}</a>)}
       </nav>
-      <CatalogCards items={items} showLevel />
+      <CatalogList items={items} programs />
       {items.length === 0 && <p className="empty" role="status">No programs are currently classified at this level. Browse all programs for listings with an unspecified level.</p>}
     </section>
   </div>;

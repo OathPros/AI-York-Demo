@@ -61,16 +61,13 @@ main { flex: 1 }
 
 /* Homepage */
 .home-page { background: #fff }
-.home-hero, .experience-hero {
+.experience-hero {
   display: flex;
   align-items: flex-end;
   color: #fff;
   background: linear-gradient(90deg, rgba(15, 12, 13, .88) 0%, rgba(15, 12, 13, .66) 57%, rgba(15, 12, 13, .24) 100%),
     var(--banner) center var(--banner-position, 50%) / cover #30252a;
 }
-.home-hero { --banner: url("./assets/banners/home.webp"); min-height: clamp(28rem, 46vw, 39rem); padding-block: clamp(3rem, 7vw, 6rem) }
-.home-hero h1 { margin: 0 0 1rem; font-size: clamp(3.4rem, 8vw, 7rem); letter-spacing: -.065em }
-.home-hero-copy > p { max-width: 39rem; margin: 0; font-size: clamp(1.08rem, 1.6vw, 1.34rem) }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.5rem }
 .home-statement { background: #1c1c1c; color: #fff }
 .home-statement .home-shell { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem }
@@ -385,7 +382,7 @@ footer a { color: #fff; text-underline-offset: .25em }
   .brand small { display: none }
   .site-header nav { width: 100%; gap: .4rem 1rem; flex-wrap: wrap; justify-content: flex-start; padding-bottom: .4rem }
   .site-header nav a { flex: 0 0 auto }
-  .home-hero, .experience-hero { background-image: linear-gradient(0deg, rgba(15, 12, 13, .94), rgba(15, 12, 13, .57) 72%), var(--banner) }
+  .experience-hero { background-image: linear-gradient(0deg, rgba(15, 12, 13, .94), rgba(15, 12, 13, .57) 72%), var(--banner) }
   .home-statement .home-shell { padding-block: 1.2rem; align-items: flex-start; flex-direction: column }
   .section { padding-block: 2.5rem }
   .principles, .grid { grid-template-columns: 1fr }
@@ -404,6 +401,5 @@ footer a { color: #fff; text-underline-offset: .25em }
 #york-learning-guide h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5rem) }
 #york-learning-guide .section { padding-bottom: 0 }
 .training-page > .section { padding-top: 0 }
-.programs-page > .page-head { padding-bottom: 1.5rem }
 .programs-page > .section { padding-top: 0 }
 .programs-page > .section > h2 { font-size: clamp(2rem, 4vw, 3rem) }

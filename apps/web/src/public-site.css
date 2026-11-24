@@ -4,12 +4,19 @@
 .public-site .site-header nav .nav-primary { border-radius: 2rem; }
 .public-site .demo-banner { background: #24211f; }
 .public-site .site-menu-toggle { display: none; }
-.public-site .home-hero { display: block; background: #f4efe6; color: #201c1b; min-height: auto; padding-block: clamp(2rem, 5vw, 5rem); }
-.home-hero-layout { display: grid; grid-template-columns: .92fr 1.08fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-.home-hero-layout > * { min-width: 0; }
-.home-hero-layout img { display: block; width: 100%; aspect-ratio: 5 / 4; object-fit: cover; object-position: 58% center; border-radius: .25rem; }
-.home-hero-copy .eyebrow { font-size: .75rem; }
-.public-site .home-hero h1 { font-size: clamp(3.5rem, 8.5vw, 7.4rem); margin: .35rem 0 1rem; line-height: 1; }
+/* Image fills the section; reading width is handled by the copy, independently. */
+.immersive-hero { display: grid; align-items: end; position: relative; isolation: isolate; overflow: hidden; background: #26201c; color: #fffaf2; min-height: var(--hero-height, 29rem); }
+.immersive-hero > img { width: 100%; height: 100%; position: absolute; inset: 0; z-index: -2; object-fit: cover; object-position: var(--image-position, center); }
+.immersive-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(17 13 12 / .87), rgb(17 13 12 / .65) 38%, rgb(17 13 12 / .1) 78%); }
+.immersive-copy { padding-block: clamp(2.75rem, 8vw, 7rem); }
+.immersive-copy > .eyebrow { color: #ffd0d5; }
+.immersive-copy > .lead, .home-lede { max-width: 36rem; color: #fffaf2; font-size: clamp(1.04rem, 1.6vw, 1.35rem); }
+.home-hero { --hero-height: clamp(29rem, 47vw, 47rem); --image-position: 64% center; }
+.home-hero h1 { font-size: clamp(4rem, 11vw, 10rem); margin: .3rem 0 .8rem; line-height: .96; letter-spacing: -.075em; }
+.home-hero .home-check-link { color: #fff; }
+.home-finder { background: #f6f0e7; margin-top: clamp(1.5rem, 4vw, 3rem); }
+.home-finder .guide .journey { background: #fffaf3; }
+.community-hero { --hero-height: clamp(20rem, 36vw, 32rem); --image-position: center 53%; }
 .home-check-link { display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; }
 .home-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-block: 1.5rem 0; border-bottom: 1px solid var(--line); }
 .home-shortcuts a { display: grid; grid-template-columns: 1fr auto; gap: .25rem 1rem; padding: 1rem; color: inherit; text-decoration: none; }
@@ -21,7 +28,7 @@
 .public-site .home-page .home-updates { background: #292522; }
 .public-site .home-next { background: #eae2d5; color: #201c1b; }
 .public-site .home-next .home-route-list { background: #302827; }
-.public-site .tools-page .grid, .public-site .catalog-page .grid { gap: 1rem; }
+.public-site .guide > h1 { margin: 0; font-size: clamp(2.75rem, 6vw, 5.25rem); }
 .public-site .guide .journey { background: #f1ebe3; border-radius: .6rem; }
 .guide-task-shortcuts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
 .guide-task-shortcuts button { border-radius: 2rem; }
@@ -36,8 +43,9 @@
 }
 @media (max-width: 700px) {
   .public-site .site-header { padding-inline: 16px; }
-  .home-hero-layout, .home-shortcuts { grid-template-columns: minmax(0, 1fr); }
-  .home-hero-layout img { aspect-ratio: 16 / 10; }
+  .home-shortcuts { grid-template-columns: minmax(0, 1fr); }
+  .immersive-hero::before { background: linear-gradient(0deg, rgb(17 13 12 / .93), rgb(17 13 12 / .73) 49%, rgb(17 13 12 / .14) 100%); }
+  .immersive-copy { padding-block: 4.5rem 2.5rem; }
   .home-shortcuts { margin-top: .5rem; }
   .home-shortcuts a { padding-inline: 0; }
 }
@@ -66,3 +74,33 @@
 .public-site .catalog-practice details { margin-top: .5rem; padding: .85rem 1rem; background: var(--wash); }
 .public-site .catalog-practice summary { cursor: pointer; font-weight: 700; }
 .public-site .site-menu-toggle { border: 1px solid var(--line); border-radius: 2rem; padding: .4rem 1rem; background: #fff; font-weight: 700; }
+
+
+.academic-intro { background: #ede6d9; padding-block: clamp(2.75rem, 8vw, 7rem); }
+.academic-intro h1 { font-size: clamp(3.75rem, 9vw, 8.25rem); margin: 0; letter-spacing: -.065em; }
+.academic-intro p { margin-bottom: 0; }
+.programs-page .section { padding-top: clamp(1.25rem, 4vw, 3.5rem); }
+.academic-list { border-top: 1px solid var(--line); }
+.academic-entry { display: grid; grid-template-columns: minmax(0, .65fr) minmax(0, 2fr) minmax(0, .7fr); gap: .65rem clamp(1rem, 4vw, 4rem); align-items: baseline; padding-block: clamp(1.25rem, 3vw, 2.25rem); border-bottom: 1px solid var(--line); }
+.academic-entry h2, .academic-entry h3 { margin: 0; font-size: clamp(1.3rem, 2.6vw, 2.1rem); }
+.academic-entry h2 + p, .academic-entry h3 + p { margin: .5rem 0 0; }
+.academic-entry > a { justify-self: start; }
+.public-site .updates-page .news-cards { display: block; border-top: 1px solid var(--line); }
+.public-site .updates-page .news-card { display: grid; grid-template-columns: minmax(0, .65fr) minmax(0, 2fr); gap: .55rem clamp(1rem, 5vw, 4rem); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: clamp(1.15rem, 3vw, 2.25rem) 0; box-shadow: none; }
+.public-site .updates-page .news-card > :not(.update-meta) { grid-column: 2; margin: 0; }
+.public-site .updates-page .news-card h2 { font-size: clamp(1.4rem, 3vw, 2.3rem); }
+.public-site .tools-page .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); gap: 0 2rem; }
+.public-site .tools-page .card { padding: 1.45rem 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+@media (max-width: 640px) {
+  .academic-entry, .public-site .updates-page .news-card, .public-site .tools-page .grid { grid-template-columns: minmax(0, 1fr); }
+  .public-site .updates-page .news-card > :not(.update-meta) { grid-column: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .public-site :is(a, button) { transition: background-color .18s ease, color .18s ease, border-color .18s ease; }
+  .immersive-hero > img { animation: immersive-arrival .58s cubic-bezier(.22,.61,.36,1) both; }
+  @supports (animation-timeline: view()) {
+    .public-site :is(.roundtable-records, .guidance-example-layout, .academic-list) { animation: editorial-arrival linear both; animation-timeline: view(); animation-range: entry 0% entry 65%; }
+  }
+}
+@keyframes immersive-arrival { from { opacity: .78; transform: scale(1.025); } to { opacity: 1; transform: scale(1); } }
+@keyframes editorial-arrival { from { opacity: .84; transform: translateY(.6rem); } to { opacity: 1; transform: none; } }

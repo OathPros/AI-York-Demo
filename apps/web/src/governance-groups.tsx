@@ -96,13 +96,23 @@ export function groupById(id: string): Group | undefined {
 }
 
 export function GroupCards({ section, open }: { section: GroupSection; open: (group: Group) => void }) {
-  return <div className="document-cards">
-    {groups.filter((group) => group.section === section).map((group) => <article className="document-card group-card" key={group.id}>
-      <p className="document-meta"><span>{group.type}</span></p>
-      <h3>{group.name}</h3>
-      <p className="document-overview">{group.overview}</p>
-      <div className="document-actions"><button type="button" aria-haspopup="dialog" onClick={() => open(group)}>View overview<span className="visually-hidden"> of {group.name}</span></button></div>
-    </article>)}
+  return <div className="governance-directory">
+    {groups.filter((group) => group.section === section).map((group) => {
+      const href = `#/governance/groups/${group.id}`;
+      const records = groupRecords[group.id];
+      return <article className="governance-directory-row" key={group.id}>
+        <div><h3><a href={href}>{group.name}</a></h3><p>{group.overview}</p></div>
+        <div className="governance-directory-records">
+          {records && <>
+            <time dateTime={records.upcoming.date}>{formatDate(records.upcoming.date)}</time>
+            <a className="text-link" href={groupRecordHref(group.id, "upcoming")}>{records.upcoming.title}</a>
+            <a className="text-link" href={groupRecordHref(group.id, "archive")}>{section === "community" ? "Recent discussion" : "Minutes and decisions"}</a>
+            {section !== "community" && <a className="text-link" href={groupRecordHref(group.id, "deliverable")}>Deliverables and actions</a>}
+          </>}
+        </div>
+        <button className="text-button" type="button" aria-haspopup="dialog" onClick={() => open(group)}>View overview<span className="visually-hidden"> of {group.name}</span></button>
+      </article>;
+    })}
   </div>;
 }
 
@@ -122,7 +132,7 @@ export function GroupOverview({ group, close }: { group: Group; close: () => voi
   </dialog>;
 }
 
-const formatDate = (date: string) => new Intl.DateTimeFormat("en-CA", { dateStyle: "long", timeZone: "UTC" }).format(new Date(date + "T00:00:00Z"));
+export const formatDate = (date: string) => new Intl.DateTimeFormat("en-CA", { dateStyle: "long", timeZone: "UTC" }).format(new Date(date + "T00:00:00Z"));
 
 function GroupRecords({ group, selected }: { group: Group; selected?: string }) {
   const record = groupRecords[group.id];
