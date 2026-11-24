@@ -15,16 +15,17 @@
 
 /* Public tokens, primitives and chrome. Workspace and Studio keep styles.css. */
 .public-site {
-  --red: #ba1635;
-  --red-dark: #a41130;
-  --ink: #121822;
-  --text: #323d50;
-  --muted: #526076;
-  --line: #d7dfe9;
-  --wash: #edf2f8;
-  --dark-field: #131c2b;
-  --dark-line: #68758b;
-  --focus: #587be6;
+  --red: #e31837;
+  --red-dark: #a61129;
+  --ink: #171717;
+  --text: #363436;
+  --muted: #5c5659;
+  --line: #e1dadd;
+  --wash: #f5f3f4;
+  --dark-field: #39131c;
+  --on-dark: #fae9ed;
+  --dark-line: #8c7278;
+  --focus: var(--red);
   --gutter: clamp(1rem, 4.5vw, 5rem);
   --space: clamp(3.25rem, 7vw, 7.5rem);
   --compact-space: clamp(1.5rem, 3.9vw, 4rem);
@@ -91,9 +92,10 @@
 
   .demo-banner {
     display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .2rem 1.35rem;
-    padding: .42rem var(--gutter); background: #0d1420; color: #dce5f3; font-size: .75rem; line-height: 1.45;
+    padding: .42rem var(--gutter); background: var(--red); color: #fff; font-size: .75rem; line-height: 1.45;
   }
   .demo-banner__message { flex: 1 1 25rem; }
+  .demo-banner :is(a, button):focus-visible { outline-color: #fff; }
   .demo-banner__actions { display: flex; gap: .25rem 1rem; flex-wrap: wrap; }
   .demo-banner__actions :is(button, a) {
     display: inline-flex; align-items: center; padding: 0; min-height: 28px; color: #fff; background: transparent; border: 0;
@@ -111,7 +113,7 @@
   .site-header .nav-primary { border-inline-start: 1px solid var(--line); padding-inline-start: clamp(.6rem, 1.6vw, 1.6rem); color: var(--red-dark); }
   .site-menu-toggle { display: none; }
   footer {
-    padding: 2rem var(--gutter); background: var(--dark-field); color: #e3ebf6;
+    padding: 2rem var(--gutter); background: var(--dark-field); color: var(--on-dark);
     border: 0; font-size: .9rem;
   }
   footer strong { color: #fff; }
@@ -125,11 +127,11 @@
   .photo-hero img { width: 100%; height: 100%; object-fit: cover; object-position: var(--image-position, center); }
   .photo-hero::after {
     position: absolute; z-index: -1; inset: 0; content: "";
-    background: linear-gradient(90deg, rgba(9, 15, 24, .94), rgba(9, 15, 24, .72) 45%, rgba(9, 15, 24, .25)), linear-gradient(0deg, rgba(9, 15, 24, .57), transparent 72%);
+    background: linear-gradient(90deg, rgba(24, 13, 16, .94), rgba(24, 13, 16, .72) 45%, rgba(24, 13, 16, .25)), linear-gradient(0deg, rgba(24, 13, 16, .57), transparent 72%);
   }
   .photo-copy { padding-block: var(--space) var(--compact-space); }
   .photo-copy h1 { font-family: var(--editorial-font); font-weight: 450; font-size: var(--display); letter-spacing: -.05em; }
-  .photo-copy :is(.lead, .home-lede) { color: #f0f4fb; font-size: clamp(1.08rem, 1.85vw, 1.45rem); }
+  .photo-copy :is(.lead, .home-lede) { color: var(--on-dark); font-size: clamp(1.08rem, 1.85vw, 1.45rem); }
   .photo-copy .button.secondary, .photo-copy .text-link { color: #fff; }
   .photo-copy .button.secondary:hover { background: #fff; color: var(--ink); }
 
@@ -142,7 +144,7 @@
   }
   @media (max-width: 640px) {
     .photo-hero img { object-position: var(--mobile-position, center); }
-    .photo-hero::after { background: linear-gradient(0deg, rgba(9, 15, 24, .96), rgba(9, 15, 24, .82) 44%, rgba(9, 15, 24, .12)); }
+    .photo-hero::after { background: linear-gradient(0deg, rgba(24, 13, 16, .96), rgba(24, 13, 16, .82) 44%, rgba(24, 13, 16, .12)); }
     .two { grid-template-columns: minmax(0, 1fr); }
   }
   @media (prefers-reduced-motion: no-preference) {
