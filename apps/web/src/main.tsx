@@ -168,7 +168,7 @@ function App() {
       case "programs": return <ProgramsPage content={content} level={level} />;
       case "events": return <EventList content={content} />;
       case "news": return <NewsPage story={params.get("story") ?? undefined} />;
-      case "next-steps": return <WorkplanPage section={params.get("section") ?? undefined} />;
+      case "next-steps": return <WorkplanPage key={hash} />;
       case "index": return <IndexPage content={content} go={go} />;
     }
   };

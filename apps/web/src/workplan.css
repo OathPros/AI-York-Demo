@@ -1,45 +1,8 @@
 .public-site .workplan {
-  .workplan-cover {
-    background: var(--dark-field);
-    color: #fff;
-    padding-block: var(--space);
-  }
+  background: var(--wash);
 
-  .workplan-cover .eyebrow { color: #ffd5de; }
-  .workplan-cover h1 {
-    font-family: var(--editorial-font);
-    font-size: var(--title);
-    font-weight: 450;
-    letter-spacing: -.045em;
-  }
-  .workplan-cover .lead { color: var(--on-dark); }
-  .workplan-cover .button.secondary { color: #fff; }
-  .workplan-cover .button.secondary:hover { background: #fff; color: var(--ink); }
-
-  .workplan-decision {
-    display: grid;
-    grid-template-columns: minmax(0, .85fr) minmax(0, 2fr);
-    gap: .65rem var(--compact-space);
-    margin-block-start: var(--compact-space);
-    padding: .35rem 0 .35rem clamp(.85rem, 2.8vw, 2rem);
-    border-inline-start: 4px solid var(--red);
-  }
-  .workplan-decision h2 { font-size: clamp(1.65rem, 2.8vw, 2.65rem); }
-  .workplan-decision p { margin-block: 0 .6rem; }
-  .workplan-decision p:first-child { font-size: 1.14rem; }
-  .workplan-decision p:last-child { margin-bottom: 0; }
-  .workplan-index { margin: var(--compact-space) auto 0; }
-  .workplan-index [aria-current="location"] { color: var(--red-dark); border-bottom-color: var(--red); }
-
-  .workplan-band { background: var(--wash); }
-  .workplan-band > .section, .workplan-dependencies > .section { padding-block: var(--compact-space); }
-  .workplan-flow, .workplan-streams, .workplan-structure { margin: 1.4rem 0 0; }
-  .workplan-flow, .workplan-streams { list-style: none; padding: 0; }
-  .workplan-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem 1.6rem; }
-  .workplan-flow li, .workplan-outcomes > div { border-top: 2px solid var(--line); padding-top: .8rem; }
-  .workplan-flow h3 { font-size: 1.17rem; }
-  .workplan-flow p { color: var(--text); margin-bottom: 0; }
-
+  > .section { padding-block: var(--compact-space); }
+  .workplan-streams { list-style: none; margin: 1.4rem 0 0; padding: 0; }
   .workplan-stream {
     display: grid;
     grid-template-columns: minmax(0, .85fr) minmax(0, 1.8fr) minmax(0, 1fr);
@@ -48,48 +11,20 @@
     border-top: 1px solid var(--line);
     padding-block: 1.35rem;
   }
+  .workplan-stream h2 { font-size: clamp(1.18rem, 2.1vw, 1.8rem); }
+  .workplan-stream h3 { font-size: 1.08rem; }
   .workplan-stream .status { margin-top: 0; }
   .workplan-stream ul { margin: .7rem 0 0; padding-inline-start: 1.15rem; }
   .workplan-stream li + li { margin-top: .25rem; }
   .workplan-deliverables { border-inline-start: 2px solid var(--line); padding-inline-start: .95rem; }
   .workplan-deliverables p { margin-bottom: 0; }
 
-  .workplan-model { width: 100%; table-layout: fixed; border-collapse: collapse; margin-block-start: 1.25rem; }
-  .workplan-model th, .workplan-model td { padding: .7rem clamp(.35rem, 1.4vw, 1rem); text-align: start; vertical-align: top; border-bottom: 1px solid var(--line); }
-  .workplan-model thead { background: var(--dark-field); color: #fff; }
-  .workplan-model thead th:first-child { width: 28%; }
-  .workplan-model tbody th { font-weight: 620; }
-
-  .workplan-operating, .workplan-dependencies ol, .workplan-outcomes {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.2rem var(--compact-space);
-    margin-block: 1.4rem 0;
-  }
-  .workplan-operating dl { margin-bottom: 0; }
-  .workplan-operating dl > div { border-top: 1px solid var(--line); padding-block: .6rem; }
-  .workplan-operating dt, .workplan-outcomes dt { font-weight: 650; }
-  .workplan-operating dd, .workplan-outcomes dd { margin: .25rem 0 0; color: var(--text); }
-
-  .workplan-dependencies { background: var(--dark-field); color: #fff; }
-  .workplan-dependencies ol, .workplan-structure { padding-inline-start: 1.5rem; }
-  .workplan-dependencies li::marker { color: #ffd5de; font-weight: 650; }
-  .workplan-dependencies h3 { font-size: clamp(1.14rem, 2.1vw, 1.55rem); }
-  .workplan-dependencies p { color: var(--on-dark); margin-bottom: 0; }
-
-  .workplan-structure { display: flex; flex-wrap: wrap; gap: .5rem 2.4rem; font-weight: 620; }
-
   @media (max-width: 760px) {
     .workplan-stream { grid-template-columns: minmax(0, 1fr) minmax(0, .7fr); }
     .workplan-stream > header { grid-column: 1 / -1; }
-    .workplan-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 540px) {
-    .workplan-decision, .workplan-stream, .workplan-operating, .workplan-dependencies ol, .workplan-outcomes {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .workplan-model { font-size: .88rem; }
-    .workplan-structure { display: grid; }
+    .workplan-stream { grid-template-columns: minmax(0, 1fr); }
   }
 }
